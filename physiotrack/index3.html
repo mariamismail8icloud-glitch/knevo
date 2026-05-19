@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhysioTrack Patient Portal</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <meta name="description" content="Professional patient rehabilitation portal for PhysioTrack" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Login -->
+  <section class="login-screen" id="loginScreen">
+    <div class="login-panel">
+      <div class="login-left">
+        <div class="logo-wrap">
+          <div class="logo-mark">P</div>
+          <div>
+            <h1>PhysioTrack</h1>
+            <p>Patient Recovery Portal</p>
+          </div>
+        </div>
+
+        <h2>Welcome back</h2>
+        <p class="login-text">
+          Access your rehabilitation plan, monitor recovery progress, and stay connected with your therapist.
+        </p>
+
+        <div class="field">
+          <label for="email">Email or Patient ID</label>
+          <input type="text" id="email" placeholder="Enter your email or patient ID" />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" />
+        </div>
+
+        <button class="btn btn-primary" onclick="login()">Sign In</button>
+
+        <div class="login-links">
+          <a href="#">Forgot password?</a>
+          <a href="#">Contact support</a>
+        </div>
+      </div>
+
+      <div class="login-right">
+        <div class="hero-card">
+          <span class="hero-badge">Connected Care</span>
+          <h3>Track your recovery with confidence</h3>
+          <p>
+            Follow assigned exercises, review therapist feedback, monitor device sync, and stay on top of your appointments.
+          </p>
+
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <strong>78%</strong>
+              <span>Recovery Progress</span>
+            </div>
+            <div class="hero-stat">
+              <strong>3</strong>
+              <span>Exercises Today</span>
+            </div>
+            <div class="hero-stat">
+              <strong>1</strong>
+              <span>Upcoming Visit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- App -->
+  <div class="app-shell" id="app">
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="logo-wrap">
+          <div class="logo-mark">P</div>
+          <div>
+            <h2>PhysioTrack</h2>
+            <p>Patient Portal</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-link active" onclick="showSection('dashboard', this)">
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-link" onclick="showSection('exercises', this)">
+          <span>Exercises</span>
+        </button>
+        <button class="nav-link" onclick="showSection('progress', this)">
+          <span>Progress</span>
+        </button>
+        <button class="nav-link" onclick="showSection('messages', this)">
+          <span>Messages</span>
+        </button>
+        <button class="nav-link" onclick="showSection('appointments', this)">
+          <span>Appointments</span>
+        </button>
+        <button class="nav-link" onclick="showSection('profile', this)">
+          <span>Profile</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Patient Overview</p>
+          <h1>Welcome back, Sarah</h1>
+          <p class="topbar-sub">Your rehabilitation summary for today is ready.</p>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="device-status online">Device Connected</div>
+          <button class="ghost-btn">Message Therapist</button>
+        </div>
+      </header>
+
+      <!-- Dashboard -->
+      <section id="dashboard" class="section active">
+        <div class="cards-grid four">
+          <div class="card stat-card">
+            <div class="stat-head">
+              <span>Today's Exercises</span>
+              <span class="status-dot blue"></span>
+            </div>
+            <h3>3</h3>
+            <p>2 completed, 1 remaining</p>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-head">
+              <span>Recovery Progress</span>
+              <span class="status-dot green"></span>
+            </div>
+            <h3>78%</h3>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 78%;"></div>
+            </div>
+            <p>Steady improvement this week</p>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-head">
+              <span>Pain Level</span>
+              <span class="status-dot orange"></span>
+            </div>
+            <h3>3 / 10</h3>
+            <p>Stable and within target range</p>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-head">
+              <span>Next Appointment</span>
+              <span class="status-dot blue"></span>
+            </div>
+            <h3>16 Apr</h3>
+            <p>Thursday, 11:00 AM</p>
+          </div>
+        </div>
+
+        <div class="cards-grid two section-gap">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Today's Plan</h2>
+                <p>Assigned rehabilitation tasks</p>
+              </div>
+              <button class="ghost-btn small">View All</button>
+            </div>
+
+            <div class="list-item">
+              <div>
+                <strong>Heel Slides</strong>
+                <p>3 sets × 10 reps</p>
+              </div>
+              <span class="badge pending">Pending</span>
+            </div>
+
+            <div class="list-item">
+              <div>
+                <strong>Straight Leg Raise</strong>
+                <p>3 sets × 12 reps</p>
+              </div>
+              <span class="badge complete">Completed</span>
+            </div>
+
+            <div class="list-item">
+              <div>
+                <strong>Quad Sets</strong>
+                <p>4 sets × 15 sec hold</p>
+              </div>
+              <span class="badge progress">In Progress</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Therapist Note</h2>
+                <p>Latest clinical feedback</p>
+              </div>
+            </div>
+
+            <div class="message-box">
+              <h4>Dr. Ahmed</h4>
+              <p>
+                Excellent consistency this week. Continue with your range-of-motion routine and avoid sudden twisting under load.
+              </p>
+              <span class="message-time">Updated today</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exercises -->
+      <section id="exercises" class="section">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>My Exercises</h2>
+              <p>Your prescribed rehabilitation program</p>
+            </div>
+          </div>
+
+          <div class="exercise-grid">
+            <div class="exercise-card">
+              <div class="exercise-top">
+                <h3>Heel Slides</h3>
+                <span class="badge pending">Pending</span>
+              </div>
+              <p>Improve knee flexion mobility and control.</p>
+              <div class="exercise-meta">
+                <span>3 sets</span>
+                <span>10 reps</span>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary small-btn">Start Exercise</button>
+                <button class="ghost-btn small">Mark Done</button>
+              </div>
+            </div>
+
+            <div class="exercise-card">
+              <div class="exercise-top">
+                <h3>Straight Leg Raise</h3>
+                <span class="badge complete">Completed</span>
+              </div>
+              <p>Build quadriceps strength and knee stability.</p>
+              <div class="exercise-meta">
+                <span>3 sets</span>
+                <span>12 reps</span>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary small-btn">Start Exercise</button>
+                <button class="ghost-btn small">Mark Done</button>
+              </div>
+            </div>
+
+            <div class="exercise-card">
+              <div class="exercise-top">
+                <h3>Quad Sets</h3>
+                <span class="badge progress">In Progress</span>
+              </div>
+              <p>Activate muscles around the knee joint safely.</p>
+              <div class="exercise-meta">
+                <span>4 sets</span>
+                <span>15 sec hold</span>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary small-btn">Start Exercise</button>
+                <button class="ghost-btn small">Mark Done</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress -->
+      <section id="progress" class="section">
+        <div class="cards-grid three">
+          <div class="card stat-card">
+            <span>Completion Rate</span>
+            <h3>85%</h3>
+            <p>Exercise adherence is strong</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Range of Motion</span>
+            <h3>112°</h3>
+            <p>Improved from last assessment</p>
+          </div>
+
+          <div class="card stat-card">
+            <span>Walking Improvement</span>
+            <h3>Good</h3>
+            <p>Gait pattern becoming more stable</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Messages -->
+      <section id="messages" class="section">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Messages</h2>
+              <p>Secure communication with your therapist</p>
+            </div>
+          </div>
+
+          <div class="message-thread">
+            <div class="message-box">
+              <h4>Dr. Ahmed</h4>
+              <p>Please continue today’s exercise plan and record any increase in swelling after activity.</p>
+              <span class="message-time">Today • 09:15 AM</span>
+            </div>
+
+            <div class="message-box self">
+              <h4>You</h4>
+              <p>I completed the morning session and pain remained low.</p>
+              <span class="message-time">Today • 11:00 AM</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Appointments -->
+      <section id="appointments" class="section">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Appointments</h2>
+              <p>Your scheduled sessions and follow-ups</p>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <div>
+              <strong>Clinic Follow-up</strong>
+              <p>Thursday, 16 April • 11:00 AM</p>
+            </div>
+            <span class="badge pending">Upcoming</span>
+          </div>
+
+          <div class="list-item">
+            <div>
+              <strong>Progress Review</strong>
+              <p>Monday, 20 April • 01:30 PM</p>
+            </div>
+            <span class="badge progress">Scheduled</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile -->
+      <section id="profile" class="section">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Profile</h2>
+              <p>Personal and rehabilitation details</p>
+            </div>
+          </div>
+
+          <div class="profile-grid">
+            <div class="profile-row"><span>Name</span><strong>Sarah Ali</strong></div>
+            <div class="profile-row"><span>Condition</span><strong>Knee Rehabilitation</strong></div>
+            <div class="profile-row"><span>Assigned Therapist</span><strong>Dr. Ahmed</strong></div>
+            <div class="profile-row"><span>Emergency Contact</span><strong>+20 100 000 0000</strong></div>
+            <div class="profile-row"><span>Device Status</span><strong>Connected</strong></div>
+            <div class="profile-row"><span>Last Sync</span><strong>Today, 08:42 AM</strong></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PhysioTrack • Exercises</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Knee Rehabilitation Patient Management System" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="PhysioTrack" />
+  
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">∿</div>
+      <div class="brand-title">
+        <b>Exercise Plans</b>
+        <span id="exForPatient">Create and adjust rehab programs</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="pill">View: <b id="deviceHint">Laptop</b></div>
+      <button class="icon-btn" id="btnTheme">Theme: <b id="themeLabel">Light</b></button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <nav class="nav">
+      <a data-nav href="index.html">🏠 Dashboard</a>
+      <a data-nav href="patients.html">👥 Patients</a>
+      <a data-nav href="exercises.html" class="active">🧩 Exercises</a>
+      <a data-nav href="messages.html">💬 Messages</a>
+      <a data-nav href="reports.html">📄 Reports</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <section class="grid-2">
+      <div class="card">
+        <h2 class="section-title">Exercise Library</h2>
+        <div style="height:10px"></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Exercise</th>
+              <th>Sets</th>
+              <th>Reps</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="exerciseLibrary"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <h2 class="section-title">Current Plan</h2>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="btn" id="btnClearPlan">Clear</button>
+            <button class="btn primary" id="btnSavePlan">Save Plan</button>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div id="currentPlan" style="display:grid;gap:10px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="mobile-nav">
+  <div class="tabs">
+    <a data-nav href="index.html">🏠<div>Home</div></a>
+    <a data-nav href="patients.html">👥<div>Patients</div></a>
+    <a data-nav href="exercises.html" class="active">🧩<div>Plans</div></a>
+    <a data-nav href="messages.html">💬<div>Chat</div></a>
+    <a data-nav href="reports.html">📄<div>Reports</div></a>
+  </div>
+</nav>
+
+<script>
+  // Service Worker Registration
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ SW active on exercises page'))
+        .catch(err => console.log('❌ SW Error:', err));
+    });
+  }
+</script>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

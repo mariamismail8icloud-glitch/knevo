@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knevo Patient Portal</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#E8007D" />
+  <meta name="description" content="Knevo patient recovery portal" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <section class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-brand" style="flex-direction:column; align-items:center; text-align:center; width:100%; margin-bottom:24px;">
+        <div style="width:140px; height:140px; border-radius:50%; overflow:hidden; margin:0 auto; border:3px solid #f0d6e8;">
+          <img src="logo.png" alt="Knevo" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        <h1 style="margin-top:12px; font-size:26px;">Knevo</h1>
+        <p style="color:#64748b;">Patient Recovery Portal</p>
+      </div>
+      <h2>Welcome back</h2>
+      <p class="login-sub">Follow your exercises, track your recovery, and stay in touch with your therapist.</p>
+      <div class="field">
+        <label for="email">Email or Patient ID</label>
+        <input type="text" id="email" placeholder="Enter your email or ID" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" />
+      </div>
+      <button class="primary-btn" onclick="login()">Sign In</button>
+    </div>
+  </section>
+
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand-row" style="flex-direction:column; align-items:center; gap:4px;">
+        <div style="width:46px; height:46px; border-radius:50%; overflow:hidden; border:2px solid #f0d6e8;">
+          <img src="logo.png" alt="Knevo" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        <h2 style="font-size:14px; margin:0;">Knevo</h2>
+      </div>
+      <nav class="topnav">
+        <button class="nav-btn active" onclick="showSection('dashboard', this)">Home</button>
+        <button class="nav-btn" onclick="showSection('exercises', this)">Exercises</button>
+        <button class="nav-btn" onclick="showSection('progress', this)">Progress</button>
+        <button class="nav-btn" onclick="showSection('messages', this)">Messages</button>
+        <button class="nav-btn" onclick="showSection('profile', this)">Profile</button>
+      </nav>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+
+    <main class="container">
+
+      <!-- Dashboard -->
+      <section id="dashboard" class="section active">
+        <div class="hero">
+          <div>
+            <span class="eyebrow">Recovery Overview</span>
+            <h1 id="greeting">Good morning, Sarah</h1>
+            <p>Your rehabilitation plan is ready for today.</p>
+          </div>
+          <div class="hero-badge">Device Connected</div>
+        </div>
+
+        <div class="stats">
+          <div class="soft-card stat">
+            <span>Today's Exercises</span>
+            <h3>3</h3>
+            <p>2 completed, 1 remaining</p>
+          </div>
+          <div class="soft-card stat">
+            <span>Recovery Progress</span>
+            <h3>78%</h3>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:78%"></div>
+            </div>
+          </div>
+          <div class="soft-card stat">
+            <span>Pain Level</span>
+            <h3 id="painDisplay">— / 10</h3>
+            <p id="painStatus">Not logged today</p>
+          </div>
+        </div>
+
+        <!-- Pain Check-in -->
+        <div class="soft-card pain-checkin">
+          <div class="card-head">
+            <h3>Daily Pain Check-in</h3>
+            <span class="pain-logged-badge" id="painBadge" style="display:none;">Logged ✓</span>
+          </div>
+          <p class="pain-desc">How is your pain level today? Select the face that best describes how you feel.</p>
+          <div class="face-row">
+            <div class="face-btn" onclick="selectFace(this, 0, 'No Pain')">
+              <span class="face-icon">😊</span>
+              <span class="face-label">No pain</span>
+              <span class="face-num">0</span>
+            </div>
+            <div class="face-btn" onclick="selectFace(this, 2, 'Mild Pain')">
+              <span class="face-icon">🙂</span>
+              <span class="face-label">Mild</span>
+              <span class="face-num">1–3</span>
+            </div>
+            <div class="face-btn" onclick="selectFace(this, 5, 'Moderate Pain')">
+              <span class="face-icon">😐</span>
+              <span class="face-label">Moderate</span>
+              <span class="face-num">4–6</span>
+            </div>
+            <div class="face-btn" onclick="selectFace(this, 8, 'Severe Pain')">
+              <span class="face-icon">😟</span>
+              <span class="face-label">Severe</span>
+              <span class="face-num">7–9</span>
+            </div>
+            <div class="face-btn" onclick="selectFace(this, 10, 'Worst Pain')">
+              <span class="face-icon">😣</span>
+              <span class="face-label">Worst</span>
+              <span class="face-num">10</span>
+            </div>
+          </div>
+          <button class="primary-btn" style="width:100%; margin-top:16px;" onclick="logPain()">Log Pain Level</button>
+          <p id="painFeedback" style="margin-top:10px; font-size:14px; font-weight:600; color:#E8007D;"></p>
+        </div>
+
+        <div class="content-grid" style="margin-top:18px;">
+          <div class="soft-card">
+            <div class="card-head">
+              <h3>Today's Plan</h3>
+              <a href="#">See all</a>
+            </div>
+            <div class="list-row">
+              <div>
+                <strong>Heel Slides</strong>
+                <p>3 sets × 10 reps</p>
+              </div>
+              <span class="badge blue" id="badge-heel">Pending</span>
+            </div>
+            <div class="list-row">
+              <div>
+                <strong>Straight Leg Raise</strong>
+                <p>3 sets × 12 reps</p>
+              </div>
+              <span class="badge green" id="badge-leg">Done</span>
+            </div>
+            <div class="list-row">
+              <div>
+                <strong>Quad Sets</strong>
+                <p>4 sets × 15 sec hold</p>
+              </div>
+              <span class="badge orange" id="badge-quad">In Progress</span>
+            </div>
+          </div>
+
+          <div class="soft-card">
+            <div class="card-head">
+              <h3>Next Appointment</h3>
+            </div>
+            <div class="appointment-box">
+              <h4>Clinic Follow-up</h4>
+              <p>Thursday, 16 April • 11:00 AM</p>
+              <button class="secondary-btn">View Details</button>
+            </div>
+            <div class="note-box">
+              <h4>Therapist Note</h4>
+              <p>Keep following your current exercise plan and avoid sudden twisting movement.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exercises -->
+      <section id="exercises" class="section">
+        <div class="section-header">
+          <h2>My Exercises</h2>
+          <p>Your daily rehabilitation routine</p>
+        </div>
+        <div class="exercise-grid">
+
+          <div class="soft-card exercise-card" id="card-heel">
+            <h3>Heel Slides</h3>
+            <p>Improve knee flexion mobility.</p>
+            <div class="exercise-meta">
+              <span class="set-badge" id="sets-heel">Set 1 of 3</span>
+              <span class="set-badge">10 reps</span>
+            </div>
+            <div class="timer-box" id="timer-heel" style="display:none;">
+              <span class="timer-count" id="count-heel">30</span>
+              <span class="timer-label">seconds remaining</span>
+            </div>
+            <p class="exercise-status" id="status-heel"></p>
+            <div class="btn-row">
+              <button class="primary-btn small" id="startbtn-heel" onclick="startExercise('heel', 30, 3)">Start Set 1</button>
+              <button class="secondary-btn small" onclick="markDone('heel')">Mark Done</button>
+            </div>
+          </div>
+
+          <div class="soft-card exercise-card" id="card-leg">
+            <h3>Straight Leg Raise</h3>
+            <p>Increase quadriceps strength safely.</p>
+            <div class="exercise-meta">
+              <span class="set-badge" id="sets-leg">Set 1 of 3</span>
+              <span class="set-badge">12 reps</span>
+            </div>
+            <div class="timer-box" id="timer-leg" style="display:none;">
+              <span class="timer-count" id="count-leg">30</span>
+              <span class="timer-label">seconds remaining</span>
+            </div>
+            <p class="exercise-status" id="status-leg"></p>
+            <div class="btn-row">
+              <button class="primary-btn small" id="startbtn-leg" onclick="startExercise('leg', 30, 3)">Start Set 1</button>
+              <button class="secondary-btn small" onclick="markDone('leg')">Mark Done</button>
+            </div>
+          </div>
+
+          <div class="soft-card exercise-card" id="card-quad">
+            <h3>Quad Sets</h3>
+            <p>Activate knee-supporting muscles.</p>
+            <div class="exercise-meta">
+              <span class="set-badge" id="sets-quad">Set 1 of 4</span>
+              <span class="set-badge">15 sec hold</span>
+            </div>
+            <div class="timer-box" id="timer-quad" style="display:none;">
+              <span class="timer-count" id="count-quad">15</span>
+              <span class="timer-label">seconds remaining</span>
+            </div>
+            <p class="exercise-status" id="status-quad"></p>
+            <div class="btn-row">
+              <button class="primary-btn small" id="startbtn-quad" onclick="startExercise('quad', 15, 4)">Start Set 1</button>
+              <button class="secondary-btn small" onclick="markDone('quad')">Mark Done</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Progress -->
+      <section id="progress" class="section">
+        <div class="section-header">
+          <h2>Recovery Progress</h2>
+          <p>Your recent rehabilitation summary</p>
+        </div>
+        <div class="stats">
+          <div class="soft-card stat">
+            <span>Completion Rate</span>
+            <h3>85%</h3>
+          </div>
+          <div class="soft-card stat">
+            <span>Range of Motion</span>
+            <h3>112°</h3>
+          </div>
+          <div class="soft-card stat">
+            <span>Walking Status</span>
+            <h3>Improving</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- Messages -->
+      <section id="messages" class="section">
+        <div class="section-header">
+          <h2>Messages</h2>
+          <p>Secure communication with your therapist</p>
+        </div>
+        <div class="soft-card">
+          <div class="chat-box" id="chatBox">
+            <div class="date-separator">Today</div>
+            <div class="message">
+              <strong>Dr. Ahmed</strong>
+              <p>Please continue today's exercises and report any swelling after training.</p>
+              <span>09:15 AM</span>
+            </div>
+            <div class="message self">
+              <strong>You</strong>
+              <p>I completed the morning session and pain stayed low.</p>
+              <span>11:00 AM</span>
+            </div>
+          </div>
+          <div class="reply-box">
+            <textarea id="replyInput" placeholder="Write your message here..." class="reply-input"></textarea>
+            <button class="primary-btn" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile -->
+      <section id="profile" class="section">
+        <div class="section-header">
+          <h2>Profile</h2>
+          <p>Your rehabilitation information</p>
+        </div>
+        <div class="profile-grid">
+          <div class="soft-card profile-item">
+            <span>Name</span>
+            <strong>Sarah Ali</strong>
+          </div>
+          <div class="soft-card profile-item">
+            <span>Condition</span>
+            <strong>Knee Rehabilitation</strong>
+          </div>
+          <div class="soft-card profile-item">
+            <span>Therapist</span>
+            <strong>Dr. Ahmed</strong>
+          </div>
+          <div class="soft-card profile-item">
+            <span>Device Status</span>
+            <strong>Connected</strong>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="js/jsapp.js"></script>
+</body>
+</html>

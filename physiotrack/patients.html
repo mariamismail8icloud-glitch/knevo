@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PhysioTrack • Patients</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Knee Rehabilitation Patient Management System" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="PhysioTrack" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">∿</div>
+      <div class="brand-title">
+        <b>PhysioTrack</b>
+        <span>Patients Directory</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="pill">View: <b id="deviceHint">Laptop</b></div>
+      <button class="icon-btn" id="btnTheme">Theme: <b id="themeLabel">Light</b></button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <nav class="nav">
+      <a data-nav href="index.html">🏠 Dashboard</a>
+      <a data-nav href="patients.html" class="active">👥 Patients</a>
+      <a data-nav href="exercises.html">🧩 Exercises</a>
+      <a data-nav href="messages.html">💬 Messages</a>
+      <a data-nav href="reports.html">📄 Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="userbox">
+        <div class="avatar">DR</div>
+        <div>
+          <div style="font-weight:800">Dr / Physio</div>
+          <div style="color:var(--muted);font-size:12px">demo</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="searchbar">
+      🔎
+      <input id="searchInput" placeholder="Search patients by name, ID, or diagnosis…" />
+      <button class="chip active" data-filter="all">All (<b id="patientsCount">0</b>)</button>
+      <button class="chip" data-filter="improving">Improving</button>
+      <button class="chip" data-filter="stable">Stable</button>
+      <button class="chip" data-filter="needs-attention">Needs attention</button>
+    </div>
+
+    <h2 class="section-title">Patients</h2>
+    <section class="patients-grid" id="patientsGrid"></section>
+  </main>
+</div>
+
+<nav class="mobile-nav">
+  <div class="tabs">
+    <a data-nav href="index.html">🏠<div>Home</div></a>
+    <a data-nav href="patients.html" class="active">👥<div>Patients</div></a>
+    <a data-nav href="exercises.html">🧩<div>Plans</div></a>
+    <a data-nav href="messages.html">💬<div>Chat</div></a>
+    <a data-nav href="reports.html">📄<div>Reports</div></a>
+  </div>
+</nav>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ SW active on patients page'))
+        .catch(err => console.log('❌ SW Error:', err));
+    });
+  }
+</script>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

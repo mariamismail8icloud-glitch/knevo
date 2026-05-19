@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PhysioTrack • Patient Details</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">∿</div>
+      <div class="brand-title">
+        <b>Patient Details</b>
+        <span><a href="patients.html" style="color:var(--primary);text-decoration:none;font-weight:700">← Back to Patients</a></span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="pill">View: <b id="deviceHint">Laptop</b></div>
+      <button class="icon-btn" id="btnTheme">Theme: <b id="themeLabel">Light</b></button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <nav class="nav">
+      <a data-nav href="index.html">🏠 Dashboard</a>
+      <a data-nav href="patients.html">👥 Patients</a>
+      <a data-nav href="exercises.html">🧩 Exercises</a>
+      <a data-nav href="messages.html">💬 Messages</a>
+      <a data-nav href="reports.html">📄 Reports</a>
+    </nav>
+  </aside>
+
+  <main class="main" id="patientDetailsRoot">
+    <section class="grid-2">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div>
+            <div style="font-size:22px;font-weight:900" id="pdName">—</div>
+            <div style="color:var(--muted);font-size:13px">ID: <b id="pdId">—</b></div>
+            <div style="margin-top:8px;color:var(--muted)" id="pdDiagnosis">—</div>
+          </div>
+          <div style="display:grid;gap:10px;justify-items:end">
+            <div class="pill">Device: <b id="pdDevice">—</b></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+              <button class="btn" id="btnCall">📞 Call</button>
+              <button class="btn primary" id="btnMessage">💬 Message</button>
+              <button class="btn" id="btnAdjust">🧩 Adjust Plan</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="grid-3">
+          <div class="card" style="box-shadow:none">
+            <h3>Next Visit</h3>
+            <p class="big" style="font-size:18px" id="pdNext">—</p>
+          </div>
+          <div class="card" style="box-shadow:none">
+            <h3>Avg Pain</h3>
+            <p class="big" id="pdPain">—</p>
+          </div>
+          <div class="card" style="box-shadow:none">
+            <h3>Compliance</h3>
+            <p class="big" id="pdCompliance">—</p>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card" style="box-shadow:none">
+          <h3>Clinical Notes</h3>
+          <div id="pdNotes" style="color:var(--muted);font-size:14px">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Alerts</h2>
+        <ul id="pdAlerts" class="kv" style="margin-top:12px"></ul>
+        <div style="height:12px"></div>
+        <div class="card" style="box-shadow:none">
+          <h3>Quick Actions</h3>
+          <div style="display:grid;gap:10px;margin-top:10px">
+            <a class="btn" href="reports.html">📄 Include in Report</a>
+            <a class="btn" href="messages.html">💬 Open Messages</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-3">
+      <div class="card">
+        <h2 class="section-title">Rehab Progress</h2>
+        <canvas id="chartProgress" height="120"></canvas>
+      </div>
+      <div class="card">
+        <h2 class="section-title">Pain Trend</h2>
+        <canvas id="chartPain" height="120"></canvas>
+      </div>
+      <div class="card">
+        <h2 class="section-title">Compliance</h2>
+        <canvas id="chartCompliance" height="120"></canvas>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="mobile-nav">
+  <div class="tabs">
+    <a data-nav href="index.html">🏠<div>Home</div></a>
+    <a data-nav href="patients.html">👥<div>Patients</div></a>
+    <a data-nav href="exercises.html">🧩<div>Plans</div></a>
+    <a data-nav href="messages.html">💬<div>Chat</div></a>
+    <a data-nav href="reports.html">📄<div>Reports</div></a>
+  </div>
+</nav>
+
+<!-- Charts (no backend needed) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
