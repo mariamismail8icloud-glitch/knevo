@@ -103,6 +103,8 @@ Patients and doctors are separate user populations with no UI overlap. They can 
 @startuml
 !include <C4/C4_Context>
 
+LAYOUT_TOP_DOWN()
+
 title System Context — Knee Exoskeleton Rehabilitation System
 
 Person(patient, "Patient", "Rehabilitation patient. Uses the exoskeleton device and mobile app.")
@@ -111,9 +113,9 @@ Person(admin, "Admin", "Clinic administrator. Manages doctor accounts.")
 
 System(knes, "Knee Exoskeleton System", "Captures rehabilitation session data, enables remote therapy configuration and progress monitoring.")
 
-Rel(patient, knes, "Performs therapy sessions, views schedule")
-Rel(doctor, knes, "Reviews session data, sets therapy parameters")
-Rel(admin, knes, "Enrolls and manages doctor accounts")
+Rel_D(patient, knes, "Performs therapy sessions, views schedule")
+Rel_D(doctor, knes, "Reviews session data, sets therapy parameters")
+Rel_D(admin, knes, "Enrolls and manages doctor accounts")
 
 @enduml
 ```
@@ -126,7 +128,7 @@ Rel(admin, knes, "Enrolls and manages doctor accounts")
 @startuml
 !include <C4/C4_Container>
 
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 
 title Container Diagram — Knee Exoskeleton Rehabilitation System
 
@@ -135,22 +137,22 @@ Person(doctor, "Doctor", "Uses web browser")
 Person(admin, "Admin", "Uses web browser")
 
 System_Boundary(exoskeleton_system, "Exoskeleton System") {
-    Container(device, "Knee Exoskeleton Firmware", "ESP32-S3 / C/C++", "Captures data from 3 IMUs and 2 FSRs. Executes active therapy config. Buffers sensor data locally. Streams to mobile app over local WiFi.")
     Container(mobile, "Patient Mobile App", "React Native / iOS", "Provisions device WiFi via BLE. Starts and stops sessions. Delivers doctor configs to device via BLE at session start. Relays sensor data to backend over HTTPS.")
+    Container(device, "Knee Exoskeleton Firmware", "ESP32-S3 / C/C++", "Captures data from 3 IMUs and 2 FSRs. Executes active therapy config. Buffers sensor data locally. Streams to mobile app over local WiFi.")
     Container(backend, "Backend API", "Firebase or Spring Boot", "Manages users, sessions, sensor data, and therapy configs. Serves data to mobile app and web app.")
     ContainerDb(db, "Database", "Firestore or PostgreSQL", "Persists all user records, sessions, sensor readings, and therapy configurations.")
     Container(webapp, "Doctor Web App", "React", "Displays session data, sensor graphs, progress trends. Allows doctors to issue therapy configurations.")
 }
 
-Rel(patient, mobile, "Interacts with", "Touch UI")
-Rel(doctor, webapp, "Interacts with", "HTTPS / Browser")
-Rel(admin, webapp, "Manages doctors via", "HTTPS / Browser")
+Rel_D(patient, mobile, "Interacts with", "Touch UI")
+Rel_D(doctor, webapp, "Interacts with", "HTTPS / Browser")
+Rel_D(admin, webapp, "Manages doctors via", "HTTPS / Browser")
 
 Rel(mobile, device, "Provisions WiFi, starts/stops session, delivers config", "BLE")
 Rel(device, mobile, "Streams buffered sensor data", "Local WiFi")
-Rel(mobile, backend, "Uploads session data, fetches pending configs", "HTTPS")
-Rel(webapp, backend, "Fetches session data and trends, submits therapy configs", "HTTPS")
-Rel(backend, db, "Reads and writes", "Native driver")
+Rel_D(mobile, backend, "Uploads session data, fetches pending configs", "HTTPS")
+Rel_D(webapp, backend, "Fetches session data and trends, submits therapy configs", "HTTPS")
+Rel_D(backend, db, "Reads and writes", "Native driver")
 
 @enduml
 ```
