@@ -47,14 +47,13 @@ The `device_assisted` boolean on `TherapySetConfig` determines which type applie
 ### Patient — Can
 
 - Create account, complete profile
-- View Patient ID and share with doctor
+- Generate enrollment code to share it with doctor
 - Connect and calibrate device
 - Start assigned exercises
-- Report pain at any time
 - View progress, session history
-- Chat with doctor in real time
-- View calendar and appointments
-- Export own reports
+- Chat with doctor in real time (low priority)
+- View calendar and appointments (low priority)
+- Export own reports (low priority)
 
 ### Patient — Cannot
 
@@ -62,27 +61,23 @@ The `device_assisted` boolean on `TherapySetConfig` determines which type applie
 - Edit clinical scores (FIM, MMT, MMSE)
 - Change exercise prescription
 - Delete session history
-- Change assigned doctor directly
 
 ### Doctor (Physiotherapist) — Can
 
 - Sign up (pending admin approval before portal access)
-- Link patient using Patient ID or enrollment code
+- Link patient using patient enrollment code
+- Create a patient profile
 - Create rehab plans and prescribe exercises from library
-- Set ROM, angular velocity, assistance level
-- Monitor live sessions
-- Lower safety limits during a live session
-- Remotely stop a session safely
-- Chat with patients in real time
-- View reports, export PDF/CSV (V2)
-- View and manage calendar
+- Review rehab sessions data
+- Chat with patients in real time (low priority)
+- View reports, export PDF/CSV (V2) (low priority)
+- View and manage calendar (low priority)
 
 ### Doctor — Cannot
 
 - Access portal before admin approval
-- Access unlinked patients
-- Increase ROM, speed, or assistance during an active live session
-- Control the motor directly from the web portal
+- Change configuration of an active live session
+- Control the device directly from the web portal
 - Delete audit logs
 
 ### Admin — Can
@@ -96,31 +91,11 @@ The `device_assisted` boolean on `TherapySetConfig` determines which type applie
 ### Admin — Cannot
 
 - Edit patient medical plans unless also a qualified doctor
+- Delete Patients or their sessions logs
 
 ---
 
 ## 4. Authentication & Identity
-
-### Login Field
-
-```
-Email, Username, or Patient/Doctor ID
-```
-
-Backend routing logic:
-```
-If input starts with "KNEVO-P-"  → search patient_id column
-If input starts with "KNEVO-DR-" → search doctor_id column
-If input contains "@"            → search email
-Else                             → search username
-```
-
-### ID Formats
-
-| Role | Format | Example |
-|------|--------|---------|
-| Patient | `KNEVO-P-XXXXXX` | `KNEVO-P-000124` |
-| Doctor | `KNEVO-DR-XXXXXX` | `KNEVO-DR-000018` |
 
 ### Doctor Account Statuses
 
@@ -134,71 +109,24 @@ Else                             → search username
 ### Signup Fields
 
 **Patient:**
+
 - Step 1: Username, email, password, confirm password
-- Step 2: Full name, birth date, gender, height, weight, phone, emergency contact name, emergency contact phone
-- Step 3: Condition (post-stroke only), affected side (Right/Left/Both/Not specified), walking difficulty (Mild/Moderate/Severe), walking aid (None/Cane/Walker/Other), rehabilitation history
-- Step 4: Consent checkboxes
-- Step 5: Patient ID display screen with copy button
+- Step 2: Full name, birth date, gender, phone, emergency contact name, emergency contact phone
+- Step 3: Consent checkbox
+- Step 4: Enrollment code display screen with copy button
 
 **Doctor:**
+
 - Full name, email, username, password, phone, clinic/hospital name, specialization, professional ID/license (optional), years of experience (optional)
 - Submits for admin approval; cannot log in until approved
-
-### Auth Implementation
-
-- JWT access tokens + refresh tokens
-- BCrypt or Argon2 password hashing
-- Rate limiting on auth endpoints
-- No default passwords
-- Offline re-login allowed only if previously authenticated on device
 
 ---
 
 ## 5. Patient Profile — Additional Fields
 
-The `PatientProfile` entity in `spec-and-architecture.md` captures clinical assessment. The following fields must also be stored, split by editability:
+### Only Doctors edit PatientProfile
 
-### Patient-Editable Fields (stored on patient record, not PatientProfile)
-
-| Field | Notes |
-|-------|-------|
-| `affected_side` | `RIGHT`, `LEFT`, `BOTH`, `NOT_SPECIFIED` — V1 hardware is right-leg only, but patient's clinical affected side may differ |
-| `walking_difficulty` | `MILD`, `MODERATE`, `SEVERE` |
-| `walking_aid` | `NONE`, `CANE`, `WALKER`, `OTHER` |
-| `rehab_history` | `NO_PREVIOUS_REHAB`, `CURRENTLY_IN_REHAB`, `COMPLETED_PREVIOUS_REHAB`, `OTHER` |
-| `emergency_contact_name` | |
-| `emergency_contact_phone` | |
-| `phone` | |
-
-Changes to patient-editable fields should:
-- Store edit history (or at minimum last-updated timestamp)
-- Notify linked doctor of medically significant changes
-
-### Doctor-Only Clinical Fields in PatientProfile
-
-Patients cannot edit FIM, MMT, MMSE, or `home_exercise_permission`. The following granularity is recommended for the PatientProfile entity beyond what the spec shows:
-
-**FIM sub-scores:**
-| Field | Notes |
-|-------|-------|
-| `fim_total` | 1–7 overall |
-| `fim_mobility` | Mobility/walking sub-score |
-| `fim_transfer` | Transfer sub-score |
-
-**MMT per muscle group (0–5 each):**
-| Field |
-|-------|
-| `mmt_hip_flexion` |
-| `mmt_hip_extension` |
-| `mmt_knee_flexion` |
-| `mmt_knee_extension` |
-| `mmt_ankle_dorsiflexion` |
-| `mmt_ankle_plantarflexion` |
-
-**Home safety decision (replaces simple boolean):**
-- `HOME_EXERCISE_ALONE`
-- `HOME_EXERCISE_WITH_SUPERVISION`
-- `HOME_EXERCISE_NOT_ALLOWED`
+Patients cannot edit PatientProfile.
 
 ---
 
@@ -214,7 +142,6 @@ Pain is recorded on a 0–10 standard clinical scale. Presented in the UI as a l
 | During session | Patient-initiated via Pain button |
 | After set | Per TherapySetRecord (see data model) |
 | After session | Required in session summary |
-| Daily life | Via pain report shortcut, anytime |
 
 ### Pain Response Rules
 
@@ -226,6 +153,7 @@ Pain is recorded on a 0–10 standard clinical scale. Presented in the UI as a l
 | 9–10 | Stop session; show emergency guidance; offer call to emergency contact and local emergency services |
 
 **Pre-session specific:**
+
 | Level | Action |
 |-------|--------|
 | 0–6 | Allow session start (warn at 4–6) |
@@ -233,24 +161,6 @@ Pain is recorded on a 0–10 standard clinical scale. Presented in the UI as a l
 | 9–10 | Block session; show emergency help |
 
 Do not automatically call an ambulance. Offer the option.
-
----
-
-## 7. Assistance Level Definition
-
-Assistance level controls motor torque/current contribution — not patient speed directly.
-
-| % Range | Patient-Facing Label | Meaning |
-|---------|---------------------|---------|
-| 0% | No assistance | Motor does not assist movement |
-| 1–30% | Low | Small motor support within safety limits |
-| 31–70% | Medium | Moderate motor support within safety limits |
-| 71–100% | High | Stronger support, still capped by firmware safety caps |
-
-**Doctor sees:** 0–100% numeric slider with label overlay.
-**Patient sees:** Low / Medium / High only. Never show the percentage to the patient.
-
-100% does **not** mean unlimited motor power. It means the maximum assistance allowed within the patient's prescription and the firmware's absolute hard safety caps.
 
 ---
 
@@ -262,7 +172,7 @@ Assistance level controls motor torque/current contribution — not patient spee
 
 ### Motor
 
-**MG5010E-i36**
+## MG5010E-i36
 
 | Parameter | Value |
 |-----------|-------|
@@ -274,6 +184,7 @@ Assistance level controls motor torque/current contribution — not patient spee
 | Direction | Flexion and extension |
 
 Motor communication:
+
 - **Primary:** CAN / TWAI (main control and status feedback)
 - **Secondary:** UART (debugging, configuration, backup)
 
@@ -288,6 +199,7 @@ Sample rate: 100 Hz
 Connection: wired
 
 **I2C address conflict:** MPU6050 supports only two I2C addresses (AD0 pin). Three sensors require either:
+
 - An I2C multiplexer (TCA9548A recommended)
 - Separate I2C buses
 - Mixed addressing + multiplexer
@@ -319,6 +231,7 @@ Connection: wired
 | Firmware hard cap (velocity) | 90°/s |
 
 Protection layers (in order):
+
 1. Doctor-prescribed soft limit (stored in TherapyConfig)
 2. Firmware software hard limit
 3. Motor current and speed limit
@@ -338,13 +251,11 @@ Adjustable flexion mechanical hard stop options: 30°, 45°, 60°, 90°, 120°.
 | ~8 A (near max) | Immediate motor stop |
 | Sudden spike | Emergency stop logic |
 
-Fields to log per session: `avg_motor_current`, `max_motor_current`, `current_fault_count`, `time_above_rated_current_s`
-
 ---
 
 ## 11. Firmware State Machine
 
-```
+```text
 BOOT
   ↓
 SELF_CHECK
@@ -372,7 +283,7 @@ SESSION_COMPLETE
 
 ### Fault States
 
-```
+```text
 FAULT_IMU
 FAULT_MOTOR_CURRENT
 FAULT_MOTOR_COMMUNICATION
@@ -386,19 +297,6 @@ FAULT_CALIBRATION
 
 ---
 
-## 12. BLE Heartbeat
-
-- App sends heartbeat to device every **500 ms – 1 s**
-- No heartbeat for **2 seconds** → firmware pauses motor assistance safely
-- No heartbeat for **5 seconds** → firmware stops session; marks session `INTERRUPTED`
-
-Heartbeat loss behaviour:
-- **App crash:** Firmware detects missing heartbeat → motor stops safely → session stored locally → synced after reconnect
-- **Internet lost but BLE alive:** Do not stop the motor. Internet loss alone is not a reason to stop assistance.
-- **BLE disconnected:** Motor assistance pauses/stops. BLE connection is required for active motor assistance.
-
----
-
 ## 13. Battery Rules
 
 | Battery Level | Behaviour |
@@ -409,7 +307,8 @@ Heartbeat loss behaviour:
 | Below 10% | Device must not start active session |
 
 Message shown below 20%:
-```
+
+```text
 Battery is too low for a safe assisted session.
 Please charge your brace before starting.
 ```
@@ -422,8 +321,6 @@ Please charge your brace before starting.
 |-----------|-----------|
 | Internet offline, BLE connected, plan downloaded | Session may continue; session data saved locally and synced later |
 | Internet offline, no BLE | Mobile-only sessions can continue if plan is downloaded |
-| BLE disconnected during active device session | Motor assistance pauses/stops safely |
-| New login attempt while offline | Blocked; requires internet |
 | Re-opening app while offline (previously authenticated) | Allowed |
 
 ---
@@ -432,36 +329,20 @@ Please charge your brace before starting.
 
 Calibration is required before every device-assisted session.
 
-1. Patient puts on brace
-2. Patient stands upright or sits with right leg extended
-3. App instructs: *"Stand straight or sit with your right leg extended. Keep your leg still. Press Start Calibration."*
-4. Patient presses Start Calibration
-5. System collects 3–5 seconds of IMU data
-6. Firmware calculates average thigh and shank orientation; stores knee angle offset
-7. Patient performs a small test bend if needed
-8. System checks plausibility
-9. If valid → session can proceed
-10. If invalid → session blocked; patient retries
+Performs 4 steps of calibration as per the code in `knevo_dataset`
 
-**Success message:**
-```
-Calibration completed successfully.
-You can now start your exercise.
-```
+There should be two buttons for each step of the 4 steps:
 
-**Failure message:**
-```
-Calibration failed.
-Please check that the sensors are fixed correctly and keep your leg still.
-Try again.
-```
+- Repeat same calibration
+- Next calibration
+These are purely based on user judgement
 
 Live calibration status shown:
+
 - Foot IMU: OK / Error
 - Shank IMU: OK / Error
 - Thigh IMU: OK / Error
-- Knee angle: X°
-- Calibration: Good / Failed
+- WiFi Status
 
 ---
 
@@ -474,36 +355,10 @@ Emergency stop must cut motor power through **hardware**, not only software.
 3. Firmware detects emergency input
 4. Buzzer activates
 5. App shows emergency message
-6. Session stops and is marked `INTERRUPTED`
-7. Doctor receives alert
-8. Motor must not restart automatically — manual reset required
+6. The set stops and is marked `INTERRUPTED`
+7. Motor must not restart automatically — manual reset required
 
 Software emergency button is additional to, not a replacement for, the physical button.
-
----
-
-## 17. Doctor Safety Controls During Live Session
-
-| Action | Allowed During Active Session? |
-|--------|-------------------------------|
-| Lower ROM limit | Yes |
-| Lower velocity limit | Yes |
-| Lower assistance level | Yes |
-| Remotely stop session (safe stop) | Yes |
-| Send message to patient | Yes |
-| Increase ROM | No |
-| Increase velocity | No |
-| Increase assistance | No |
-| Directly move motor | No |
-
-Remote stop flow:
-1. Doctor presses Remote Stop in portal
-2. Backend sends stop command to app
-3. App shows patient warning
-4. Firmware transitions to safe stop/pause state
-5. Motor assistance stops safely
-6. Session marked `STOPPED_REMOTELY`
-7. Audit log created
 
 ---
 
@@ -517,7 +372,7 @@ The `Exercise` entity in `spec-and-architecture.md` has minimal fields. The full
 | `name` | |
 | `category` | See categories below |
 | `activity_type` | `STANDING`, `WALKING`, `SEATED` |
-| `mode` | `MOBILE_ONLY`, `DEVICE_ASSISTED`, `BOTH` |
+| `mode` | `MOBILE_ONLY`, `DEVICE_ASSISTED` |
 | `difficulty` | `BEGINNER`, `INTERMEDIATE`, `ADVANCED` |
 | `description` | Full description |
 | `patient_instructions` | Simplified language for patient app |
@@ -528,20 +383,17 @@ The `Exercise` entity in `spec-and-architecture.md` has minimal fields. The full
 | `default_min_rom_deg` | |
 | `default_max_rom_deg` | |
 | `default_max_angular_velocity_deg_s` | |
-| `default_assistance_level_pct` | |
 | `default_pain_stop_threshold` | |
-| `requires_motor` | Boolean |
-| `requires_walking_support` | Boolean |
-| `requires_supervision` | Boolean |
-| `contraindications` | Free text |
 | `safety_notes` | Free text |
 | `video_url` | Optional |
 | `image_url` | Optional |
 | `target_joint` | `KNEE`, `ANKLE`, `BOTH` |
 | `is_active` | Boolean; never hard-delete |
-| `created_by_admin_id` | FK → User (Admin) |
+| `created_by_id` | FK → User (Admin) |
 | `created_at` | |
 | `updated_at` | |
+
+The video and image will be AI generated and stored in the system to be referenced and viewed later
 
 ### Exercise Categories
 
@@ -689,7 +541,7 @@ All safety-related changes must be logged. Audit logs must never be deleted.
 
 Actions that must be logged: ROM change, velocity change, assistance level change, pain threshold change, exercise prescription change, doctor-patient link, remote session stop, report export, device assignment/unassignment, admin approval/rejection.
 
-### SessionMetrics
+### SessionMetrics (out of scope for now)
 
 Aggregated summary data per session (complements raw SensorReading rows).
 
@@ -712,7 +564,7 @@ Aggregated summary data per session (complements raw SensorReading rows).
 
 ---
 
-## 20. Session Status Values
+## 20. Session Status Values (out of scope)
 
 The spec has `IN_PROGRESS`, `COMPLETED`, `INTERRUPTED`. For implementation, the following stop-reason statuses are needed:
 
@@ -723,9 +575,6 @@ The spec has `IN_PROGRESS`, `COMPLETED`, `INTERRUPTED`. For implementation, the 
 | `STOPPED_BY_PATIENT` | Patient chose to stop early |
 | `STOPPED_DUE_TO_PAIN` | Pain threshold exceeded |
 | `STOPPED_DUE_TO_DEVICE_FAULT` | Device/motor fault |
-| `INTERRUPTED_CONNECTION` | BLE/heartbeat lost |
-| `STOPPED_REMOTELY` | Doctor triggered remote stop |
-| `CALIBRATION_FAILED` | Could not complete calibration |
 
 ---
 
@@ -743,7 +592,6 @@ The spec has `IN_PROGRESS`, `COMPLETED`, `INTERRUPTED`. For implementation, the 
 | Exercise reminder | Patient |
 | Appointment reminder | Patient |
 | New message | Patient + Doctor |
-| Doctor link request | Patient (enrollment code redeemed) |
 | Plan updated | Patient |
 | Session completed | Doctor |
 | Missed session | Doctor |
@@ -751,22 +599,23 @@ The spec has `IN_PROGRESS`, `COMPLETED`, `INTERRUPTED`. For implementation, the 
 | Emergency stop alert | Doctor |
 | Device fault | Doctor |
 | Low battery | Patient |
-| Calibration failed | Patient + Doctor |
 | Admin approval result | Doctor |
 
 ---
 
-## 22. Real-Time Chat
+## 22. Real-Time Chat (low priority)
 
 WebSocket required for patient-doctor messaging (V1).
 
 WebSocket endpoints:
-```
+
+```text
 /ws/chat
 /ws/live-session/{sessionId}
 ```
 
 **Doctor quick replies:**
+
 - Please stop exercising for today.
 - Please repeat calibration and try again.
 - Your session looks good.
@@ -774,6 +623,7 @@ WebSocket endpoints:
 - Please schedule a follow-up appointment.
 
 **Patient quick messages:**
+
 - I feel pain.
 - I need help with calibration.
 - I had a device problem.
@@ -791,6 +641,7 @@ WebSocket endpoints:
 The gait model must run locally on the device — it must not depend on a cloud connection. It must be small enough for ESP32-S3 memory constraints and tested for latency and reliability.
 
 **Six gait phases:**
+
 1. Initial contact / heel strike
 2. Loading response
 3. Mid stance
@@ -799,11 +650,9 @@ The gait model must run locally on the device — it must not depend on a cloud 
 6. Swing
 
 **On-device outputs:**
+
 - Current gait phase (real-time)
-- Phase timeline summary
 - Confidence score (if available)
-- Stance/swing ratio summary
-- Abnormal timing flag (for doctor review only)
 
 **Models under consideration:** Random Forest, SVM, XGBoost, LSTM, CNN-LSTM, BiLSTM
 
@@ -812,6 +661,11 @@ The gait model must run locally on the device — it must not depend on a cloud 
 ### Backend Analytics Service
 
 Separate from on-device gait analysis. Runs post-session. Schema is pending (OD-3 in spec). See `spec-and-architecture.md`.
+May consider the following for the backend analytics service
+
+- Phase timeline summary
+- Stance/swing ratio summary
+- Abnormal timing flag (for doctor review only)
 
 ### AI Restrictions (All AI Components)
 
@@ -821,7 +675,8 @@ Separate from on-device gait analysis. Runs post-session. Schema is pending (OD-
 - AI-generated insights must be labelled as support tools in the UI
 
 **Required UI disclaimer:**
-```
+
+```text
 AI analysis is a support tool only.
 Final clinical decisions must be made by the physiotherapist.
 ```
@@ -829,17 +684,20 @@ Final clinical decisions must be made by the physiotherapist.
 ### Patient AI Chat (V1)
 
 An in-app AI assistant available to the patient. It may access (with proper auth):
+
 - Patient profile and medical history
 - Assigned exercise plan
 - Session summaries and pain logs
 - Device and session status summaries
 
 AI chat must not:
+
 - Diagnose or prescribe independently
 - Change device settings, ROM, speed, or assistance
 - Tell the patient to ignore high pain or emergency symptoms
 
 AI must escalate (recommend contacting the doctor) when:
+
 - Pain level is high
 - Symptoms are clinically concerning
 - Device fault occurs
@@ -855,6 +713,7 @@ AI must escalate (recommend contacting the doctor) when:
 | V2 | PDF export, CSV export, print |
 
 Report types to build:
+
 - Session report
 - Weekly progress report
 - Monthly progress report
@@ -883,7 +742,7 @@ Report types to build:
 
 ### Auth
 
-```
+```text
 POST /api/auth/signup
 POST /api/auth/login
 POST /api/auth/refresh
@@ -894,7 +753,7 @@ POST /api/auth/reset-password
 
 ### Admin
 
-```
+```text
 GET  /api/admin/doctors/pending
 POST /api/admin/doctors/{id}/approve
 POST /api/admin/doctors/{id}/reject
@@ -906,7 +765,7 @@ GET  /api/admin/devices
 
 ### Patient
 
-```
+```text
 GET  /api/patient/profile
 PUT  /api/patient/profile
 GET  /api/patient/home
@@ -921,7 +780,7 @@ POST /api/patient/link-requests/{id}/reject
 
 ### Doctor
 
-```
+```text
 GET  /api/doctor/dashboard
 GET  /api/doctor/patients
 GET  /api/doctor/patients/{id}
@@ -935,7 +794,7 @@ POST /api/alerts/{id}/resolve
 
 ### Exercise Library
 
-```
+```text
 GET  /api/exercises
 GET  /api/exercises/{id}
 POST /api/admin/exercises
@@ -945,7 +804,7 @@ POST /api/admin/exercises/{id}/deactivate
 
 ### Rehab Plans
 
-```
+```text
 POST /api/doctor/patients/{patientId}/plans
 GET  /api/doctor/patients/{patientId}/plans
 PUT  /api/doctor/plans/{planId}
@@ -956,7 +815,7 @@ POST /api/doctor/plans/{planId}/complete
 
 ### Sessions
 
-```
+```text
 POST /api/sessions/start
 POST /api/sessions/{id}/metrics
 POST /api/sessions/{id}/finish
@@ -968,7 +827,7 @@ GET  /api/sessions/{id}
 
 ### Devices
 
-```
+```text
 GET  /api/devices
 GET  /api/devices/{id}
 POST /api/devices/{id}/assign
@@ -978,21 +837,22 @@ POST /api/devices/{id}/status
 
 ### Messages
 
-```
+```text
 GET  /api/messages
 POST /api/messages
 PUT  /api/messages/{id}/read
 ```
 
 WebSocket:
-```
+
+```text
 /ws/chat
 /ws/live-session/{sessionId}
 ```
 
 ### AI
 
-```
+```text
 POST /api/ai/sessions/{sessionId}/predict-gait
 GET  /api/ai/sessions/{sessionId}/results
 ```
@@ -1013,6 +873,7 @@ GET  /api/ai/sessions/{sessionId}/results
 - Rate limiting on auth endpoints
 - Backend validation of all commands (firmware also validates safety commands independently)
 - Firmware enforces hard safety limits regardless of backend commands
+- OWASP top ten resistant
 
 ---
 
@@ -1021,6 +882,7 @@ GET  /api/ai/sessions/{sessionId}/results
 Each patient account may be paired with only one active device at a time.
 
 Device replacement flow:
+
 1. Doctor or admin unassigns old device
 2. New device is assigned to patient
 3. Patient pairs the new brace
@@ -1036,12 +898,14 @@ Patients cannot replace their own device without doctor/admin action.
 The production app must not include a simulated or fake device mode.
 
 **Allowed (for development and graduation demo):**
+
 - Fake patient accounts (test accounts)
 - Seeded session logs
 - Seeded pain logs, alerts, and chat messages
 - Developer test fixtures
 
 **Not allowed as a product feature:**
+
 - A user-facing fake brace connection
 - A production toggle that pretends hardware is connected
 - A doctor-facing fake live monitoring mode labelled as real
@@ -1057,17 +921,17 @@ For demo purposes: if real hardware is not connected, label the environment clea
 Build real flows end-to-end with seeded data for development:
 
 **Patient app:**
-signup → login → profile → patient ID → doctor link → home → exercise list → mobile-only session timer → pain logging → session summary → messages → calendar → progress
+signup → login → profile → generate enrollment code → home → sessions and exercise list → mobile-only session/set/break timer → pain logging → session summary → messages → calendar → progress
 
 **Doctor portal:**
-signup → admin approval → login → dashboard → link patient → patient profile → exercise library → create plan → set safety limits → view sessions → messages → calendar → reports
+signup → admin approval → login → dashboard → enroll patient → patient profile → exercise library → create plan → set safety limits → view sessions → messages → calendar → reports
 
 **Backend:**
 auth → roles → patients → doctors → admin approval → patient-doctor link → exercise library → plans → sessions → pain logs → messages → calendar events → reports → alerts
 
 ### Phase 2 — Hardware Integration
 
-BLE connection, ESP32 telemetry, real knee angle, angular velocity, motor current, battery, emergency stop, session data pipeline
+BLE connection, ESP32 telemetry, real knee angle, angular velocity, battery, emergency stop, session data pipeline
 
 ### Phase 3 — AI
 
@@ -1079,7 +943,7 @@ CSV dataset pipeline, 6-phase gait classification, AI analysis page, doctor AI r
 
 ### Emergency Stop
 
-```
+```text
 Emergency stop activated.
 Motor assistance has been stopped.
 Please sit down safely.
@@ -1088,7 +952,7 @@ Contact your physiotherapist if you feel pain or discomfort.
 
 ### High Pain (7–8)
 
-```
+```text
 High pain level reported.
 Your session has been stopped for safety.
 Do not continue exercising now.
@@ -1097,7 +961,7 @@ Your physiotherapist has been notified.
 
 ### Severe Pain (9–10)
 
-```
+```text
 Severe pain reported.
 Stop using the brace now.
 If this is a medical emergency, call emergency services immediately.
@@ -1106,7 +970,7 @@ You can also contact your emergency contact or physiotherapist.
 
 ### Sensor Error
 
-```
+```text
 Sensor problem detected.
 Brace assistance has been disabled.
 Please check the brace placement and try calibration again.
@@ -1114,15 +978,14 @@ Please check the brace placement and try calibration again.
 
 ### BLE Disconnected
 
-```
+```text
 Connection lost.
-Brace assistance has been paused for safety.
 Trying to reconnect...
 ```
 
 ### Calibration Failed
 
-```
+```text
 Calibration failed.
 Keep your leg still and make sure all brace parts are fixed correctly.
 Try again.
@@ -1130,26 +993,26 @@ Try again.
 
 ### Low Battery
 
-```
+```text
 Battery is too low for a safe assisted session.
 Please charge your brace before starting.
 ```
 
 ### ROM Near Limit
 
-```
+```text
 Slow down. You are close to your movement limit.
 ```
 
 ### Speed Too High
 
-```
+```text
 Move slower. Your knee movement is faster than the safe limit.
 ```
 
 ### High Motor Current
 
-```
+```text
 Motor load is high.
 Brace assistance has been paused for safety.
 ```
