@@ -56,6 +56,11 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 - Progress trends across sessions over time
 - Therapy configuration panel (issue updated prescriptions)
 
+### Data Analytics
+
+- **Sensor processing** — after each session, the Data Analytics Service processes raw IMU and FSR readings to derive higher-level metrics: step count, cadence, gait phase distribution, and anomalous walking pattern detection
+- **SessionInsight** — derived metrics are stored as a SessionInsight record linked to the session and surfaced in the doctor dashboard
+
 ---
 
 ## 4. Architecture
@@ -94,6 +99,10 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 ## OD-2: Separate vs Shared User Auth
 
 Patients and doctors are separate user populations with no UI overlap. They can share the same backend user table with a `role` field, or be completely separate auth domains. Separate domains are cleaner but more setup. Recommend: single backend user table with `role: PATIENT | DOCTOR | ADMIN`.
+
+## OD-3: SessionInsight Schema (Pending)
+
+The Data Analytics Service produces derived insights from sensor readings — step count, gait metrics, anomaly flags. The output schema is not yet defined; it depends on the analytics algorithms chosen. **Do not implement the SessionInsight entity until the Data Analytics Service design is underway.**
 
 ---
 
@@ -140,8 +149,9 @@ System_Boundary(exoskeleton_system, "Exoskeleton System") {
     Container(mobile, "Patient Mobile App", "React Native / iOS", "Provisions device WiFi via BLE. Starts and stops sessions. Delivers doctor configs to device via BLE at session start. Relays sensor data to backend over HTTPS.")
     Container(device, "Knee Exoskeleton Firmware", "ESP32-S3 / C/C++", "Captures data from 3 IMUs and 2 FSRs. Executes active therapy config. Buffers sensor data locally. Streams to mobile app over local WiFi.")
     Container(backend, "Backend API", "Firebase or Spring Boot", "Manages users, sessions, sensor data, and therapy configs. Serves data to mobile app and web app.")
-    ContainerDb(db, "Database", "Firestore or PostgreSQL", "Persists all user records, sessions, sensor readings, and therapy configurations.")
-    Container(webapp, "Doctor Web App", "React", "Displays session data, sensor graphs, progress trends. Allows doctors to issue therapy configurations.")
+    ContainerDb(db, "Database", "Firestore or PostgreSQL", "Persists all user records, sessions, sensor readings, therapy configurations, and session insights.")
+    Container(analytics, "Data Analytics Service", "TBD", "Processes raw sensor readings from completed sessions. Derives step count, gait metrics, and anomalous walking pattern detection. Writes results to SessionInsight.")
+    Container(webapp, "Doctor Web App", "React", "Displays session data, sensor graphs, progress trends, and analytics insights. Allows doctors to issue therapy configurations.")
 }
 
 Rel_D(patient, mobile, "Interacts with", "Touch UI")
@@ -151,8 +161,10 @@ Rel_D(admin, webapp, "Manages doctors via", "HTTPS / Browser")
 Rel(mobile, device, "Provisions WiFi, starts/stops session, delivers config", "BLE")
 Rel(device, mobile, "Streams buffered sensor data", "Local WiFi")
 Rel_D(mobile, backend, "Uploads session data, fetches pending configs", "HTTPS")
-Rel_D(webapp, backend, "Fetches session data and trends, submits therapy configs", "HTTPS")
+Rel_D(webapp, backend, "Fetches session data, trends and insights, submits therapy configs", "HTTPS")
 Rel_D(backend, db, "Reads and writes", "Native driver")
+Rel_D(backend, analytics, "Triggers analysis after session completion", "Internal")
+Rel(analytics, db, "Reads sensor readings, writes SessionInsight", "Native driver")
 
 @enduml
 ```
@@ -187,7 +199,7 @@ Rel_D(backend, db, "Reads and writes", "Native driver")
 
 ## 5. Data Model
 
-> High-level entities only. Expand per-feature as needed.
+> High-level entities only. Expand per-feature as needed. Full column detail for each entity is in the tables below the diagram.
 
 ```mermaid
 erDiagram
@@ -195,8 +207,18 @@ erDiagram
         uuid id PK
         string email
         enum role "PATIENT | DOCTOR | ADMIN"
+        enum education_level
         string enrollment_code "patients only"
         uuid doctor_id FK "patients only"
+    }
+    PATIENT_PROFILE {
+        uuid id PK
+        uuid patient_id FK
+        uuid doctor_id FK "assessing doctor"
+        date assessment_date
+        int fim_score "1-7"
+        int mmt_score "0-5"
+        int mmse_score "0-30"
     }
     DEVICE {
         uuid id PK
@@ -209,11 +231,20 @@ erDiagram
         uuid patient_id FK
         uuid issued_by FK "doctor"
         float max_speed
-        float max_range_of_motion_deg
-        int session_duration_min
+        float max_extension_angle_deg
+        float max_flexion_angle_deg
         int sessions_per_week
-        string schedule
-        datetime delivered_at "null until delivered to device"
+        int total_sessions_num
+        enum status "SCHEDULED | INPROGRESS | FINISHED | DISCONTINUED"
+        datetime delivered_at
+    }
+    THERAPY_SET_CONFIG {
+        uuid id PK
+        uuid therapy_config_id FK
+        string exercise_name
+        int duration_min
+        int rest_duration_min
+        boolean device_assisted
     }
     SESSION {
         uuid id PK
@@ -224,21 +255,48 @@ erDiagram
         datetime ended_at
         enum status "IN_PROGRESS | COMPLETED | INTERRUPTED"
     }
+    THERAPY_SET_RECORD {
+        uuid id PK
+        uuid session_id FK
+        uuid therapy_set_config_id FK
+        datetime start_datetime
+        datetime stop_datetime
+        int pain_level "0-10"
+        string patient_feedback
+    }
     SENSOR_READING {
         uuid id PK
         uuid session_id FK
-        datetime timestamp
-        float knee_angle_deg
-        string gait_event
+        bigint timestamp_us
+        int sample_id
+        float knee_angle_est_deg "computed"
+        string gait_phase_label "computed"
+        int heel_fsr_raw
+        int midfoot_fsr_raw
+    }
+    SESSION_INSIGHT {
+        uuid id PK
+        uuid session_id FK
     }
 
     USER ||--o{ SESSION : "performs"
     USER ||--o{ THERAPY_CONFIG : "prescribed for"
     USER ||--o| DEVICE : "owns"
     USER }o--o| USER : "patient treated by doctor"
+    USER ||--o{ PATIENT_PROFILE : "assessed as"
     THERAPY_CONFIG ||--o{ SESSION : "applied in"
+    THERAPY_CONFIG ||--o{ THERAPY_SET_CONFIG : "consists of"
     SESSION ||--o{ SENSOR_READING : "contains"
+    SESSION ||--o{ THERAPY_SET_RECORD : "records"
+    THERAPY_SET_CONFIG ||--o{ THERAPY_SET_RECORD : "executed as"
+    SESSION ||--o| SESSION_INSIGHT : "analyzed into"
 ```
+
+> **Note on SENSOR_READING:** Only key columns are shown in the diagram. See the full column table below for all 18 IMU channels, 2 FSR channels, and computed fields.
+
+> **Note on SESSION_INSIGHT:** Structure is a pending decision (OD-3). Entity shown to preserve the relationship. Do not implement until the Data Analytics Service design begins.
+
+---
 
 ### User
 
@@ -251,10 +309,37 @@ Single table for all user types; `role` determines which fields are applicable.
 | `id` | UUID |
 | `email` | Unique |
 | `name` | Full name |
+| `gender` | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY` |
+| `birth_date` | Date |
+| `education_level` | `NO_FORMAL_EDUCATION`, `PRIMARY`, `HIGH_SCHOOL`, `TECHNICAL_VOCATIONAL`, `GRADUATE`, `POST_GRADUATE` |
 | `role` | `PATIENT`, `DOCTOR`, `ADMIN` |
 | `enrollment_code` | Patients only — one-time code shared with doctor to complete enrollment |
 | `doctor_id` | Patients only — FK → User (Doctor); set when doctor redeems enrollment code |
 | `created_at` | |
+
+---
+
+### PatientProfile
+
+A point-in-time clinical snapshot of a patient. Multiple records can exist per patient as the patient is reassessed over time. The `doctor_id` here captures the assessing doctor at the time of the snapshot — this may differ from the treating doctor in USER.doctor_id if the patient's care transfers between assessments.
+
+| Field | Notes |
+|-------|-------|
+| `id` | UUID |
+| `patient_id` | FK → User (Patient) |
+| `doctor_id` | FK → User (Doctor) — the assessing doctor at time of this snapshot |
+| `assessment_date` | Date of assessment |
+| `weight_kg` | |
+| `height_cm` | |
+| `fim_score` | 1–7; Functional Independence Measure |
+| `mmt_score` | 0–5; Oxford Manual Muscle Test (MRC scale) |
+| `mmse_score` | 0–30; Mini Mental State Examination. 24–30: Normal; 18–23: Mild impairment; 10–17: Moderate impairment; 0–9: Severe impairment |
+| `can_follow_instructions` | 0–10 |
+| `needs_supervision` | Boolean |
+| `home_exercise_permission` | Boolean — controls whether patient is permitted to use the device outside supervised sessions |
+| `notes` | Free text clinical notes |
+
+---
 
 ### Device
 
@@ -265,6 +350,8 @@ Single table for all user types; `role` determines which fields are applicable.
 | `firmware_version` | For compatibility tracking |
 | `active_config_id` | FK → TherapyConfig; last config delivered to device |
 
+---
+
 ### TherapyConfig
 
 | Field | Notes |
@@ -273,12 +360,33 @@ Single table for all user types; `role` determines which fields are applicable.
 | `patient_id` | FK → User (Patient) |
 | `issued_by` | FK → User (Doctor) |
 | `max_speed` | Units TBD by hardware team |
-| `max_range_of_motion` | Degrees |
-| `session_duration_minutes` | Target per session |
+| `max_extension_angle_deg` | Maximum knee extension angle in degrees |
+| `max_flexion_angle_deg` | Maximum knee flexion angle in degrees |
 | `sessions_per_week` | Frequency |
-| `schedule` | e.g. days of week |
+| `schedule` | Days of week, e.g. Mon/Wed/Fri |
+| `total_sessions_num` | Total number of sessions prescribed in this therapy program |
+| `status` | `SCHEDULED`, `INPROGRESS`, `FINISHED`, `DISCONTINUED` |
+| `comment` | Doctor's notes on this config |
 | `created_at` | |
 | `delivered_at` | Null until confirmed delivered to device |
+
+---
+
+### TherapySetConfig
+
+Describes the individual sets that compose a therapy config. Each TherapyConfig consists of one or more ordered sets, each prescribing a specific exercise with duration and rest guidance.
+
+| Field | Notes |
+|-------|-------|
+| `id` | UUID |
+| `therapy_config_id` | FK → TherapyConfig |
+| `device_assisted` | Boolean — whether the exoskeleton actively assists during this set |
+| `exercise_name` | Name of the exercise |
+| `duration_min` | Duration of the set in minutes |
+| `rest_duration_min` | Rest time after the set in minutes |
+| `exercise_description` | Free text description or instructions |
+
+---
 
 ### Session
 
@@ -292,17 +400,80 @@ Single table for all user types; `role` determines which fields are applicable.
 | `ended_at` | Null while in progress |
 | `status` | `IN_PROGRESS`, `COMPLETED`, `INTERRUPTED` |
 
-### SensorReading
+---
+
+### TherapySetRecord
+
+Captures the actual execution of each set within a session, including patient-reported pain and feedback after the set. Fields that mirror TherapySetConfig are denormalized here to preserve a snapshot of the prescription as it was at execution time.
 
 | Field | Notes |
 |-------|-------|
 | `id` | UUID |
 | `session_id` | FK → Session |
-| `timestamp` | Device-side timestamp |
-| `imu_1`, `imu_2`, `imu_3` | Raw or pre-processed IMU vectors |
-| `fsr_1`, `fsr_2` | Force values |
-| `knee_angle` | Derived value in degrees |
-| `gait_event` | e.g. `HEEL_STRIKE`, `TOE_OFF`, `SWING`, `STANCE`, null |
+| `therapy_set_config_id` | FK → TherapySetConfig |
+| `device_assisted` | Boolean — actual device assistance used (may differ from plan) |
+| `exercise_name` | Snapshot of exercise name at execution time |
+| `planned_duration_min` | Copied from TherapySetConfig at execution time |
+| `planned_rest_duration_min` | Copied from TherapySetConfig at execution time |
+| `start_datetime` | |
+| `stop_datetime` | |
+| `pain_level` | 0–10; patient-reported pain after the set (standard clinical pain scale; presented as a labelled list in the UI) |
+| `patient_feedback` | Free text patient input after the set |
+
+---
+
+### SensorReading
+
+One row per sample streamed from the device. Sample rate: 100 Hz. IMU placement: foot, shank, thigh (right leg). FSR placement: heel, midfoot.
+
+| Field | Notes |
+|-------|-------|
+| `id` | UUID |
+| `session_id` | FK → Session |
+| `timestamp_us` | Device-side timestamp in microseconds |
+| `sample_id` | Sequential sample index within the session |
+| **Foot IMU** | |
+| `foot_ax_g` | Foot accelerometer X axis (g) |
+| `foot_ay_g` | Foot accelerometer Y axis (g) |
+| `foot_az_g` | Foot accelerometer Z axis (g) |
+| `foot_gx_rad_s` | Foot gyroscope X axis (rad/s) |
+| `foot_gy_rad_s` | Foot gyroscope Y axis (rad/s) |
+| `foot_gz_rad_s` | Foot gyroscope Z axis (rad/s) |
+| **Shank IMU** | |
+| `shank_ax_g` | Shank accelerometer X axis (g) |
+| `shank_ay_g` | Shank accelerometer Y axis (g) |
+| `shank_az_g` | Shank accelerometer Z axis (g) |
+| `shank_gx_rad_s` | Shank gyroscope X axis (rad/s) |
+| `shank_gy_rad_s` | Shank gyroscope Y axis (rad/s) |
+| `shank_gz_rad_s` | Shank gyroscope Z axis (rad/s) |
+| **Thigh IMU** | |
+| `thigh_ax_g` | Thigh accelerometer X axis (g) |
+| `thigh_ay_g` | Thigh accelerometer Y axis (g) |
+| `thigh_az_g` | Thigh accelerometer Z axis (g) |
+| `thigh_gx_rad_s` | Thigh gyroscope X axis (rad/s) |
+| `thigh_gy_rad_s` | Thigh gyroscope Y axis (rad/s) |
+| `thigh_gz_rad_s` | Thigh gyroscope Z axis (rad/s) |
+| **Force Sensitive Resistors** | |
+| `heel_fsr_raw` | Heel FSR raw ADC value (0–4095) |
+| `midfoot_fsr_raw` | Midfoot FSR raw ADC value (0–4095) |
+| **Computed fields** | |
+| `heel_contact` | -1 = unlabeled, 0 = no contact, 1 = contact |
+| `midfoot_contact` | -1 = unlabeled, 0 = no contact, 1 = contact |
+| `gait_phase_id` | Integer phase ID; -1 = unlabeled |
+| `gait_phase_label` | e.g. `STANCE`, `SWING`, `HEEL_STRIKE`, `TOE_OFF`, `unlabeled` |
+| `knee_angle_est_deg` | Estimated knee angle in degrees; null until computed |
+
+---
+
+### SessionInsight
+
+> **Pending Decision (OD-3):** The structure of this entity is not yet defined. It depends on the output schema of the Data Analytics Service. A placeholder is shown in the ER diagram to preserve the relationship. Define this entity when the Data Analytics Service design begins.
+
+| Field | Notes |
+|-------|-------|
+| `id` | UUID |
+| `session_id` | FK → Session |
+| *(remaining fields TBD)* | |
 
 ---
 
