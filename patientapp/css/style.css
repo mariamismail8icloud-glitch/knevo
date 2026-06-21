@@ -579,106 +579,283 @@ body {
     width: 100%;
     text-align: center;
   }
+
   /* Pain check-in face selector */
-.pain-checkin {
-  margin-bottom: 18px;
+  .pain-checkin {
+    margin-bottom: 18px;
+  }
+
+  .pain-desc {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .face-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .face-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 16px 10px;
+    border-radius: 20px;
+    border: 2px solid var(--line);
+    background: #fff5fa;
+    transition: 0.2s;
+    text-align: center;
+  }
+
+  .face-btn:hover {
+    border-color: var(--primary);
+    background: #fce8f3;
+    transform: translateY(-2px);
+  }
+
+  .face-btn.active {
+    border-color: var(--primary);
+    background: #fce8f3;
+    transform: translateY(-2px);
+  }
+
+  .face-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .face-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .face-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    background: #fce8f3;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .pain-logged-badge {
+    background: var(--green-soft);
+    color: #15803d;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Date separator */
+  .date-separator {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    position: relative;
+    margin: 8px 0 16px;
+  }
+
+  .date-separator::before,
+  .date-separator::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    background: #fce8f3;
+  }
+
+  .date-separator::before { 
+    left: 0; 
+  }
+
+  .date-separator::after { 
+    right: 0; 
+  }
+
+  @media (max-width: 600px) {
+    .face-row { 
+      gap: 6px; 
+    }
+
+    .face-btn { 
+      padding: 12px 6px; 
+    }
+
+    .face-icon { 
+      font-size: 24px; 
+    }
+
+    .face-label { 
+      font-size: 10px; 
+    }
+  }
 }
 
-.pain-desc {
+/* Application Profile / Motion / Speed Range */
+.application-settings {
+  margin-top: 18px;
+}
+
+.settings-subtitle {
   color: var(--muted);
   font-size: 14px;
-  margin-bottom: 18px;
+  margin-top: 6px;
 }
 
-.face-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+.settings-title {
+  margin-bottom: 16px;
+  color: var(--text);
 }
 
-.face-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 16px 10px;
-  border-radius: 20px;
-  border: 2px solid var(--line);
-  background: #fff5fa;
-  transition: 0.2s;
-  text-align: center;
-}
-
-.face-btn:hover {
-  border-color: var(--primary);
-  background: #fce8f3;
-  transform: translateY(-2px);
-}
-
-.face-btn.active {
-  border-color: var(--primary);
-  background: #fce8f3;
-  transform: translateY(-2px);
-}
-
-.face-icon {
-  font-size: 32px;
-  line-height: 1;
-}
-
-.face-label {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.face-num {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--primary);
-  background: #fce8f3;
-  padding: 3px 8px;
-  border-radius: 999px;
-}
-
-.pain-logged-badge {
-  background: var(--green-soft);
-  color: #15803d;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* Date separator */
-.date-separator {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  position: relative;
-  margin: 8px 0 16px;
-}
-
-.date-separator::before,
-.date-separator::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 38%;
+.settings-divider {
   height: 1px;
   background: #fce8f3;
+  margin: 24px 0;
 }
 
-.date-separator::before { left: 0; }
-.date-separator::after { right: 0; }
-
-@media (max-width: 600px) {
-  .face-row { gap: 6px; }
-  .face-btn { padding: 12px 6px; }
-  .face-icon { font-size: 24px; }
-  .face-label { font-size: 10px; }
+.app-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
+
+.app-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-field label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.app-field input,
+.app-field select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #fcfdff;
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+}
+
+.app-field input:focus,
+.app-field select:focus {
+  border-color: var(--primary);
+}
+
+.app-field input[type="range"] {
+  padding: 0;
+  accent-color: var(--primary);
+}
+
+.settings-preview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 24px 0;
+}
+
+.settings-preview div {
+  background: #fff5fa;
+  border: 1px solid #fce8f3;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.settings-preview span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.settings-preview strong {
+  color: var(--text);
+}
+
+.save-feedback {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #15803d;
+}
+
+@media (max-width: 992px) {
+  .app-settings-grid,
+  .settings-preview {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sign In / Sign Up / Forgot Password */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: #fff5fa;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 6px;
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.auth-tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+.auth-form {
+  display: none;
+}
+
+.auth-form.active {
+  display: block;
+}
+
+.login-box .primary-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.forgot-btn {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.forgot-btn:hover {
+  text-decoration: underline;
 }

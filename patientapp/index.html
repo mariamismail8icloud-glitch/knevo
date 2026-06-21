@@ -21,17 +21,79 @@
         <h1 style="margin-top:12px; font-size:26px;">Knevo</h1>
         <p style="color:#64748b;">Patient Recovery Portal</p>
       </div>
-      <h2>Welcome back</h2>
-      <p class="login-sub">Follow your exercises, track your recovery, and stay in touch with your therapist.</p>
-      <div class="field">
-        <label for="email">Email or Patient ID</label>
-        <input type="text" id="email" placeholder="Enter your email or ID" />
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" onclick="showAuthForm('login')">Sign In</button>
+        <button class="auth-tab" id="signupTab" onclick="showAuthForm('signup')">Sign Up</button>
       </div>
-      <div class="field">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password" />
+
+      <div class="auth-form active" id="loginForm">
+        <h2>Welcome back</h2>
+        <p class="login-sub">Follow your exercises, track your recovery, and stay in touch with your therapist.</p>
+
+        <div class="field">
+          <label for="email">Email or Patient ID</label>
+          <input type="text" id="email" placeholder="Enter your email or ID" />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" />
+        </div>
+
+        <button class="primary-btn" onclick="login()">Sign In</button>
+
+        <button class="forgot-btn" onclick="showAuthForm('reset')">
+          Forgot password?
+        </button>
       </div>
-      <button class="primary-btn" onclick="login()">Sign In</button>
+
+      <div class="auth-form" id="signupForm">
+        <h2>Create account</h2>
+        <p class="login-sub">Create your Knevo patient account to start tracking your recovery.</p>
+
+        <div class="field">
+          <label for="signupName">Full Name</label>
+          <input type="text" id="signupName" placeholder="Enter your full name" />
+        </div>
+
+        <div class="field">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" placeholder="Enter your email" />
+        </div>
+
+        <div class="field">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" placeholder="Create password" />
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm password" />
+        </div>
+
+        <button class="primary-btn" onclick="signup()">Create Account</button>
+
+        <button class="forgot-btn" onclick="showAuthForm('login')">
+          Already have an account? Sign in
+        </button>
+      </div>
+
+      <div class="auth-form" id="resetForm">
+        <h2>Forgot password?</h2>
+        <p class="login-sub">Enter your email and we will send you a password reset link.</p>
+
+        <div class="field">
+          <label for="resetEmail">Email</label>
+          <input type="email" id="resetEmail" placeholder="Enter your email" />
+        </div>
+
+        <button class="primary-btn" onclick="resetPassword()">Send Reset Link</button>
+
+        <button class="forgot-btn" onclick="showAuthForm('login')">
+          Back to sign in
+        </button>
+      </div>
     </div>
   </section>
 
@@ -43,6 +105,7 @@
         </div>
         <h2 style="font-size:14px; margin:0;">Knevo</h2>
       </div>
+
       <nav class="topnav">
         <button class="nav-btn active" onclick="showSection('dashboard', this)">Home</button>
         <button class="nav-btn" onclick="showSection('exercises', this)">Exercises</button>
@@ -50,12 +113,12 @@
         <button class="nav-btn" onclick="showSection('messages', this)">Messages</button>
         <button class="nav-btn" onclick="showSection('profile', this)">Profile</button>
       </nav>
+
       <button class="logout-btn" onclick="logout()">Logout</button>
     </header>
 
     <main class="container">
 
-      <!-- Dashboard -->
       <section id="dashboard" class="section active">
         <div class="hero">
           <div>
@@ -72,6 +135,7 @@
             <h3>3</h3>
             <p>2 completed, 1 remaining</p>
           </div>
+
           <div class="soft-card stat">
             <span>Recovery Progress</span>
             <h3>78%</h3>
@@ -79,6 +143,7 @@
               <div class="progress-fill" style="width:78%"></div>
             </div>
           </div>
+
           <div class="soft-card stat">
             <span>Pain Level</span>
             <h3 id="painDisplay">— / 10</h3>
@@ -86,40 +151,46 @@
           </div>
         </div>
 
-        <!-- Pain Check-in -->
         <div class="soft-card pain-checkin">
           <div class="card-head">
             <h3>Daily Pain Check-in</h3>
             <span class="pain-logged-badge" id="painBadge" style="display:none;">Logged ✓</span>
           </div>
+
           <p class="pain-desc">How is your pain level today? Select the face that best describes how you feel.</p>
+
           <div class="face-row">
             <div class="face-btn" onclick="selectFace(this, 0, 'No Pain')">
               <span class="face-icon">😊</span>
               <span class="face-label">No pain</span>
               <span class="face-num">0</span>
             </div>
+
             <div class="face-btn" onclick="selectFace(this, 2, 'Mild Pain')">
               <span class="face-icon">🙂</span>
               <span class="face-label">Mild</span>
               <span class="face-num">1–3</span>
             </div>
+
             <div class="face-btn" onclick="selectFace(this, 5, 'Moderate Pain')">
               <span class="face-icon">😐</span>
               <span class="face-label">Moderate</span>
               <span class="face-num">4–6</span>
             </div>
+
             <div class="face-btn" onclick="selectFace(this, 8, 'Severe Pain')">
               <span class="face-icon">😟</span>
               <span class="face-label">Severe</span>
               <span class="face-num">7–9</span>
             </div>
+
             <div class="face-btn" onclick="selectFace(this, 10, 'Worst Pain')">
               <span class="face-icon">😣</span>
               <span class="face-label">Worst</span>
               <span class="face-num">10</span>
             </div>
           </div>
+
           <button class="primary-btn" style="width:100%; margin-top:16px;" onclick="logPain()">Log Pain Level</button>
           <p id="painFeedback" style="margin-top:10px; font-size:14px; font-weight:600; color:#E8007D;"></p>
         </div>
@@ -130,6 +201,7 @@
               <h3>Today's Plan</h3>
               <a href="#">See all</a>
             </div>
+
             <div class="list-row">
               <div>
                 <strong>Heel Slides</strong>
@@ -137,6 +209,7 @@
               </div>
               <span class="badge blue" id="badge-heel">Pending</span>
             </div>
+
             <div class="list-row">
               <div>
                 <strong>Straight Leg Raise</strong>
@@ -144,6 +217,7 @@
               </div>
               <span class="badge green" id="badge-leg">Done</span>
             </div>
+
             <div class="list-row">
               <div>
                 <strong>Quad Sets</strong>
@@ -157,11 +231,13 @@
             <div class="card-head">
               <h3>Next Appointment</h3>
             </div>
+
             <div class="appointment-box">
               <h4>Clinic Follow-up</h4>
               <p>Thursday, 16 April • 11:00 AM</p>
               <button class="secondary-btn">View Details</button>
             </div>
+
             <div class="note-box">
               <h4>Therapist Note</h4>
               <p>Keep following your current exercise plan and avoid sudden twisting movement.</p>
@@ -170,26 +246,29 @@
         </div>
       </section>
 
-      <!-- Exercises -->
       <section id="exercises" class="section">
         <div class="section-header">
           <h2>My Exercises</h2>
           <p>Your daily rehabilitation routine</p>
         </div>
-        <div class="exercise-grid">
 
+        <div class="exercise-grid">
           <div class="soft-card exercise-card" id="card-heel">
             <h3>Heel Slides</h3>
             <p>Improve knee flexion mobility.</p>
+
             <div class="exercise-meta">
               <span class="set-badge" id="sets-heel">Set 1 of 3</span>
               <span class="set-badge">10 reps</span>
             </div>
+
             <div class="timer-box" id="timer-heel" style="display:none;">
               <span class="timer-count" id="count-heel">30</span>
               <span class="timer-label">seconds remaining</span>
             </div>
+
             <p class="exercise-status" id="status-heel"></p>
+
             <div class="btn-row">
               <button class="primary-btn small" id="startbtn-heel" onclick="startExercise('heel', 30, 3)">Start Set 1</button>
               <button class="secondary-btn small" onclick="markDone('heel')">Mark Done</button>
@@ -199,15 +278,19 @@
           <div class="soft-card exercise-card" id="card-leg">
             <h3>Straight Leg Raise</h3>
             <p>Increase quadriceps strength safely.</p>
+
             <div class="exercise-meta">
               <span class="set-badge" id="sets-leg">Set 1 of 3</span>
               <span class="set-badge">12 reps</span>
             </div>
+
             <div class="timer-box" id="timer-leg" style="display:none;">
               <span class="timer-count" id="count-leg">30</span>
               <span class="timer-label">seconds remaining</span>
             </div>
+
             <p class="exercise-status" id="status-leg"></p>
+
             <div class="btn-row">
               <button class="primary-btn small" id="startbtn-leg" onclick="startExercise('leg', 30, 3)">Start Set 1</button>
               <button class="secondary-btn small" onclick="markDone('leg')">Mark Done</button>
@@ -217,39 +300,44 @@
           <div class="soft-card exercise-card" id="card-quad">
             <h3>Quad Sets</h3>
             <p>Activate knee-supporting muscles.</p>
+
             <div class="exercise-meta">
               <span class="set-badge" id="sets-quad">Set 1 of 4</span>
               <span class="set-badge">15 sec hold</span>
             </div>
+
             <div class="timer-box" id="timer-quad" style="display:none;">
               <span class="timer-count" id="count-quad">15</span>
               <span class="timer-label">seconds remaining</span>
             </div>
+
             <p class="exercise-status" id="status-quad"></p>
+
             <div class="btn-row">
               <button class="primary-btn small" id="startbtn-quad" onclick="startExercise('quad', 15, 4)">Start Set 1</button>
               <button class="secondary-btn small" onclick="markDone('quad')">Mark Done</button>
             </div>
           </div>
-
         </div>
       </section>
 
-      <!-- Progress -->
       <section id="progress" class="section">
         <div class="section-header">
           <h2>Recovery Progress</h2>
           <p>Your recent rehabilitation summary</p>
         </div>
+
         <div class="stats">
           <div class="soft-card stat">
             <span>Completion Rate</span>
             <h3>85%</h3>
           </div>
+
           <div class="soft-card stat">
             <span>Range of Motion</span>
-            <h3>112°</h3>
+            <h3>112</h3>
           </div>
+
           <div class="soft-card stat">
             <span>Walking Status</span>
             <h3>Improving</h3>
@@ -257,26 +345,29 @@
         </div>
       </section>
 
-      <!-- Messages -->
       <section id="messages" class="section">
         <div class="section-header">
           <h2>Messages</h2>
           <p>Secure communication with your therapist</p>
         </div>
+
         <div class="soft-card">
           <div class="chat-box" id="chatBox">
             <div class="date-separator">Today</div>
+
             <div class="message">
               <strong>Dr. Ahmed</strong>
               <p>Please continue today's exercises and report any swelling after training.</p>
               <span>09:15 AM</span>
             </div>
+
             <div class="message self">
               <strong>You</strong>
               <p>I completed the morning session and pain stayed low.</p>
               <span>11:00 AM</span>
             </div>
           </div>
+
           <div class="reply-box">
             <textarea id="replyInput" placeholder="Write your message here..." class="reply-input"></textarea>
             <button class="primary-btn" onclick="sendMessage()">Send</button>
@@ -284,29 +375,155 @@
         </div>
       </section>
 
-      <!-- Profile -->
       <section id="profile" class="section">
         <div class="section-header">
           <h2>Profile</h2>
           <p>Your rehabilitation information</p>
         </div>
+
         <div class="profile-grid">
           <div class="soft-card profile-item">
             <span>Name</span>
             <strong>Sarah Ali</strong>
           </div>
+
           <div class="soft-card profile-item">
             <span>Condition</span>
             <strong>Knee Rehabilitation</strong>
           </div>
+
           <div class="soft-card profile-item">
             <span>Therapist</span>
             <strong>Dr. Ahmed</strong>
           </div>
+
           <div class="soft-card profile-item">
             <span>Device Status</span>
             <strong>Connected</strong>
           </div>
+        </div>
+
+        <div class="soft-card application-settings">
+          <div class="card-head">
+            <div>
+              <h3>Application Profile</h3>
+              <p class="settings-subtitle">Set the recovery stage, maximum range of motion, and safe speed range.</p>
+            </div>
+            <span class="badge blue">Settings</span>
+          </div>
+
+          <div class="app-settings-grid">
+            <div class="app-field">
+              <label for="appPatientId">Patient ID</label>
+              <input type="text" id="appPatientId" placeholder="PT-001" />
+            </div>
+
+            <div class="app-field">
+              <label for="appProfileType">Profile Type</label>
+              <select id="appProfileType">
+                <option value="Knee Rehabilitation">Knee Rehabilitation</option>
+                <option value="Walking Assist">Walking Assist</option>
+                <option value="Gait Training">Gait Training</option>
+                <option value="Post Surgery Recovery">Post Surgery Recovery</option>
+              </select>
+            </div>
+
+            <div class="app-field">
+              <label for="appRecoveryStage">Recovery Stage</label>
+              <select id="appRecoveryStage">
+                <option value="Phase 1 - Pain & Swelling Control">Phase 1 - Pain & Swelling Control</option>
+                <option value="Phase 2 - Range of Motion Recovery">Phase 2 - Range of Motion Recovery</option>
+                <option value="Phase 3 - Strengthening">Phase 3 - Strengthening</option>
+                <option value="Phase 4 - Gait Training">Phase 4 - Gait Training</option>
+                <option value="Phase 5 - Return to Activity">Phase 5 - Return to Activity</option>
+              </select>
+              <small class="field-hint">Assigned by the therapist or doctor.</small>
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <h3 class="settings-title">Range of Motion</h3>
+
+          <div class="app-settings-grid">
+            <div class="app-field">
+              <label for="appMinRom">Minimum Knee Angle</label>
+              <input type="number" id="appMinRom" min="0" max="130" value="0" />
+            </div>
+
+            <div class="app-field">
+              <label for="appMaxRom">Maximum Range of Motion</label>
+              <input type="number" id="appMaxRom" min="0" max="130" value="120" />
+              <small class="field-hint">Maximum allowed knee angle.</small>
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <h3 class="settings-title">Assistance Settings</h3>
+
+          <div class="app-settings-grid">
+            <div class="app-field">
+              <label for="appAssistLevel">Assistance Level</label>
+              <select id="appAssistLevel">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+
+            <div class="app-field">
+              <label for="appMotionSensitivity">
+                Sensor Sensitivity:
+                <strong id="motionSensitivityValue">5</strong>
+              </label>
+              <input type="range" id="appMotionSensitivity" min="1" max="10" value="5" />
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <h3 class="settings-title">Speed Range</h3>
+
+          <div class="app-settings-grid">
+            <div class="app-field">
+              <label for="appMinSpeed">Minimum Speed</label>
+              <input type="number" id="appMinSpeed" min="0" value="5" />
+            </div>
+
+            <div class="app-field">
+              <label for="appMaxSpeed">Maximum Speed</label>
+              <input type="number" id="appMaxSpeed" min="0" value="40" />
+            </div>
+
+            <div class="app-field">
+              <label for="appCurrentSpeed">
+                Current Speed:
+                <strong id="currentSpeedValue">20</strong>
+              </label>
+              <input type="range" id="appCurrentSpeed" min="5" max="40" value="20" />
+            </div>
+          </div>
+
+          <div class="settings-preview">
+            <div>
+              <span>Recovery Stage</span>
+              <strong id="stagePreview">Phase 1 - Pain & Swelling Control</strong>
+            </div>
+
+            <div>
+              <span>Maximum ROM</span>
+              <strong id="romRangePreview">0 - 120</strong>
+            </div>
+
+            <div>
+              <span>Safe Speed Range</span>
+              <strong id="speedRangePreview">5 - 40</strong>
+            </div>
+          </div>
+
+          <button class="primary-btn" onclick="saveApplicationProfile()">Save Application Profile</button>
+          <p id="appProfileFeedback" class="save-feedback"></p>
         </div>
       </section>
 
