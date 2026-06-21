@@ -95,11 +95,12 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 | Keep Firebase | Already partially in use; fast to prototype; built-in auth and real-time push | Limited query flexibility for analytics; less control; vendor lock-in |
 | Switch to Spring Boot + PostgreSQL | Full SQL query power for analytics; industry-standard; more control | More setup time; requires hosting; more code to write |
 
-**Recommendation:** If the doctor dashboard's analytics are simple (filters, date ranges, per-session views), stay with Firebase. If complex aggregations or joins are needed, switch to Spring Boot + PostgreSQL. Decide before writing any backend analytics code.
+**Decision:** switch to Spring Boot + PostgreSQL
 
 ## OD-2: Separate vs Shared User Auth
 
-Patients and doctors are separate user populations with no UI overlap. They can share the same backend user table with a `role` field, or be completely separate auth domains. Separate domains are cleaner but more setup. Recommend: single backend user table with `role: PATIENT | DOCTOR | ADMIN`.
+Patients and doctors are separate user populations with no UI overlap. They can share the same backend user table with a `role` field, or be completely separate auth domains. Separate domains are cleaner but more setup.
+**Decision:** single backend user table with `role: PATIENT | DOCTOR | ADMIN`.
 
 ## OD-3: SessionInsight Schema (Pending)
 
@@ -172,24 +173,26 @@ Rel(analytics, db, "Reads sensor readings, writes SessionInsight", "Native drive
 
 ---
 
-### 4.6 Key Data Flows
+## 4.6 Key Data Flows
 
 ---
 
-## Flow 1 — Therapy Session
+### Flow 1 — Therapy Session
 
-### Actors
+#### Actors
+
 - **Patient** — interacts with the mobile app
 - **Mobile App** — controls BLE, relays data, tracks session state
 - **Device (ESP32-S3)** — captures sensor data during device-assisted sets
 - **Backend** — persists all records
 
-### Pre-condition
+#### Pre-condition
+
 Mobile app holds the latest TherapyConfig (synced in real-time when internet is available — see Flow 3).
 
-### Happy Path
+#### Happy Path
 
-**Phase 1 — Session Open**
+Phase 1 — Session Open
 
 | Event | Who | Outcome |
 |-------|-----|---------|
@@ -209,7 +212,7 @@ Mobile app holds the latest TherapyConfig (synced in real-time when internet is 
 | Patient inputs pain level (0–10) and optional feedback | Patient | THERAPY_SET_RECORD updated |
 | No remaining device-assisted sets in session | Mobile App | BLE connection dropped |
 
-**Phase 3 — Session End**
+Phase 3 — Session End
 
 | Event | Who | Outcome |
 |-------|-----|---------|
@@ -385,7 +388,7 @@ erDiagram
 ```
 
 > **Note on SENSOR_READING:** Only key columns are shown in the diagram. See the full column table below for all 18 IMU channels, 2 FSR channels, and computed fields.
-
+>
 > **Note on SESSION_INSIGHT:** Structure is a pending decision (OD-3). Entity shown to preserve the relationship. Do not implement until the Data Analytics Service design begins.
 
 ---
