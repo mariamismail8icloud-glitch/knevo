@@ -238,10 +238,16 @@ erDiagram
         enum status "SCHEDULED | INPROGRESS | FINISHED | DISCONTINUED"
         datetime delivered_at
     }
+    EXERCISE {
+        uuid id PK
+        string name
+        enum target_joint "KNEE | ANKLE | BOTH"
+        boolean is_active
+    }
     THERAPY_SET_CONFIG {
         uuid id PK
         uuid therapy_config_id FK
-        string exercise_name
+        uuid exercise_id FK
         int duration_min
         int rest_duration_min
         boolean device_assisted
@@ -259,6 +265,7 @@ erDiagram
         uuid id PK
         uuid session_id FK
         uuid therapy_set_config_id FK
+        uuid exercise_id FK
         datetime start_datetime
         datetime stop_datetime
         int pain_level "0-10"
@@ -286,6 +293,8 @@ erDiagram
     USER ||--o{ PATIENT_PROFILE : "assessed as"
     THERAPY_CONFIG ||--o{ SESSION : "applied in"
     THERAPY_CONFIG ||--o{ THERAPY_SET_CONFIG : "consists of"
+    EXERCISE ||--o{ THERAPY_SET_CONFIG : "prescribed in"
+    EXERCISE ||--o{ THERAPY_SET_RECORD : "performed in"
     THERAPY_SET_RECORD ||--o{ SENSOR_READING : "contains"
     SESSION ||--o{ THERAPY_SET_RECORD : "records"
     THERAPY_SET_CONFIG ||--o{ THERAPY_SET_RECORD : "executed as"
@@ -372,6 +381,22 @@ A point-in-time clinical snapshot of a patient. Multiple records can exist per p
 
 ---
 
+### Exercise
+
+Reference list of knee and ankle rehabilitation exercises. Exercises must not be hard-deleted once referenced by historical records — use `is_active = false` to retire an exercise.
+
+> **Seed data:** A sample dataset of standard physiotherapy exercises will be created alongside the database migration (see task: *Populate sample exercise reference data*).
+
+| Field | Notes |
+|-------|-------|
+| `id` | UUID |
+| `name` | Exercise name |
+| `description` | Full description and instructions |
+| `target_joint` | `KNEE`, `ANKLE`, `BOTH` |
+| `is_active` | Boolean — false to retire; never hard-delete |
+
+---
+
 ### TherapySetConfig
 
 Describes the individual sets that compose a therapy config. Each TherapyConfig consists of one or more ordered sets, each prescribing a specific exercise with duration and rest guidance.
@@ -380,11 +405,10 @@ Describes the individual sets that compose a therapy config. Each TherapyConfig 
 |-------|-------|
 | `id` | UUID |
 | `therapy_config_id` | FK → TherapyConfig |
+| `exercise_id` | FK → Exercise |
 | `device_assisted` | Boolean — whether the exoskeleton actively assists during this set |
-| `exercise_name` | Name of the exercise |
 | `duration_min` | Duration of the set in minutes |
 | `rest_duration_min` | Rest time after the set in minutes |
-| `exercise_description` | Free text description or instructions |
 
 ---
 
@@ -411,8 +435,8 @@ Captures the actual execution of each set within a session, including patient-re
 | `id` | UUID |
 | `session_id` | FK → Session |
 | `therapy_set_config_id` | FK → TherapySetConfig |
+| `exercise_id` | FK → Exercise — exercises are a stable reference list; no snapshot needed |
 | `device_assisted` | Boolean — actual device assistance used (may differ from plan) |
-| `exercise_name` | Snapshot of exercise name at execution time |
 | `planned_duration_min` | Copied from TherapySetConfig at execution time |
 | `planned_rest_duration_min` | Copied from TherapySetConfig at execution time |
 | `start_datetime` | |
