@@ -30,7 +30,7 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 
 - **WiFi provisioning** — mobile app provisions the device's WiFi credentials over BLE on first setup
 - **Session lifecycle** — patient starts and stops therapy sessions from the mobile app; device executes the active therapy config
-- **Sensor capture** — device continuously captures data from 3 IMUs and 2 FSRs, deriving knee angle and gait events
+- **Sensor capture** — device captures data from 3 IMUs and 2 FSRs during active therapy sets only; capture begins when the patient starts a set and ends when the timer completes or the patient stops the set manually
 - **Local buffering** — device buffers captured data to decouple capture from transmission; tolerates transient WiFi loss mid-session
 
 ### Data Pipeline
@@ -266,7 +266,7 @@ erDiagram
     }
     SENSOR_READING {
         uuid id PK
-        uuid session_id FK
+        uuid therapy_set_record_id FK
         bigint timestamp_us
         int sample_id
         float knee_angle_est_deg "computed"
@@ -286,7 +286,7 @@ erDiagram
     USER ||--o{ PATIENT_PROFILE : "assessed as"
     THERAPY_CONFIG ||--o{ SESSION : "applied in"
     THERAPY_CONFIG ||--o{ THERAPY_SET_CONFIG : "consists of"
-    SESSION ||--o{ SENSOR_READING : "contains"
+    THERAPY_SET_RECORD ||--o{ SENSOR_READING : "contains"
     SESSION ||--o{ THERAPY_SET_RECORD : "records"
     THERAPY_SET_CONFIG ||--o{ THERAPY_SET_RECORD : "executed as"
     SESSION ||--o| SESSION_INSIGHT : "analyzed into"
@@ -429,7 +429,7 @@ One row per sample streamed from the device. Sample rate: 100 Hz. IMU placement:
 | Field | Notes |
 |-------|-------|
 | `id` | UUID |
-| `session_id` | FK → Session |
+| `therapy_set_record_id` | FK → TherapySetRecord — sensor capture is bounded by set start/stop; no readings exist outside an active set |
 | `timestamp_us` | Device-side timestamp in microseconds |
 | `sample_id` | Sequential sample index within the session |
 | **Foot IMU** | |
