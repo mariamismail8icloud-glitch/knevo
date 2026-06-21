@@ -274,9 +274,17 @@ erDiagram
         uuid id PK
         string email
         enum role "PATIENT | DOCTOR | ADMIN"
+        enum gender "MALE | FEMALE"
         enum education_level
+        string phone
+        string emergency_contact_name
+        string emergency_contact_phone
         string enrollment_code "patients only"
         uuid doctor_id FK "patients only"
+        string clinic_name "doctors only"
+        string specialization "doctors only"
+        string professional_license "doctors only; optional"
+        int years_experience "doctors only; optional"
     }
     PATIENT_PROFILE {
         uuid id PK
@@ -286,6 +294,11 @@ erDiagram
         int fim_score "1-7"
         int mmt_score "0-5"
         int mmse_score "0-30"
+        string condition
+        enum affected_side "RIGHT | LEFT | BOTH"
+        enum walking_difficulty "MILD | MODERATE | SEVERE"
+        enum walking_aid "NONE | CANE | WALKER | OTHER"
+        string rehabilitation_history
     }
     DEVICE {
         uuid id PK
@@ -327,6 +340,9 @@ erDiagram
         datetime started_at
         datetime ended_at
         enum status "IN_PROGRESS | COMPLETED | INTERRUPTED"
+        int pain_before "0-10; required; blocks if ≥7"
+        int pain_during "0-10; pain button; terminates session"
+        int pain_after "0-10; nullable"
     }
     THERAPY_SET_RECORD {
         uuid id PK
@@ -385,12 +401,19 @@ Single table for all user types; `role` determines which fields are applicable.
 | `id` | UUID |
 | `email` | Unique |
 | `name` | Full name |
-| `gender` | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY` |
+| `gender` | `MALE`, `FEMALE` |
 | `birth_date` | Date |
 | `education_level` | `NO_FORMAL_EDUCATION`, `PRIMARY`, `HIGH_SCHOOL`, `TECHNICAL_VOCATIONAL`, `GRADUATE`, `POST_GRADUATE` |
+| `phone` | |
+| `emergency_contact_name` | Patients: name of person to call in emergency. Doctors: name of assistant who can be reached when the doctor is needed urgently. |
+| `emergency_contact_phone` | Corresponding phone number for emergency contact |
 | `role` | `PATIENT`, `DOCTOR`, `ADMIN` |
 | `enrollment_code` | Patients only — one-time code shared with doctor to complete enrollment |
 | `doctor_id` | Patients only — FK → User (Doctor); set when doctor redeems enrollment code |
+| `clinic_name` | Doctors only — clinic or hospital name |
+| `specialization` | Doctors only — e.g. Physiotherapy, Neurology |
+| `professional_license` | Doctors only — professional ID or license number; optional |
+| `years_experience` | Doctors only — integer; optional |
 | `created_at` | |
 
 ---
@@ -413,6 +436,11 @@ A point-in-time clinical snapshot of a patient. Multiple records can exist per p
 | `can_follow_instructions` | 0–10 |
 | `needs_supervision` | Boolean |
 | `home_exercise_permission` | Boolean — controls whether patient is permitted to use the device outside supervised sessions |
+| `condition` | Free text description of the patient's medical condition |
+| `affected_side` | `RIGHT`, `LEFT`, `BOTH` |
+| `walking_difficulty` | `MILD`, `MODERATE`, `SEVERE` |
+| `walking_aid` | `NONE`, `CANE`, `WALKER`, `OTHER` |
+| `rehabilitation_history` | Free text description of prior rehabilitation history |
 | `notes` | Free text clinical notes |
 
 ---
@@ -490,6 +518,9 @@ Describes the individual sets that compose a therapy config. Each TherapyConfig 
 | `started_at` | |
 | `ended_at` | Null while in progress |
 | `status` | `IN_PROGRESS`, `COMPLETED`, `INTERRUPTED` |
+| `pain_before` | 0–10; required before session starts; session is blocked if value ≥ 7 |
+| `pain_during` | 0–10; nullable; entered when patient presses the in-session pain button; triggers immediate session termination |
+| `pain_after` | 0–10; nullable; entered after session ends; may be absent if session terminated abruptly |
 
 ---
 
