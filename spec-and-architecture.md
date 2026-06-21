@@ -72,7 +72,8 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 | **Offline-tolerant device** | Device buffers data locally and retransmits on reconnect; sessions do not fail on transient WiFi loss |
 | **Mobile-as-relay** | The mobile app is the data and control gateway between the device and the backend. The device never talks to the backend directly. |
 | **BLE for control, WiFi for data** | BLE is used for WiFi provisioning, session start/stop signals, and config delivery. WiFi (local network) is used for bulk sensor data transfer from device to mobile app. |
-| **Async config delivery** | Doctor configs are not pushed in real time to the device; they are staged in the backend and delivered at the next session start |
+| **Real-time config sync to app** | When the doctor updates a therapy config, the change is pushed to the patient's mobile app immediately if the app is connected to the internet. Session reminders update automatically without requiring the patient to open the app. |
+| **Async config delivery to device** | The mobile app holds the latest config locally. The config is delivered to the exoskeleton device via BLE at the point the device is needed in a session (first device-assisted set). |
 | **Single tenant** | One clinic, no multi-tenancy required |
 | **iOS primary** | Mobile app targets iOS. React Native used, so Android is theoretically possible but not tested. |
 
@@ -173,27 +174,93 @@ Rel(analytics, db, "Reads sensor readings, writes SessionInsight", "Native drive
 
 ### 4.6 Key Data Flows
 
-## Therapy Session (Happy Path)
+---
 
-1. Patient opens mobile app → app connects to device via BLE
-2. App fetches pending doctor config from backend → delivers config to device via BLE
-3. Patient starts session in app → start signal sent to device via BLE
-4. Device captures IMU + FSR data → buffers locally → streams to mobile app via local WiFi
-5. Mobile app receives data → uploads to backend via HTTPS (near real-time, seconds delay)
-6. Patient stops session in app → stop signal sent via BLE → any remaining buffered data flushed
+## Flow 1 — Therapy Session
 
-## Doctor Issues New Config
+### Actors
+- **Patient** — interacts with the mobile app
+- **Mobile App** — controls BLE, relays data, tracks session state
+- **Device (ESP32-S3)** — captures sensor data during device-assisted sets
+- **Backend** — persists all records
 
-1. Doctor sets config (speed, ROM, duration, frequency, schedule) in web app
-2. Web app posts config to backend → stored against patient record
-3. Next time patient's mobile app polls/receives push → fetches pending config
-4. At next session start (step 2 above) → config delivered to device via BLE
+### Pre-condition
+Mobile app holds the latest TherapyConfig (synced in real-time when internet is available — see Flow 3).
 
-## WiFi Loss Mid-Session
+### Happy Path
 
-1. Device detects WiFi loss → continues capturing and buffering locally
-2. WiFi restored → device resumes streaming buffered data to mobile app
-3. Session integrity preserved; no data loss within device buffer capacity
+**Phase 1 — Session Open**
+
+| Event | Who | Outcome |
+|-------|-----|---------|
+| Patient opens scheduled session in app | Patient | App inspects the set list |
+| Session contains at least one device-assisted set | Mobile App | App initiates BLE scan and connects to device |
+| BLE connected | Mobile App | Pending config delivered to device over BLE |
+| Patient taps "Start Session" | Patient | SESSION record created (`IN_PROGRESS`) |
+
+**Phase 2 — Set Execution Loop** *(repeated for each set)*
+
+| Event | Who | Outcome |
+|-------|-----|---------|
+| Patient taps "Start Set" | Patient | THERAPY_SET_RECORD created (`start_datetime` set) |
+| *If device-assisted:* set start signal sent to device | Mobile App → Device | Device begins sensor capture at 100 Hz |
+| Sensor data streamed to mobile app | Device → Mobile App | Data relayed to backend via HTTPS (seconds delay) |
+| Timer completes **or** patient taps "Stop Set" | Patient / Timer | Capture stops; THERAPY_SET_RECORD updated (`stop_datetime` set) |
+| Patient inputs pain level (0–10) and optional feedback | Patient | THERAPY_SET_RECORD updated |
+| No remaining device-assisted sets in session | Mobile App | BLE connection dropped |
+
+**Phase 3 — Session End**
+
+| Event | Who | Outcome |
+|-------|-----|---------|
+| All sets complete **or** patient taps "End Session" | Patient | SESSION updated (`COMPLETED` or `INTERRUPTED`) |
+| Any remaining buffered sensor data flushed | Mobile App | All SENSOR_READING rows confirmed in backend |
+
+### Connectivity Loss Mid-Set
+
+| Scenario | Behaviour |
+|----------|-----------|
+| WiFi lost during device-assisted set | Device buffers sensor data locally; resumes streaming when WiFi restores |
+| BLE lost during device-assisted set | No impact — BLE is only needed to send the set-start signal. Once the set is underway, all data flows over local WiFi. |
+
+> **Decision:** A config change made while the patient is mid-session takes effect from the next session only. The running session completes under the config that was active when it started (`SESSION.config_id`).
+
+---
+
+## Flow 2 — Doctor Issues Therapy Config
+
+| Event | Who | Outcome |
+|-------|-----|---------|
+| Doctor sets config parameters in web app | Doctor | Web app POSTs to backend |
+| Backend stores TherapyConfig (`SCHEDULED`) | Backend | Config stored; `delivered_at = null` |
+| Backend pushes update to patient's mobile app | Backend → Mobile App | Mobile app receives and stores config locally |
+| Session reminders updated automatically | Mobile App | No user action required |
+| Patient opens next session with device-assisted sets | Patient | App connects via BLE and delivers config to device |
+| Config confirmed delivered | Mobile App | `delivered_at` timestamp set on TherapyConfig |
+
+---
+
+## Flow 3 — Real-Time Config Sync
+
+The mobile app must always hold the latest config without requiring the patient to open the app.
+
+| Condition | Behaviour |
+|-----------|-----------|
+| Mobile app is online when doctor saves config | Backend pushes update immediately; app receives and stores config; reminders updated |
+| Mobile app is offline when doctor saves config | Config is queued in backend; delivered on next app connectivity |
+| Patient opens app after being offline | App syncs latest config on startup |
+
+> **Decision:** Session reminders are driven by the `schedule` field (days of week) in the active TherapyConfig. The mobile app schedules a local push notification on each configured day to remind the patient they have a session. Time of day is an implementation detail to be determined.
+
+---
+
+## Flow 4 — WiFi Loss Mid-Session
+
+| Event | Behaviour |
+|-------|-----------|
+| Device detects WiFi loss | Continues capturing and buffering locally |
+| WiFi restored | Device resumes streaming buffered data to mobile app |
+| Session completes before WiFi restored | Buffered data uploaded at next connectivity opportunity |
 
 ---
 
