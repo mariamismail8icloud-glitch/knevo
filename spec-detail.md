@@ -287,7 +287,6 @@ SESSION_COMPLETE
 FAULT_IMU
 FAULT_MOTOR_CURRENT
 FAULT_MOTOR_COMMUNICATION
-FAULT_BLUETOOTH_LOST
 FAULT_ROM_LIMIT
 FAULT_VELOCITY_LIMIT
 FAULT_EMERGENCY_STOP
@@ -319,7 +318,9 @@ Please charge your brace before starting.
 
 | Condition | Behaviour |
 |-----------|-----------|
-| Internet offline, BLE connected, plan downloaded | Session may continue; session data saved locally and synced later |
+| BLE disconnects during an active device-assisted set | No interruption — device runs the set to completion autonomously; BLE is not required after the set-start signal is sent |
+| WiFi disconnects during an active device-assisted set | No interruption — device continues capturing and buffers data locally; uploads when WiFi restores |
+| Internet offline, plan already downloaded | Session may continue; session data saved locally and synced later |
 | Internet offline, no BLE | Mobile-only sessions can continue if plan is downloaded |
 | Re-opening app while offline (previously authenticated) | Allowed |
 
@@ -539,7 +540,7 @@ All safety-related changes must be logged. Audit logs must never be deleted.
 | `ip_address` | |
 | `created_at` | |
 
-Actions that must be logged: ROM change, velocity change, assistance level change, pain threshold change, exercise prescription change, doctor-patient link, remote session stop, report export, device assignment/unassignment, admin approval/rejection.
+Actions that must be logged: ROM change, velocity change, assistance level change, pain threshold change, exercise prescription change, doctor-patient link, report export, device assignment/unassignment, admin approval/rejection.
 
 ### SessionMetrics (out of scope for now)
 
@@ -820,7 +821,6 @@ POST /api/sessions/start
 POST /api/sessions/{id}/metrics
 POST /api/sessions/{id}/finish
 POST /api/sessions/{id}/stop
-POST /api/sessions/{id}/remote-stop
 GET  /api/doctor/patients/{patientId}/sessions
 GET  /api/sessions/{id}
 ```

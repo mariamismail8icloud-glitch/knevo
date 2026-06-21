@@ -149,12 +149,12 @@
 
 ### M11 — Device-Assisted Session Runs End-to-End
 
-**Goal:** Patient starts a device-assisted set; the device captures 100 Hz sensor data; data reaches the backend and is stored against the correct TherapySetRecord.
+**Goal:** Patient starts a device-assisted set; the device captures 100 Hz sensor data; data reaches the backend. BLE and WiFi loss during the set do not interrupt the patient — the device runs autonomously until the set completes.
 
 | Component | What's built |
 |-----------|-------------|
 | Patient app | BLE config delivery at session start; set-start signal over BLE; 100 Hz WiFi stream reception from device; relay to backend via HTTPS; buffered upload on reconnect |
-| Device (ESP32-S3) | BLE config receive + apply; BLE set-start handler; sensor capture loop (IMU × 3, FSR × 2) at 100 Hz over WiFi; local buffer on WiFi loss |
+| Device (ESP32-S3) | BLE config receive + apply; BLE set-start handler; sensor capture loop (IMU × 3, FSR × 2) at 100 Hz; local buffer on WiFi loss; continues set to completion regardless of BLE or WiFi state after set-start |
 | Backend | `SENSOR_READING` bulk insert; accept relay from app; associate readings with `therapy_set_record_id` |
 
 > Enables **Flow 1 — Therapy Session** (device-assisted variant) and **Flow 4 — WiFi Loss Mid-Session**.
@@ -172,28 +172,15 @@
 
 ---
 
-### M13 — Emergency Stop and Doctor Remote Controls
+### M13 — Physical Emergency Stop and Device Safety Limits
 
-**Goal:** Doctor can remotely stop a live session from the portal; patient's app and device respond immediately. All safety-critical changes are audit-logged.
-
-| Component | What's built |
-|-----------|-------------|
-| Backend | `POST /sessions/:id/remote-stop`; doctor can lower limits but not raise them mid-session; `AUDIT_LOG` writes on all safety changes |
-| Doctor portal | Live session monitor; remote stop button; limit adjustment controls (lower only) |
-| Patient app | Receive remote-stop push; send emergency stop signal to device over BLE; display safety message |
-| Device (ESP32-S3) | Emergency stop handler; graceful shutdown; status confirmation back to app |
-
----
-
-### M14 — BLE Heartbeat and Disconnect Safety
-
-**Goal:** If BLE is lost for more than 5 seconds during a device-assisted set, the session stops and is saved cleanly — no data loss, no stuck state.
+**Goal:** Pressing the physical emergency stop button on the brace immediately cuts motor power; the device enters a locked-out fault state; the set is saved as interrupted. Device-local safety limits (ROM exceeded, motor current exceeded, battery critical) also trigger graceful autonomous shutdown — no app or connectivity required for any of this.
 
 | Component | What's built |
 |-----------|-------------|
-| Patient app | Heartbeat monitor (500 ms interval; 2 s warning; 5 s → auto-stop session); displays disconnect warning |
-| Device (ESP32-S3) | Heartbeat sender (500 ms–1 s); triggers local emergency stop if app heartbeat absent |
-| Backend | Session saved as `INTERRUPTED` with correct timestamps and any buffered data |
+| Device (ESP32-S3) | Physical e-stop input cuts motor via hardware path (not software-only); firmware enters `FAULT_EMERGENCY_STOP`; buzzer activates; manual reset required before motor can restart; ROM/current/battery fault states trigger graceful set stop |
+| Patient app | Displays emergency stop or fault message when app is connected; set saved as `INTERRUPTED` with correct timestamps |
+| Backend | `THERAPY_SET_RECORD` and `SESSION` persisted as `INTERRUPTED`; any buffered sensor data uploaded |
 
 ---
 
@@ -201,7 +188,7 @@
 
 ---
 
-### M15 — On-Device Gait Classification
+### M14 — On-Device Gait Classification
 
 **Goal:** During a device-assisted set, the ESP32-S3 classifies each sample into one of 6 gait phases in real time; phase labels are stored in SENSOR_READING.
 
@@ -212,7 +199,7 @@
 
 ---
 
-### M16 — Data Analytics Service Produces Session Insights
+### M15 — Data Analytics Service Produces Session Insights
 
 **Goal:** After a session completes, the Data Analytics Service processes sensor readings and writes a SessionInsight record with step count, cadence, gait phase distribution, and anomaly flags.
 
@@ -222,7 +209,7 @@
 
 ---
 
-### M17 — AI Reports in Doctor Portal
+### M16 — AI Reports in Doctor Portal
 
 **Goal:** Doctor opens a completed session and sees the AI-derived analysis: gait metrics, anomaly flags, and session-over-session trends.
 
