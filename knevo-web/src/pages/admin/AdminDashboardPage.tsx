@@ -172,6 +172,22 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-8">
+        {/* Quick-access cards (same as doctor dashboard) */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {[
+            { href: '/patients',  sub: 'Patients',  title: 'Patient list' },
+            { href: '/exercises', sub: 'Library',   title: 'Exercise library' },
+            { href: '/messages',  sub: 'Messaging', title: 'Messages' },
+          ].map(({ href, sub, title }) => (
+            <a key={href} href={href}
+              className="block p-5 rounded-2xl border border-[#f0d6e8] bg-white hover:border-[#E8007D] hover:shadow-knevo transition-all">
+              <p className="text-xs text-[#64748b] mb-1">{sub}</p>
+              <p className="font-bold text-[#0f172a]">{title}</p>
+              <p className="text-[#E8007D] text-xs font-semibold mt-2">Open →</p>
+            </a>
+          ))}
+        </div>
+
         <h1 className="text-2xl font-bold text-[#0f172a] mb-6">Doctor Accounts</h1>
 
         {/* Tabs */}
