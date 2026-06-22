@@ -1,16 +1,4 @@
-import axios from 'axios';
-import { API_BASE_URL } from '../config/api';
-
-const api = axios.create({ baseURL: API_BASE_URL });
-
-api.interceptors.request.use(config => {
-  const token = sessionStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-// Helper: get userId from sessionStorage (set alongside accessToken)
-const getUserId = () => sessionStorage.getItem('userId') ?? '';
+import client from './client';
 
 export interface Patient {
   id: string;
@@ -21,15 +9,10 @@ export interface Patient {
 }
 
 export const getMyPatients = (): Promise<Patient[]> =>
-  api.get<Patient[]>('/api/doctor/patients', {
-    headers: { 'X-User-Id': getUserId() },
-  }).then(r => r.data);
+  client.get<Patient[]>('/api/doctor/patients').then(r => r.data);
 
 export const enrollPatient = (enrollmentCode: string): Promise<Patient> =>
-  api.post<Patient>('/api/doctor/enroll-patient',
-    { enrollmentCode },
-    { headers: { 'X-User-Id': getUserId() } }
-  ).then(r => r.data);
+  client.post<Patient>('/api/doctor/enroll-patient', { enrollmentCode }).then(r => r.data);
 
 export interface Exercise {
   id: string;
@@ -124,23 +107,19 @@ export interface UpdateConfigRequest {
 }
 
 export const updateTherapyConfig = (configId: string, req: UpdateConfigRequest): Promise<TherapyConfig> =>
-  api.put<TherapyConfig>(`/api/therapy-config/${configId}`, req).then(r => r.data);
+  client.put<TherapyConfig>(`/api/therapy-config/${configId}`, req).then(r => r.data);
 
 export const getExercises = (params?: { category?: string; mode?: string }): Promise<Exercise[]> =>
-  api.get<Exercise[]>('/api/exercises', { params }).then(r => r.data);
+  client.get<Exercise[]>('/api/exercises', { params }).then(r => r.data);
 
 export const createPlan = (patientId: string, req: CreatePlanRequest): Promise<PlanSummary> =>
-  api.post<PlanSummary>(`/api/doctor/patients/${patientId}/plans`, req, {
-    headers: { 'X-User-Id': getUserId() },
-  }).then(r => r.data);
+  client.post<PlanSummary>(`/api/doctor/patients/${patientId}/plans`, req).then(r => r.data);
 
 export const getPatientPlans = (patientId: string): Promise<PlanSummary[]> =>
-  api.get<PlanSummary[]>(`/api/doctor/patients/${patientId}/plans`, {
-    headers: { 'X-User-Id': getUserId() },
-  }).then(r => r.data);
+  client.get<PlanSummary[]>(`/api/doctor/patients/${patientId}/plans`).then(r => r.data);
 
 export const getTherapyConfig = (configId: string): Promise<TherapyConfig> =>
-  api.get<TherapyConfig>(`/api/therapy-config/${configId}`).then(r => r.data);
+  client.get<TherapyConfig>(`/api/therapy-config/${configId}`).then(r => r.data);
 
 export interface SetRecord {
   id: string;
@@ -165,12 +144,10 @@ export interface SessionSummary {
 }
 
 export const getPatientSessions = (patientId: string): Promise<SessionSummary[]> =>
-  api.get<SessionSummary[]>(`/api/doctor/patients/${patientId}/sessions`, {
-    headers: { 'X-User-Id': getUserId() },
-  }).then(r => r.data);
+  client.get<SessionSummary[]>(`/api/doctor/patients/${patientId}/sessions`).then(r => r.data);
 
 export const getSessionDetail = (sessionId: string): Promise<SessionSummary> =>
-  api.get<SessionSummary>(`/api/sessions/${sessionId}`).then(r => r.data);
+  client.get<SessionSummary>(`/api/sessions/${sessionId}`).then(r => r.data);
 
 export interface ChatMessage {
   id: string;
@@ -189,21 +166,14 @@ export interface SendMessageRequest {
   messageType?: string;
 }
 
-export const getMessageThread = (partnerId: string, userId: string): Promise<ChatMessage[]> =>
-  api.get<ChatMessage[]>('/api/messages', {
-    params: { partnerId },
-    headers: { 'X-User-Id': userId },
-  }).then(r => r.data);
+export const getMessageThread = (partnerId: string): Promise<ChatMessage[]> =>
+  client.get<ChatMessage[]>('/api/messages', { params: { partnerId } }).then(r => r.data);
 
-export const sendMessage = (req: SendMessageRequest, userId: string): Promise<ChatMessage> =>
-  api.post<ChatMessage>('/api/messages', req, {
-    headers: { 'X-User-Id': userId },
-  }).then(r => r.data);
+export const sendMessage = (req: SendMessageRequest): Promise<ChatMessage> =>
+  client.post<ChatMessage>('/api/messages', req).then(r => r.data);
 
-export const markMessageRead = (messageId: string, userId: string): Promise<void> =>
-  api.put<void>(`/api/messages/${messageId}/read`, {}, {
-    headers: { 'X-User-Id': userId },
-  }).then(r => r.data);
+export const markMessageRead = (messageId: string): Promise<void> =>
+  client.put<void>(`/api/messages/${messageId}/read`, {}).then(r => r.data);
 
 export interface WeeklyCount {
   weekLabel: string;
@@ -225,4 +195,4 @@ export interface PatientProgress {
 }
 
 export const getPatientProgress = (patientId: string): Promise<PatientProgress> =>
-  api.get<PatientProgress>(`/api/patients/${patientId}/progress`).then(r => r.data);
+  client.get<PatientProgress>(`/api/patients/${patientId}/progress`).then(r => r.data);

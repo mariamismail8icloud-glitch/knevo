@@ -14,13 +14,13 @@ export default function MessagesPage() {
 
   const { data: messages = [], refetch } = useQuery({
     queryKey: ['thread', selectedPatientId, doctorId],
-    queryFn: () => getMessageThread(selectedPatientId!, doctorId),
+    queryFn: () => getMessageThread(selectedPatientId!),
     enabled: !!selectedPatientId,
     refetchInterval: 5000,
   });
 
   const sendMutation = useMutation({
-    mutationFn: () => sendMessage({ body: input, receiverId: selectedPatientId! }, doctorId),
+    mutationFn: () => sendMessage({ body: input, receiverId: selectedPatientId! }),
     onSuccess: () => {
       setInput('');
       refetch();
