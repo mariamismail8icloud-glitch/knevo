@@ -84,7 +84,7 @@ export default function LoginPage() {
         </form>
         <p className="text-center text-sm text-[#64748b] mt-6">
           Don&apos;t have an account?{' '}
-          <a href="/signup" className="text-[#E8007D] font-semibold hover:underline">Sign Up</a>
+          <a href="/doctor-signup" className="text-[#E8007D] font-semibold hover:underline">Sign Up</a>
         </p>
       </div>
     </div>
