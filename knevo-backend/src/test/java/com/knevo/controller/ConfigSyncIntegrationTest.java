@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,23 +28,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class ConfigSyncIntegrationTest {
 
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    TherapyConfigRepository therapyConfigRepository;
+    @Autowired MockMvc mockMvc;
+    @Autowired ObjectMapper objectMapper;
+    @Autowired UserRepository userRepository;
+    @Autowired TherapyConfigRepository therapyConfigRepository;
 
     @MockBean
     SimpMessagingTemplate messagingTemplate;
 
-    private User patient;
     private User doctor;
+    private User patient;
     private TherapyConfig config;
 
     @BeforeEach
@@ -82,6 +76,7 @@ class ConfigSyncIntegrationTest {
         req.setComment("Increased frequency");
 
         mockMvc.perform(put("/api/therapy-config/" + config.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isOk())
@@ -92,7 +87,8 @@ class ConfigSyncIntegrationTest {
 
     @Test
     void markDeliveredReturns204() throws Exception {
-        mockMvc.perform(patch("/api/therapy-config/" + config.getId() + "/delivered"))
+        mockMvc.perform(patch("/api/therapy-config/" + config.getId() + "/delivered")
+                .with(user(patient.getId().toString()).roles("PATIENT")))
             .andExpect(status().isNoContent());
     }
 
@@ -102,6 +98,7 @@ class ConfigSyncIntegrationTest {
         req.setSessionsPerWeek(3);
 
         mockMvc.perform(put("/api/therapy-config/00000000-0000-0000-0000-000000000000")
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isNotFound());
@@ -109,7 +106,8 @@ class ConfigSyncIntegrationTest {
 
     @Test
     void markDeliveredWithUnknownIdReturns404() throws Exception {
-        mockMvc.perform(patch("/api/therapy-config/00000000-0000-0000-0000-000000000000/delivered"))
+        mockMvc.perform(patch("/api/therapy-config/00000000-0000-0000-0000-000000000000/delivered")
+                .with(user(patient.getId().toString()).roles("PATIENT")))
             .andExpect(status().isNotFound());
     }
 }

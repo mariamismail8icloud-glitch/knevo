@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,11 +31,12 @@ class ProgressIntegrationTest {
     @Autowired TherapyConfigRepository therapyConfigRepository;
     @Autowired SessionRepository sessionRepository;
 
+    private User doctor;
     private User patient;
 
     @BeforeEach
     void setup() {
-        User doctor = new User();
+        doctor = new User();
         doctor.setEmail("progressdoctor@test.com");
         doctor.setUsername("progressdoctor");
         doctor.setPasswordHash("hash");
@@ -59,7 +61,6 @@ class ProgressIntegrationTest {
         config.setTotalSessionsNum(6);
         therapyConfigRepository.save(config);
 
-        // Create 3 completed sessions
         for (int i = 0; i < 3; i++) {
             Session session = new Session();
             session.setPatient(patient);
@@ -73,23 +74,24 @@ class ProgressIntegrationTest {
 
     @Test
     void getProgressReturnsCorrectAdherenceAndCounts() throws Exception {
-        mockMvc.perform(get("/api/patients/{patientId}/progress", patient.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.sessionsPerWeek").isArray())
-                .andExpect(jsonPath("$.sessionsPerWeek.length()").value(8))
-                .andExpect(jsonPath("$.totalSessionsCompleted").value(3))
-                .andExpect(jsonPath("$.totalSessionsPrescribed").value(6))
-                .andExpect(jsonPath("$.adherenceRate").value(0.5))
-                .andExpect(jsonPath("$.painTrend").isArray())
-                .andExpect(jsonPath("$.painTrend.length()").value(3));
+        mockMvc.perform(get("/api/patients/{patientId}/progress", patient.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.sessionsPerWeek").isArray())
+            .andExpect(jsonPath("$.sessionsPerWeek.length()").value(8))
+            .andExpect(jsonPath("$.totalSessionsCompleted").value(3))
+            .andExpect(jsonPath("$.totalSessionsPrescribed").value(6))
+            .andExpect(jsonPath("$.adherenceRate").value(0.5))
+            .andExpect(jsonPath("$.painTrend").isArray())
+            .andExpect(jsonPath("$.painTrend.length()").value(3));
     }
 
     @Test
     void getMyProgressEndpointWorks() throws Exception {
         mockMvc.perform(get("/api/patient/progress")
-                        .header("X-User-Id", patient.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalSessionsCompleted").value(3));
+                .with(user(patient.getId().toString()).roles("PATIENT")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalSessionsCompleted").value(3));
     }
 
     @Test
@@ -112,10 +114,11 @@ class ProgressIntegrationTest {
         emptyPatient.setDoctor(doctor2);
         emptyPatient = userRepository.save(emptyPatient);
 
-        mockMvc.perform(get("/api/patients/{patientId}/progress", emptyPatient.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.adherenceRate").value(0.0))
-                .andExpect(jsonPath("$.totalSessionsCompleted").value(0))
-                .andExpect(jsonPath("$.sessionsPerWeek.length()").value(8));
+        mockMvc.perform(get("/api/patients/{patientId}/progress", emptyPatient.getId())
+                .with(user(doctor2.getId().toString()).roles("DOCTOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.adherenceRate").value(0.0))
+            .andExpect(jsonPath("$.totalSessionsCompleted").value(0))
+            .andExpect(jsonPath("$.sessionsPerWeek.length()").value(8));
     }
 }

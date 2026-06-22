@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knevo.dto.auth.DoctorSignupRequest;
 import com.knevo.dto.auth.LoginRequest;
 import com.knevo.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -23,6 +25,16 @@ class DoctorApprovalIntegrationTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @Autowired UserRepository userRepository;
+
+    // Real seeded admin ID from V3 migration (admin@knevo.com)
+    private String adminId;
+
+    @BeforeEach
+    void setup() {
+        adminId = userRepository.findByEmail("admin@knevo.com")
+            .map(u -> u.getId().toString())
+            .orElseThrow(() -> new IllegalStateException("Seeded admin not found — check V3 migration"));
+    }
 
     @Test
     void doctorSignupReturnsPending() throws Exception {
@@ -60,7 +72,8 @@ class DoctorApprovalIntegrationTest {
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isAccepted());
 
-        mockMvc.perform(get("/api/admin/doctors/pending"))
+        mockMvc.perform(get("/api/admin/doctors/pending")
+                .with(user(adminId).roles("ADMIN")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[?(@.email=='drlist@test.com')]").exists());
     }
@@ -75,7 +88,8 @@ class DoctorApprovalIntegrationTest {
 
         var doctor = userRepository.findByEmail("drapproved@test.com").orElseThrow();
 
-        mockMvc.perform(post("/api/admin/doctors/" + doctor.getId() + "/approve"))
+        mockMvc.perform(post("/api/admin/doctors/" + doctor.getId() + "/approve")
+                .with(user(adminId).roles("ADMIN")))
             .andExpect(status().isOk());
 
         LoginRequest login = new LoginRequest();

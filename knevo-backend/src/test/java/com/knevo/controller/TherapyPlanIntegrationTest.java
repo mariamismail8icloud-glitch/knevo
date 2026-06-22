@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -81,7 +82,7 @@ class TherapyPlanIntegrationTest {
         req.setSets(List.of(set));
 
         mockMvc.perform(post("/api/doctor/patients/" + patient.getId() + "/plans")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated())
@@ -91,7 +92,6 @@ class TherapyPlanIntegrationTest {
 
     @Test
     void patientFetchesActivePlan() throws Exception {
-        // Create plan first
         var exercise = exerciseRepository.findByActiveTrue().get(0);
         SetConfigRequest set = new SetConfigRequest();
         set.setExerciseId(exercise.getId());
@@ -103,13 +103,12 @@ class TherapyPlanIntegrationTest {
         req.setSets(List.of(set));
 
         mockMvc.perform(post("/api/doctor/patients/" + patient.getId() + "/plans")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
-        // Patient fetches it
         mockMvc.perform(get("/api/patient/active-plan")
-                .header("X-User-Id", patient.getId()))
+                .with(user(patient.getId().toString()).roles("PATIENT")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.patientId").value(patient.getId().toString()))
             .andExpect(jsonPath("$.sets", hasSize(1)));
@@ -118,7 +117,7 @@ class TherapyPlanIntegrationTest {
     @Test
     void noActivePlanReturns404() throws Exception {
         mockMvc.perform(get("/api/patient/active-plan")
-                .header("X-User-Id", patient.getId()))
+                .with(user(patient.getId().toString()).roles("PATIENT")))
             .andExpect(status().isNotFound());
     }
 }

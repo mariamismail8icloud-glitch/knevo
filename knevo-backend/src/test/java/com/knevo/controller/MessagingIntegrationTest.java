@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -65,20 +66,20 @@ class MessagingIntegrationTest {
         req.setReceiverId(patient.getId());
 
         mockMvc.perform(post("/api/messages")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.body").value("Hello patient"))
-                .andExpect(jsonPath("$.senderId").value(doctor.getId().toString()))
-                .andExpect(jsonPath("$.receiverId").value(patient.getId().toString()));
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.body").value("Hello patient"))
+            .andExpect(jsonPath("$.senderId").value(doctor.getId().toString()))
+            .andExpect(jsonPath("$.receiverId").value(patient.getId().toString()));
 
         mockMvc.perform(get("/api/messages")
-                .header("X-User-Id", patient.getId())
+                .with(user(patient.getId().toString()).roles("PATIENT"))
                 .param("partnerId", doctor.getId().toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
-                .andExpect(jsonPath("$[0].body").value("Hello patient"));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
+            .andExpect(jsonPath("$[0].body").value("Hello patient"));
     }
 
     @Test
@@ -88,59 +89,53 @@ class MessagingIntegrationTest {
         req.setReceiverId(patient.getId());
 
         MvcResult result = mockMvc.perform(post("/api/messages")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andReturn();
+            .andExpect(status().isCreated())
+            .andReturn();
 
-        String body = result.getResponse().getContentAsString();
-        String messageId = objectMapper.readTree(body).get("id").asText();
+        String messageId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();
 
         mockMvc.perform(put("/api/messages/{id}/read", UUID.fromString(messageId))
-                .header("X-User-Id", patient.getId()))
-                .andExpect(status().isNoContent());
+                .with(user(patient.getId().toString()).roles("PATIENT")))
+            .andExpect(status().isNoContent());
     }
 
     @Test
     void unreadCountDecreasesAfterRead() throws Exception {
-        // Send 2 messages to patient
         for (int i = 1; i <= 2; i++) {
             SendMessageRequest req = new SendMessageRequest();
             req.setBody("Message " + i);
             req.setReceiverId(patient.getId());
 
             mockMvc.perform(post("/api/messages")
-                    .header("X-User-Id", doctor.getId())
+                    .with(user(doctor.getId().toString()).roles("DOCTOR"))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(req)))
-                    .andExpect(status().isCreated());
+                .andExpect(status().isCreated());
         }
 
-        // Verify unread count = 2
         mockMvc.perform(get("/api/messages/unread-count")
-                .header("X-User-Id", patient.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").value(2));
+                .with(user(patient.getId().toString()).roles("PATIENT")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.count").value(2));
 
-        // Get the thread to find message IDs
         MvcResult threadResult = mockMvc.perform(get("/api/messages")
-                .header("X-User-Id", patient.getId())
+                .with(user(patient.getId().toString()).roles("PATIENT"))
                 .param("partnerId", doctor.getId().toString()))
-                .andReturn();
+            .andReturn();
 
         String firstMessageId = objectMapper.readTree(threadResult.getResponse().getContentAsString())
-                .get(0).get("id").asText();
+            .get(0).get("id").asText();
 
-        // Mark one read
         mockMvc.perform(put("/api/messages/{id}/read", UUID.fromString(firstMessageId))
-                .header("X-User-Id", patient.getId()))
-                .andExpect(status().isNoContent());
+                .with(user(patient.getId().toString()).roles("PATIENT")))
+            .andExpect(status().isNoContent());
 
-        // Verify count = 1
         mockMvc.perform(get("/api/messages/unread-count")
-                .header("X-User-Id", patient.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").value(1));
+                .with(user(patient.getId().toString()).roles("PATIENT")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.count").value(1));
     }
 }

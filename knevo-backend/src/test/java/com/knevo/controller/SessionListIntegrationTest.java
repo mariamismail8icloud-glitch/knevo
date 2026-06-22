@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,13 +37,14 @@ class SessionListIntegrationTest {
     @Autowired ExerciseRepository exerciseRepository;
     @Autowired TherapySetConfigRepository setConfigRepository;
 
+    private User doctor;
     private User patient;
     private TherapyConfig config;
     private TherapySetConfig setConfig;
 
     @BeforeEach
     void setup() {
-        User doctor = new User();
+        doctor = new User();
         doctor.setEmail("sessionlistdoctor@test.com");
         doctor.setUsername("sessionlistdoctor");
         doctor.setPasswordHash("hash");
@@ -76,16 +78,15 @@ class SessionListIntegrationTest {
 
     @Test
     void doctorPatientSessionsReturnsListOrderedByNewest() throws Exception {
-        // Start a session for the patient
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 2);
         mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(user(patient.getId().toString()).roles("PATIENT"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated());
 
-        // Doctor retrieves patient sessions list
-        mockMvc.perform(get("/api/doctor/patients/" + patient.getId() + "/sessions"))
+        mockMvc.perform(get("/api/doctor/patients/" + patient.getId() + "/sessions")
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$[0].status").value("IN_PROGRESS"))
@@ -94,7 +95,8 @@ class SessionListIntegrationTest {
 
     @Test
     void doctorPatientSessionsEmptyWhenNoSessions() throws Exception {
-        mockMvc.perform(get("/api/doctor/patients/" + patient.getId() + "/sessions"))
+        mockMvc.perform(get("/api/doctor/patients/" + patient.getId() + "/sessions")
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$").isEmpty());
@@ -102,10 +104,11 @@ class SessionListIntegrationTest {
 
     @Test
     void sessionDetailIncludesSetRecordsWithExerciseName() throws Exception {
-        // Start a session
+        var patientAuth = user(patient.getId().toString()).roles("PATIENT");
+
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 1);
         var startResult = mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated())
@@ -113,16 +116,15 @@ class SessionListIntegrationTest {
         var sessionId = objectMapper.readTree(
             startResult.getResponse().getContentAsString()).get("id").asText();
 
-        // Start a set record
         var startSetReq = Map.of("therapySetConfigId", setConfig.getId().toString());
         mockMvc.perform(post("/api/sessions/" + sessionId + "/start-set")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startSetReq)))
             .andExpect(status().isCreated());
 
-        // GET session detail as doctor → set records must include exerciseName
-        mockMvc.perform(get("/api/sessions/" + sessionId))
+        mockMvc.perform(get("/api/sessions/" + sessionId)
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.setRecords").isArray())
             .andExpect(jsonPath("$.setRecords[0].exerciseName").isString());

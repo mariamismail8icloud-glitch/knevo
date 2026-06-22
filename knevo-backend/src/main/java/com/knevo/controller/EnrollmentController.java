@@ -7,6 +7,8 @@ import com.knevo.service.EnrollmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,21 +21,21 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
     @PostMapping("/api/patients/enrollment-code")
-    public ResponseEntity<EnrollmentCodeResponse> regenerateCode(
-            @RequestHeader("X-User-Id") UUID patientId) {
-        return ResponseEntity.ok(enrollmentService.regenerateCode(patientId));
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<EnrollmentCodeResponse> regenerateCode(Authentication auth) {
+        return ResponseEntity.ok(enrollmentService.regenerateCode(UUID.fromString(auth.getName())));
     }
 
     @PostMapping("/api/doctor/enroll-patient")
-    public ResponseEntity<PatientSummaryDto> enrollPatient(
-            @RequestHeader("X-User-Id") UUID doctorId,
-            @Valid @RequestBody EnrollPatientRequest req) {
-        return ResponseEntity.ok(enrollmentService.enrollPatient(doctorId, req));
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<PatientSummaryDto> enrollPatient(Authentication auth,
+                                                           @Valid @RequestBody EnrollPatientRequest req) {
+        return ResponseEntity.ok(enrollmentService.enrollPatient(UUID.fromString(auth.getName()), req));
     }
 
     @GetMapping("/api/doctor/patients")
-    public ResponseEntity<List<PatientSummaryDto>> getPatients(
-            @RequestHeader("X-User-Id") UUID doctorId) {
-        return ResponseEntity.ok(enrollmentService.getDoctorPatients(doctorId));
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<List<PatientSummaryDto>> getPatients(Authentication auth) {
+        return ResponseEntity.ok(enrollmentService.getDoctorPatients(UUID.fromString(auth.getName())));
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,7 +33,6 @@ class EnrollmentIntegrationTest {
 
     @BeforeEach
     void setup() throws Exception {
-        // Create patient
         PatientSignupRequest patReq = new PatientSignupRequest();
         patReq.setUsername("enrollpatient");
         patReq.setEmail("enrollpatient@test.com");
@@ -46,7 +46,6 @@ class EnrollmentIntegrationTest {
 
         patient = userRepository.findByEmail("enrollpatient@test.com").orElseThrow();
 
-        // Create approved doctor
         doctor = new User();
         doctor.setEmail("enrolldoctor@test.com");
         doctor.setUsername("enrolldoctor");
@@ -60,7 +59,7 @@ class EnrollmentIntegrationTest {
     @Test
     void patientCanRegenerateCode() throws Exception {
         mockMvc.perform(post("/api/patients/enrollment-code")
-                .header("X-User-Id", patient.getId()))
+                .with(user(patient.getId().toString()).roles("PATIENT")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.enrollmentCode").isNotEmpty());
     }
@@ -71,7 +70,7 @@ class EnrollmentIntegrationTest {
         req.setEnrollmentCode(patient.getEnrollmentCode());
 
         mockMvc.perform(post("/api/doctor/enroll-patient")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isOk())
@@ -84,12 +83,12 @@ class EnrollmentIntegrationTest {
         req.setEnrollmentCode(patient.getEnrollmentCode());
 
         mockMvc.perform(post("/api/doctor/enroll-patient")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
         mockMvc.perform(get("/api/doctor/patients")
-                .header("X-User-Id", doctor.getId()))
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].email").value("enrollpatient@test.com"));
@@ -101,7 +100,7 @@ class EnrollmentIntegrationTest {
         req.setEnrollmentCode("BADCODE1");
 
         mockMvc.perform(post("/api/doctor/enroll-patient")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isNotFound());
@@ -113,11 +112,10 @@ class EnrollmentIntegrationTest {
         req.setEnrollmentCode(patient.getEnrollmentCode());
 
         mockMvc.perform(post("/api/doctor/enroll-patient")
-                .header("X-User-Id", doctor.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)));
 
-        // Second doctor tries same code
         User doctor2 = new User();
         doctor2.setEmail("doctor2@test.com");
         doctor2.setUsername("doctor2");
@@ -128,7 +126,7 @@ class EnrollmentIntegrationTest {
         doctor2 = userRepository.save(doctor2);
 
         mockMvc.perform(post("/api/doctor/enroll-patient")
-                .header("X-User-Id", doctor2.getId())
+                .with(user(doctor2.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isConflict());

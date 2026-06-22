@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -74,10 +75,11 @@ class SessionIntegrationTest {
 
     @Test
     void happyPathSession() throws Exception {
-        // Start session with acceptable pain level
+        var patientAuth = user(patient.getId().toString()).roles("PATIENT");
+
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 3);
         var startResult = mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated())
@@ -88,10 +90,9 @@ class SessionIntegrationTest {
         var sessionId = objectMapper.readTree(
             startResult.getResponse().getContentAsString()).get("id").asText();
 
-        // Start a set
         var startSetReq = Map.of("therapySetConfigId", setConfig.getId().toString());
         var setResult = mockMvc.perform(post("/api/sessions/" + sessionId + "/start-set")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startSetReq)))
             .andExpect(status().isCreated())
@@ -101,22 +102,21 @@ class SessionIntegrationTest {
         var setRecordId = objectMapper.readTree(
             setResult.getResponse().getContentAsString()).get("id").asText();
 
-        // Stop the set
         var stopSetReq = Map.of(
             "therapySetRecordId", setRecordId,
             "painLevel", 2,
             "feedback", "Felt good");
         mockMvc.perform(post("/api/sessions/" + sessionId + "/stop-set")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(stopSetReq)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("COMPLETED"))
             .andExpect(jsonPath("$.feedback").value("Felt good"));
 
-        // Complete session
         var completeReq = Map.of("painAfter", 2);
         mockMvc.perform(post("/api/sessions/" + sessionId + "/complete")
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(completeReq)))
             .andExpect(status().isOk())
@@ -128,7 +128,7 @@ class SessionIntegrationTest {
     void highPainBlocksSessionStart() throws Exception {
         var req = Map.of("configId", config.getId().toString(), "painBefore", 8);
         mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(user(patient.getId().toString()).roles("PATIENT"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isUnprocessableEntity());
@@ -136,10 +136,11 @@ class SessionIntegrationTest {
 
     @Test
     void painButtonTerminatesSession() throws Exception {
-        // Start session with low pain
+        var patientAuth = user(patient.getId().toString()).roles("PATIENT");
+
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 2);
         var startResult = mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated())
@@ -147,9 +148,9 @@ class SessionIntegrationTest {
         var sessionId = objectMapper.readTree(
             startResult.getResponse().getContentAsString()).get("id").asText();
 
-        // Trigger pain button
         var painReq = Map.of("painLevel", 8);
         mockMvc.perform(post("/api/sessions/" + sessionId + "/pain-button")
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(painReq)))
             .andExpect(status().isOk())
@@ -159,9 +160,11 @@ class SessionIntegrationTest {
 
     @Test
     void getSessionReturnsSetRecords() throws Exception {
+        var patientAuth = user(patient.getId().toString()).roles("PATIENT");
+
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 1);
         var startResult = mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated())
@@ -169,7 +172,8 @@ class SessionIntegrationTest {
         var sessionId = objectMapper.readTree(
             startResult.getResponse().getContentAsString()).get("id").asText();
 
-        mockMvc.perform(get("/api/sessions/" + sessionId))
+        mockMvc.perform(get("/api/sessions/" + sessionId)
+                .with(patientAuth))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(sessionId))
             .andExpect(jsonPath("$.setRecords").isArray());
@@ -177,9 +181,11 @@ class SessionIntegrationTest {
 
     @Test
     void stopSessionByPatient() throws Exception {
+        var patientAuth = user(patient.getId().toString()).roles("PATIENT");
+
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 2);
         var startResult = mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated())
@@ -187,23 +193,25 @@ class SessionIntegrationTest {
         var sessionId = objectMapper.readTree(
             startResult.getResponse().getContentAsString()).get("id").asText();
 
-        mockMvc.perform(post("/api/sessions/" + sessionId + "/stop"))
+        mockMvc.perform(post("/api/sessions/" + sessionId + "/stop")
+                .with(patientAuth))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("STOPPED_BY_PATIENT"));
     }
 
     @Test
     void getPatientSessionsList() throws Exception {
-        // Start and complete a session
+        var patientAuth = user(patient.getId().toString()).roles("PATIENT");
+
         var startReq = Map.of("configId", config.getId().toString(), "painBefore", 1);
         mockMvc.perform(post("/api/sessions/start")
-                .header("X-User-Id", patient.getId())
+                .with(patientAuth)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(startReq)))
             .andExpect(status().isCreated());
 
         mockMvc.perform(get("/api/patient/sessions")
-                .header("X-User-Id", patient.getId()))
+                .with(patientAuth))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray());
     }
