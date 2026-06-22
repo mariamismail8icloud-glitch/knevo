@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { registerUnauthorizedHandler } from './api/client';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute, { RoleRoute } from './components/PrivateRoute';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
@@ -43,7 +43,9 @@ function AppRoutes() {
         <Route path="/patients/:patientId" element={<PatientDetailPage />} />
         <Route path="/exercises" element={<ExerciseLibraryPage />} />
         <Route path="/create-plan" element={<CreatePlanPage />} />
-        <Route path="/messages" element={<MessagesPage />} />
+        <Route element={<RoleRoute allowed={['DOCTOR', 'PATIENT']} />}>
+          <Route path="/messages" element={<MessagesPage />} />
+        </Route>
       </Route>
 
       <Route path="/" element={<Navigate to="/login" replace />} />

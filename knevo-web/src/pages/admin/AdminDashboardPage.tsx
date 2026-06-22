@@ -177,7 +177,6 @@ export default function AdminDashboardPage() {
           {[
             { href: '/patients',  sub: 'Patients',  title: 'Patient list' },
             { href: '/exercises', sub: 'Library',   title: 'Exercise library' },
-            { href: '/messages',  sub: 'Messaging', title: 'Messages' },
           ].map(({ href, sub, title }) => (
             <a key={href} href={href}
               className="block p-5 rounded-2xl border border-[#f0d6e8] bg-white hover:border-[#E8007D] hover:shadow-knevo transition-all">
