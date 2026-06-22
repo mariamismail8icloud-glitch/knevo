@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getExercises, type Exercise } from '../../api/doctorApi';
+import { useAuth } from '../../context/AuthContext';
 
 const CATEGORIES = [
   'All', 'Standing exercises', 'Walking / gait exercises', 'Knee control exercises',
@@ -20,6 +21,7 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 };
 
 export default function ExerciseLibraryPage() {
+  const { role } = useAuth();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [selected, setSelected] = useState<Exercise | null>(null);
@@ -38,7 +40,9 @@ export default function ExerciseLibraryPage() {
     <div className="min-h-screen bg-[#fdf5f9] p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <a href="/dashboard" className="text-[#64748b] hover:text-[#E8007D] text-sm">← Dashboard</a>
+          <a href={role === 'ADMIN' ? '/admin' : '/dashboard'} className="text-[#64748b] hover:text-[#E8007D] text-sm">
+            {role === 'ADMIN' ? '← Admin' : '← Dashboard'}
+          </a>
         </div>
         <h1 className="text-2xl font-bold text-[#0f172a] mb-6">Exercise Library</h1>
 

@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMyPatients, enrollPatient, type Patient } from '../../api/doctorApi';
+import { useAuth } from '../../context/AuthContext';
 
 export default function PatientListPage() {
+  const { role } = useAuth();
   const qc = useQueryClient();
   const [showEnroll, setShowEnroll] = useState(false);
   const [code, setCode] = useState('');
   const [enrollError, setEnrollError] = useState('');
 
-  const { data: patients = [], isLoading } = useQuery({
+  const { data: patients = [], isLoading, isError } = useQuery({
     queryKey: ['my-patients'],
     queryFn: getMyPatients,
+    retry: false,
   });
 
   const enrollMutation = useMutation({
@@ -32,7 +35,9 @@ export default function PatientListPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <a href="/dashboard" className="text-[#64748b] hover:text-[#E8007D] transition-colors text-sm">← Dashboard</a>
+            <a href={role === 'ADMIN' ? '/admin' : '/dashboard'} className="text-[#64748b] hover:text-[#E8007D] transition-colors text-sm">
+              {role === 'ADMIN' ? '← Admin' : '← Dashboard'}
+            </a>
           </div>
           <button
             onClick={() => setShowEnroll(true)}
@@ -84,6 +89,8 @@ export default function PatientListPage() {
         <div className="bg-white rounded-2xl border border-[#f0d6e8] shadow-knevo overflow-hidden">
           {isLoading ? (
             <div className="p-8 text-center text-[#64748b]">Loading patients…</div>
+          ) : isError ? (
+            <div className="p-12 text-center text-red-600 text-sm">Failed to load patients.</div>
           ) : patients.length === 0 ? (
             <div className="p-12 text-center">
               <p className="text-[#64748b] mb-4">No patients yet.</p>

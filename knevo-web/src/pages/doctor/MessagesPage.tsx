@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getMyPatients, getMessageThread, sendMessage } from '../../api/doctorApi';
+import { useAuth } from '../../context/AuthContext';
 
 export default function MessagesPage() {
+  const { role } = useAuth();
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const doctorId = sessionStorage.getItem('userId') ?? '';
@@ -33,8 +35,8 @@ export default function MessagesPage() {
       <div className="w-64 bg-white border-r border-[#f0d6e8] flex flex-col">
         <div className="p-5 border-b border-[#f0d6e8]">
           <div className="flex items-center gap-3 mb-4">
-            <a href="/dashboard" className="text-[#64748b] hover:text-[#E8007D] text-sm">
-              ← Dashboard
+            <a href={role === 'ADMIN' ? '/admin' : '/dashboard'} className="text-[#64748b] hover:text-[#E8007D] text-sm">
+              {role === 'ADMIN' ? '← Admin' : '← Dashboard'}
             </a>
           </div>
           <h2 className="font-bold text-[#0f172a]">Messages</h2>

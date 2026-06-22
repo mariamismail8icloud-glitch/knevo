@@ -27,11 +27,7 @@ export default function DashboardPage() {
         </div>
         <div className="bg-white rounded-2xl border border-[#f0d6e8] p-8 shadow-knevo">
           <h2 className="text-lg font-semibold text-[#0f172a] mb-2">Dashboard</h2>
-          {userId ? (
-            <p className="text-[#64748b]">Signed in as <strong>{role}</strong> ({userId})</p>
-          ) : (
-            <p className="text-[#64748b]">Loading…</p>
-          )}
+          <p className="text-[#64748b]">Signed in as <strong>{role}</strong></p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <a href="/patients" className="block p-6 rounded-2xl border border-[#f0d6e8] bg-white hover:border-[#E8007D] hover:shadow-knevo transition-all">
