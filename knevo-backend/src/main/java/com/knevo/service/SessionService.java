@@ -214,6 +214,12 @@ public class SessionService {
         dto.setId(record.getId());
         dto.setTherapySetConfigId(
             record.getTherapySetConfig() != null ? record.getTherapySetConfig().getId() : null);
+        if (record.getExercise() != null) {
+            dto.setExerciseName(record.getExercise().getName());
+        } else if (record.getTherapySetConfig() != null
+                && record.getTherapySetConfig().getExercise() != null) {
+            dto.setExerciseName(record.getTherapySetConfig().getExercise().getName());
+        }
         dto.setStartDatetime(record.getStartDatetime());
         dto.setStopDatetime(record.getStopDatetime());
         dto.setPainLevel(record.getPainLevel());

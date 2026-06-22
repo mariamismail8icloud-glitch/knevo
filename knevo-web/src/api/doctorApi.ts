@@ -123,3 +123,33 @@ export const getPatientPlans = (patientId: string): Promise<PlanSummary[]> =>
 
 export const getTherapyConfig = (configId: string): Promise<TherapyConfig> =>
   api.get<TherapyConfig>(`/api/therapy-config/${configId}`).then(r => r.data);
+
+export interface SetRecord {
+  id: string;
+  therapySetConfigId: string;
+  exerciseName: string | null;
+  startDatetime: string | null;
+  stopDatetime: string | null;
+  painLevel: number | null;
+  feedback: string | null;
+  status: string;
+}
+
+export interface SessionSummary {
+  id: string;
+  status: string;
+  startedAt: string | null;
+  endedAt: string | null;
+  painBefore: number | null;
+  painDuring: number | null;
+  painAfter: number | null;
+  setRecords: SetRecord[] | null;
+}
+
+export const getPatientSessions = (patientId: string): Promise<SessionSummary[]> =>
+  api.get<SessionSummary[]>(`/api/doctor/patients/${patientId}/sessions`, {
+    headers: { 'X-User-Id': getUserId() },
+  }).then(r => r.data);
+
+export const getSessionDetail = (sessionId: string): Promise<SessionSummary> =>
+  api.get<SessionSummary>(`/api/sessions/${sessionId}`).then(r => r.data);

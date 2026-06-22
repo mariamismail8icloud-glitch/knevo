@@ -67,4 +67,10 @@ public class SessionController {
             @RequestHeader("X-User-Id") UUID patientId) {
         return ResponseEntity.ok(sessionService.getPatientSessions(patientId));
     }
+
+    @GetMapping("/api/doctor/patients/{patientId}/sessions")
+    public ResponseEntity<List<SessionDto>> getDoctorPatientSessions(
+            @PathVariable UUID patientId) {
+        return ResponseEntity.ok(sessionService.getPatientSessions(patientId));
+    }
 }

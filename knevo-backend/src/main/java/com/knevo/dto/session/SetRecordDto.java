@@ -9,6 +9,7 @@ import java.util.UUID;
 public class SetRecordDto {
     private UUID id;
     private UUID therapySetConfigId;
+    private String exerciseName;
     private OffsetDateTime startDatetime;
     private OffsetDateTime stopDatetime;
     private Integer painLevel;
