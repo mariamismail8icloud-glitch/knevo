@@ -11,24 +11,35 @@
 		0A57E3ADA6D02405324636A0 /* SetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC45AD1A924A2697D71CCF7 /* SetDetailView.swift */; };
 		140BBA86E8A35536EC056DEB /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A0DA30CAC0E9FC9FA2121E /* SessionsView.swift */; };
 		1B68DF4DB2C43B0262C6E463 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */; };
+		20D1F0A477E78BCF4AE08BFA /* PainDuringView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDDE5E57F47FB70920CAAA6 /* PainDuringView.swift */; };
 		239C8C23FA3C824A95CBE479 /* KnevoPatientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793E10578B515EA4B29904B8 /* KnevoPatientApp.swift */; };
+		24EE3E3F4EA87754F32B4204 /* PreSessionPainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DD1BC48D58E2513496A34C5 /* PreSessionPainView.swift */; };
 		2AED483D21467C4523FBECF8 /* ActivePlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296104DC7F6A10372F342F34 /* ActivePlanViewModel.swift */; };
 		2D50FAB1CA6402D226729731 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4665F97401AA6967343950A2 /* Color+Hex.swift */; };
 		2DFD4050BB5BE8AE99907694 /* KnevoTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BC66C6DD85492599D2A60D /* KnevoTextField.swift */; };
+		3F1CC3F1E9506CCDB06E6DC7 /* SessionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222709CDF8E499CFD1100260 /* SessionModels.swift */; };
 		4074FE5C218D5E3EEFC85543 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29947AD9F670C0D86933E03 /* APIClient.swift */; };
 		4827A77469EA2C70B14008B5 /* NetworkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C6C5A03378A48D8207FE2C /* NetworkConfig.swift */; };
 		4A26A6C126D6F3C32DD86AB3 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B920D7308A2C2C5640DC44D /* MainTabView.swift */; };
+		520244550325CE19EE627A36 /* ActiveSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BDA2B6FB2F41A9E651B63F /* ActiveSetView.swift */; };
 		5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */; };
+		5ECE93204F49C3CC7558E486 /* RunningSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687528EB64426AF805DDE728 /* RunningSessionView.swift */; };
+		683765D2BD39B20A03BC1521 /* SessionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA25CD03CDE26518739D9D7 /* SessionFlowView.swift */; };
 		6D4B22D9A1D539531119453F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD021D9F736324FD5C9F2F29 /* LoginView.swift */; };
 		9566E10C91F169FA1780103C /* PatientProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C78E2D247D6384259B8268 /* PatientProgressView.swift */; };
+		9913E88DEED4D6C08AE0C446 /* SessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */; };
+		9EBEED243B96B915376AD88D /* SessionSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */; };
 		B9C31E63D857B82AB5B548CE /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3230889D0EF5D7FDD98B34CC /* AuthModels.swift */; };
 		C34F462D452B63B5C2D14ABD /* ActivePlanViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */; };
 		CC47018C62C97CD6C3311233 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5E195D34BA939BAD4BE3AC /* HomeView.swift */; };
 		CE120800838FBE0F0505AB85 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEEEC2C79A1A6B009989A8B8 /* KeychainService.swift */; };
+		D5270B0A0161EC3D8A029AB5 /* PostSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775638FB1AACF5528572DD94 /* PostSessionView.swift */; };
 		D836444CBD5F4C679B68F843 /* ActivePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30F932833C539AA2E3A9E94A /* ActivePlanView.swift */; };
 		DE155BC73073DB9344975A5A /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28614986AA4C285EE58753B7 /* MessagesView.swift */; };
 		E0E15436CE20DAD4E097A8C2 /* TherapyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8426151984B8593D946E93 /* TherapyModels.swift */; };
 		E9CB26B32CF2D253F429606A /* NetworkConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */; };
+		EB79F5A3AC81F44C38CEBB69 /* RestTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FCDD9B2DC1367DE95EB21B /* RestTimerView.swift */; };
+		ED8DDDC7E5732B177641D79E /* SessionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8212C990C9205709088C0C48 /* SessionViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,16 +56,26 @@
 		0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanViewModelTests.swift; sourceTree = "<group>"; };
 		18C6C5A03378A48D8207FE2C /* NetworkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConfig.swift; sourceTree = "<group>"; };
 		1B920D7308A2C2C5640DC44D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		1DDDE5E57F47FB70920CAAA6 /* PainDuringView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PainDuringView.swift; sourceTree = "<group>"; };
 		1F5E195D34BA939BAD4BE3AC /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		222709CDF8E499CFD1100260 /* SessionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionModels.swift; sourceTree = "<group>"; };
+		22BDA2B6FB2F41A9E651B63F /* ActiveSetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSetView.swift; sourceTree = "<group>"; };
 		28614986AA4C285EE58753B7 /* MessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesView.swift; sourceTree = "<group>"; };
 		296104DC7F6A10372F342F34 /* ActivePlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanViewModel.swift; sourceTree = "<group>"; };
+		2DA25CD03CDE26518739D9D7 /* SessionFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionFlowView.swift; sourceTree = "<group>"; };
 		30F932833C539AA2E3A9E94A /* ActivePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanView.swift; sourceTree = "<group>"; };
 		31C78E2D247D6384259B8268 /* PatientProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatientProgressView.swift; sourceTree = "<group>"; };
 		3230889D0EF5D7FDD98B34CC /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		374B9A199A14079D79B2AE40 /* SignupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupFlowView.swift; sourceTree = "<group>"; };
 		43A0DA30CAC0E9FC9FA2121E /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
 		4665F97401AA6967343950A2 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewModel.swift; sourceTree = "<group>"; };
+		5DD1BC48D58E2513496A34C5 /* PreSessionPainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreSessionPainView.swift; sourceTree = "<group>"; };
+		687528EB64426AF805DDE728 /* RunningSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningSessionView.swift; sourceTree = "<group>"; };
+		775638FB1AACF5528572DD94 /* PostSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSessionView.swift; sourceTree = "<group>"; };
 		793E10578B515EA4B29904B8 /* KnevoPatientApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoPatientApp.swift; sourceTree = "<group>"; };
+		8212C990C9205709088C0C48 /* SessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewModelTests.swift; sourceTree = "<group>"; };
+		88FCDD9B2DC1367DE95EB21B /* RestTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimerView.swift; sourceTree = "<group>"; };
 		8BC45AD1A924A2697D71CCF7 /* SetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDetailView.swift; sourceTree = "<group>"; };
 		9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConfigTests.swift; sourceTree = "<group>"; };
 		A8BC66C6DD85492599D2A60D /* KnevoTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoTextField.swift; sourceTree = "<group>"; };
@@ -67,6 +88,7 @@
 		DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		F12DDCCEE54A335A3CC75615 /* KnevoPatientTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KnevoPatientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F29947AD9F670C0D86933E03 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSummaryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -102,6 +124,7 @@
 			children = (
 				296104DC7F6A10372F342F34 /* ActivePlanViewModel.swift */,
 				DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */,
+				4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -153,8 +176,24 @@
 				8BC45AD1A924A2697D71CCF7 /* SetDetailView.swift */,
 				81E86794BF2FE7F9FA0CC59E /* Auth */,
 				90F56EB91C682E11413C94BA /* Components */,
+				7627F48CD74464CF89E3BFDD /* Session */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		7627F48CD74464CF89E3BFDD /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				22BDA2B6FB2F41A9E651B63F /* ActiveSetView.swift */,
+				1DDDE5E57F47FB70920CAAA6 /* PainDuringView.swift */,
+				775638FB1AACF5528572DD94 /* PostSessionView.swift */,
+				5DD1BC48D58E2513496A34C5 /* PreSessionPainView.swift */,
+				88FCDD9B2DC1367DE95EB21B /* RestTimerView.swift */,
+				687528EB64426AF805DDE728 /* RunningSessionView.swift */,
+				2DA25CD03CDE26518739D9D7 /* SessionFlowView.swift */,
+				F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */,
+			);
+			path = Session;
 			sourceTree = "<group>";
 		};
 		81E86794BF2FE7F9FA0CC59E /* Auth */ = {
@@ -180,6 +219,7 @@
 				0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */,
 				AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */,
 				9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */,
+				8212C990C9205709088C0C48 /* SessionViewModelTests.swift */,
 			);
 			name = KnevoPatientTests;
 			path = Tests/KnevoPatientTests;
@@ -188,6 +228,7 @@
 		C591C7E0C7F68FCC0B9923A3 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				222709CDF8E499CFD1100260 /* SessionModels.swift */,
 				DB8426151984B8593D946E93 /* TherapyModels.swift */,
 			);
 			path = Models;
@@ -274,6 +315,7 @@
 				C34F462D452B63B5C2D14ABD /* ActivePlanViewModelTests.swift in Sources */,
 				5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */,
 				E9CB26B32CF2D253F429606A /* NetworkConfigTests.swift in Sources */,
+				ED8DDDC7E5732B177641D79E /* SessionViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +326,7 @@
 				4074FE5C218D5E3EEFC85543 /* APIClient.swift in Sources */,
 				D836444CBD5F4C679B68F843 /* ActivePlanView.swift in Sources */,
 				2AED483D21467C4523FBECF8 /* ActivePlanViewModel.swift in Sources */,
+				520244550325CE19EE627A36 /* ActiveSetView.swift in Sources */,
 				B9C31E63D857B82AB5B548CE /* AuthModels.swift in Sources */,
 				1B68DF4DB2C43B0262C6E463 /* AuthViewModel.swift in Sources */,
 				2D50FAB1CA6402D226729731 /* Color+Hex.swift in Sources */,
@@ -295,7 +338,16 @@
 				4A26A6C126D6F3C32DD86AB3 /* MainTabView.swift in Sources */,
 				DE155BC73073DB9344975A5A /* MessagesView.swift in Sources */,
 				4827A77469EA2C70B14008B5 /* NetworkConfig.swift in Sources */,
+				20D1F0A477E78BCF4AE08BFA /* PainDuringView.swift in Sources */,
 				9566E10C91F169FA1780103C /* PatientProgressView.swift in Sources */,
+				D5270B0A0161EC3D8A029AB5 /* PostSessionView.swift in Sources */,
+				24EE3E3F4EA87754F32B4204 /* PreSessionPainView.swift in Sources */,
+				EB79F5A3AC81F44C38CEBB69 /* RestTimerView.swift in Sources */,
+				5ECE93204F49C3CC7558E486 /* RunningSessionView.swift in Sources */,
+				683765D2BD39B20A03BC1521 /* SessionFlowView.swift in Sources */,
+				3F1CC3F1E9506CCDB06E6DC7 /* SessionModels.swift in Sources */,
+				9EBEED243B96B915376AD88D /* SessionSummaryView.swift in Sources */,
+				9913E88DEED4D6C08AE0C446 /* SessionViewModel.swift in Sources */,
 				140BBA86E8A35536EC056DEB /* SessionsView.swift in Sources */,
 				0A57E3ADA6D02405324636A0 /* SetDetailView.swift in Sources */,
 				08417DBD8C9E60E90F15D4B9 /* SignupFlowView.swift in Sources */,
@@ -384,6 +436,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -486,6 +539,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

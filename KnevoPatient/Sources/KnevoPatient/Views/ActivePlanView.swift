@@ -3,6 +3,7 @@ import SwiftUI
 struct ActivePlanView: View {
     @State private var viewModel = ActivePlanViewModel()
     @State private var selectedSet: TherapySetInfo?
+    @State private var showingSession = false
 
     var body: some View {
         NavigationStack {
@@ -32,6 +33,13 @@ struct ActivePlanView: View {
             .sheet(item: $selectedSet) { set in
                 SetDetailView(set: set)
             }
+            .sheet(isPresented: $showingSession) {
+                if let plan = viewModel.plan {
+                    NavigationStack {
+                        SessionFlowView(plan: plan)
+                    }
+                }
+            }
         }
         .task {
             await viewModel.fetchActivePlan()
@@ -60,6 +68,17 @@ struct ActivePlanView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 scheduleCard(plan)
+                Button {
+                    showingSession = true
+                } label: {
+                    Label("Start Session", systemImage: "play.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(red: 0.91, green: 0, blue: 0.49))
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: Color(red: 0.91, green: 0, blue: 0.49).opacity(0.3), radius: 8)
+                }
                 setsSection(plan.sets)
             }
             .padding()
