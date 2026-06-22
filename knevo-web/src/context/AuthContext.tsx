@@ -22,8 +22,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role: null,
   });
 
-  const setAuth = (state: AuthState) => setAuthState(state);
-  const clearAuth = () => setAuthState({ accessToken: null, userId: null, role: null });
+  const setAuth = (state: AuthState) => {
+    setAuthState(state);
+    if (state.accessToken) sessionStorage.setItem('accessToken', state.accessToken);
+    else sessionStorage.removeItem('accessToken');
+  };
+  const clearAuth = () => {
+    setAuthState({ accessToken: null, userId: null, role: null });
+    sessionStorage.removeItem('accessToken');
+  };
 
   return (
     <AuthContext.Provider value={{ ...auth, setAuth, clearAuth, isAuthenticated: !!auth.accessToken }}>

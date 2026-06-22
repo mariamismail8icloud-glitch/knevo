@@ -1,6 +1,7 @@
 package com.knevo.service;
 
 import com.knevo.dto.auth.AuthResponse;
+import com.knevo.dto.auth.DoctorSignupRequest;
 import com.knevo.dto.auth.LoginRequest;
 import com.knevo.dto.auth.PatientSignupRequest;
 import com.knevo.dto.auth.RefreshRequest;
@@ -51,6 +52,30 @@ public class AuthService {
 
         User saved = userRepository.save(user);
         return buildAuthResponse(saved);
+    }
+
+    public void signupDoctor(DoctorSignupRequest req) {
+        if (userRepository.existsByEmail(req.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+        }
+        if (userRepository.existsByUsername(req.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
+        }
+
+        User user = new User();
+        user.setEmail(req.getEmail().toLowerCase());
+        user.setUsername(req.getUsername());
+        user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        user.setName(req.getName());
+        user.setRole(User.Role.DOCTOR);
+        user.setDoctorStatus(User.DoctorStatus.PENDING);
+        user.setPhone(req.getPhone());
+        user.setClinicName(req.getClinicName());
+        user.setSpecialization(req.getSpecialization());
+        user.setProfessionalLicense(req.getProfessionalLicense());
+        user.setYearsExperience(req.getYearsExperience());
+
+        userRepository.save(user);
     }
 
     public AuthResponse login(LoginRequest req) {

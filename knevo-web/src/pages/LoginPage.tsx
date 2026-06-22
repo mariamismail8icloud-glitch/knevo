@@ -18,6 +18,11 @@ export default function LoginPage() {
       navigate('/dashboard');
     },
     onError: (err: unknown) => {
+      const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
+      if (status === 403) {
+        navigate('/pending-approval');
+        return;
+      }
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setError(msg ?? 'Invalid email or password');
     },

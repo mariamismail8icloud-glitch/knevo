@@ -18,3 +18,18 @@ export interface AuthResponse {
 
 export const login = (req: LoginRequest): Promise<AuthResponse> =>
   api.post<AuthResponse>('/api/auth/login', req).then(r => r.data);
+
+export interface DoctorSignupRequest {
+  username: string;
+  email: string;
+  password: string;
+  name: string;
+  phone?: string;
+  clinicName: string;
+  specialization: string;
+  professionalLicense?: string;
+  yearsExperience?: number;
+}
+
+export const signupDoctor = (req: DoctorSignupRequest): Promise<void> =>
+  api.post('/api/auth/signup/doctor', req).then(() => undefined);

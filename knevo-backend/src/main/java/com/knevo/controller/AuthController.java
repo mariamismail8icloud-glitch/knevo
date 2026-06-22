@@ -1,6 +1,7 @@
 package com.knevo.controller;
 
 import com.knevo.dto.auth.AuthResponse;
+import com.knevo.dto.auth.DoctorSignupRequest;
 import com.knevo.dto.auth.LoginRequest;
 import com.knevo.dto.auth.PatientSignupRequest;
 import com.knevo.dto.auth.RefreshRequest;
@@ -21,6 +22,12 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@Valid @RequestBody PatientSignupRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.signupPatient(req));
+    }
+
+    @PostMapping("/signup/doctor")
+    public ResponseEntity<Void> signupDoctor(@Valid @RequestBody DoctorSignupRequest req) {
+        authService.signupDoctor(req);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @PostMapping("/login")

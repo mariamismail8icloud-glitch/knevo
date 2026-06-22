@@ -58,6 +58,21 @@ public class User {
     @Column(name = "emergency_contact_phone")
     private String emergencyContactPhone;
 
+    @Column(name = "clinic_name")
+    private String clinicName;
+
+    @Column(name = "specialization")
+    private String specialization;
+
+    @Column(name = "professional_license")
+    private String professionalLicense;
+
+    @Column(name = "years_experience")
+    private Integer yearsExperience;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
