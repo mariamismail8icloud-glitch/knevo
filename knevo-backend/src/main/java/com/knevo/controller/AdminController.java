@@ -17,6 +17,11 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @GetMapping("/doctors")
+    public ResponseEntity<List<DoctorSummaryDto>> allDoctors() {
+        return ResponseEntity.ok(adminService.getAllDoctors());
+    }
+
     @GetMapping("/doctors/pending")
     public ResponseEntity<List<DoctorSummaryDto>> pendingDoctors() {
         return ResponseEntity.ok(adminService.getPendingDoctors());

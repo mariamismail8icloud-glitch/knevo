@@ -23,10 +23,22 @@ public class AdminService {
 
     public List<DoctorSummaryDto> getPendingDoctors() {
         return userRepository.findByRoleAndDoctorStatus(User.Role.DOCTOR, User.DoctorStatus.PENDING)
-            .stream()
-            .map(u -> new DoctorSummaryDto(u.getId(), u.getName(), u.getEmail(),
-                u.getClinicName(), u.getSpecialization(), u.getDoctorStatus().name(), u.getCreatedAt()))
-            .collect(Collectors.toList());
+            .stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    public List<DoctorSummaryDto> getAllDoctors() {
+        return userRepository.findByRoleOrderByCreatedAtDesc(User.Role.DOCTOR)
+            .stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    private DoctorSummaryDto toDto(User u) {
+        return new DoctorSummaryDto(
+            u.getId(), u.getName(), u.getEmail(), u.getPhone(),
+            u.getClinicName(), u.getSpecialization(),
+            u.getProfessionalLicense(), u.getYearsExperience(),
+            u.getDoctorStatus() != null ? u.getDoctorStatus().name() : null,
+            u.getRejectionReason(), u.getCreatedAt()
+        );
     }
 
     public void approveDoctor(UUID doctorId, UUID adminId) {

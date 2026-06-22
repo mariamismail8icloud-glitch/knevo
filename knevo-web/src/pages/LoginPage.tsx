@@ -15,7 +15,7 @@ export default function LoginPage() {
     mutationFn: login,
     onSuccess: (data) => {
       setAuth({ accessToken: data.accessToken, userId: data.userId, role: data.role });
-      navigate('/dashboard');
+      navigate(data.role === 'ADMIN' ? '/admin' : '/dashboard');
     },
     onError: (err: unknown) => {
       const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
