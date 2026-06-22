@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMyPatients, enrollPatient, type Patient } from '../../api/doctorApi';
+import { getAdminPatients } from '../../api/adminApi';
 import { useAuth } from '../../context/AuthContext';
 
 export default function PatientListPage() {
@@ -11,8 +12,8 @@ export default function PatientListPage() {
   const [enrollError, setEnrollError] = useState('');
 
   const { data: patients = [], isLoading, isError } = useQuery({
-    queryKey: ['my-patients'],
-    queryFn: getMyPatients,
+    queryKey: role === 'ADMIN' ? ['admin-patients'] : ['my-patients'],
+    queryFn: role === 'ADMIN' ? getAdminPatients : getMyPatients,
     retry: false,
   });
 

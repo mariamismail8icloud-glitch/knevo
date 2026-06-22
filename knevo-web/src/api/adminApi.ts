@@ -1,4 +1,8 @@
 import client from './client';
+import type { Patient } from './doctorApi';
+
+export const getAdminPatients = (): Promise<Patient[]> =>
+  client.get<Patient[]>('/api/admin/patients').then(r => r.data);
 
 export interface Doctor {
   id: string;

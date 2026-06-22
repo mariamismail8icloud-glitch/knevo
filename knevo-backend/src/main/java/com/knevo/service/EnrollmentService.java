@@ -70,6 +70,13 @@ public class EnrollmentService {
             .collect(Collectors.toList());
     }
 
+    public List<PatientSummaryDto> getAllPatients() {
+        return userRepository.findByRoleOrderByCreatedAtDesc(User.Role.PATIENT)
+            .stream()
+            .map(this::toSummary)
+            .collect(Collectors.toList());
+    }
+
     private PatientSummaryDto toSummary(User patient) {
         return new PatientSummaryDto(
             patient.getId(),

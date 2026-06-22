@@ -2,7 +2,9 @@ package com.knevo.controller;
 
 import com.knevo.dto.admin.DoctorSummaryDto;
 import com.knevo.dto.admin.RejectRequest;
+import com.knevo.dto.patient.PatientSummaryDto;
 import com.knevo.service.AdminService;
+import com.knevo.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,12 @@ import java.util.UUID;
 public class AdminController {
 
     private final AdminService adminService;
+    private final EnrollmentService enrollmentService;
+
+    @GetMapping("/patients")
+    public ResponseEntity<List<PatientSummaryDto>> allPatients() {
+        return ResponseEntity.ok(enrollmentService.getAllPatients());
+    }
 
     @GetMapping("/doctors")
     public ResponseEntity<List<DoctorSummaryDto>> allDoctors() {
