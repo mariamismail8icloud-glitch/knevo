@@ -8,6 +8,7 @@ import {
   getSessionDetail,
 } from '../../api/doctorApi';
 import EditConfigModal from './EditConfigModal';
+import PatientProgressTab from './PatientProgressTab';
 
 function formatDuration(start: string | null, end: string | null): string {
   if (!start || !end) return '—';
@@ -37,7 +38,7 @@ function StatusBadge({ status }: { status: string }) {
 
 export default function PatientDetailPage() {
   const { patientId = '' } = useParams();
-  const [tab, setTab] = useState<'plan' | 'sessions'>('plan');
+  const [tab, setTab] = useState<'plan' | 'sessions' | 'progress'>('plan');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [editingConfig, setEditingConfig] = useState(false);
 
@@ -82,7 +83,7 @@ export default function PatientDetailPage() {
 
         {/* Tab bar */}
         <div className="flex gap-2 mb-6">
-          {(['plan', 'sessions'] as const).map(t => (
+          {(['plan', 'sessions', 'progress'] as const).map(t => (
             <button
               key={t}
               onClick={() => { setTab(t); setSelectedSessionId(null); }}
@@ -92,7 +93,7 @@ export default function PatientDetailPage() {
                   : 'bg-white border border-[#f0d6e8] text-[#64748b] hover:border-[#E8007D]'
               }`}
             >
-              {t === 'plan' ? 'Therapy Plan' : 'Sessions'}
+              {t === 'plan' ? 'Therapy Plan' : t === 'sessions' ? 'Sessions' : 'Progress'}
             </button>
           ))}
         </div>
@@ -221,6 +222,9 @@ export default function PatientDetailPage() {
             )}
           </div>
         )}
+
+        {/* Progress tab */}
+        {tab === 'progress' && <PatientProgressTab patientId={patientId} />}
       </div>
 
       {editingConfig && config && (

@@ -204,3 +204,25 @@ export const markMessageRead = (messageId: string, userId: string): Promise<void
   api.put<void>(`/api/messages/${messageId}/read`, {}, {
     headers: { 'X-User-Id': userId },
   }).then(r => r.data);
+
+export interface WeeklyCount {
+  weekLabel: string;
+  count: number;
+}
+
+export interface PainPoint {
+  sessionDate: string;
+  avgPainBefore: number;
+}
+
+export interface PatientProgress {
+  sessionsPerWeek: WeeklyCount[];
+  painTrend: PainPoint[];
+  adherenceRate: number;
+  missedSessionsCount: number;
+  totalSessionsCompleted: number;
+  totalSessionsPrescribed: number;
+}
+
+export const getPatientProgress = (patientId: string): Promise<PatientProgress> =>
+  api.get<PatientProgress>(`/api/patients/${patientId}/progress`).then(r => r.data);
