@@ -3,6 +3,10 @@ import SwiftUI
 struct MainTabView: View {
     @Environment(AuthViewModel.self) private var authVM
 
+    private var patientId: String {
+        KeychainService.loadTokens().userId ?? ""
+    }
+
     var body: some View {
         TabView {
             ActivePlanView()
@@ -11,7 +15,7 @@ struct MainTabView: View {
                 .tabItem { Label("Sessions", systemImage: "figure.walk") }
             PatientProgressView()
                 .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
-            MessagesView()
+            MessagesView(patientId: patientId)
                 .tabItem { Label("Messages", systemImage: "message.fill") }
         }
         .tint(Color(red: 232/255, green: 0/255, blue: 125/255))

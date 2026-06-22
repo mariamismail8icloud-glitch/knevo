@@ -11,6 +11,7 @@ import PatientListPage from './pages/doctor/PatientListPage';
 import ExerciseLibraryPage from './pages/doctor/ExerciseLibraryPage';
 import CreatePlanPage from './pages/doctor/CreatePlanPage';
 import PatientDetailPage from './pages/doctor/PatientDetailPage';
+import MessagesPage from './pages/doctor/MessagesPage';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/patients/:patientId" element={<PatientDetailPage />} />
             <Route path="/exercises" element={<ExerciseLibraryPage />} />
             <Route path="/create-plan" element={<CreatePlanPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>

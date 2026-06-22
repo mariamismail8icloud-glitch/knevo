@@ -28,6 +28,7 @@ struct TherapySetInfo: Decodable, Identifiable {
 struct ActivePlan: Decodable {
     let id: String
     let patientId: String
+    let issuedById: String?
     let sessionsPerWeek: Int?
     let schedule: String?
     let totalSessionsNum: Int?

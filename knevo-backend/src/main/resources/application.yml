@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/knevo}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/knevo?stringtype=unspecified}
     username: ${DB_USER:knevo}
     password: ${DB_PASSWORD:knevo}
   jpa:

@@ -12,7 +12,7 @@ final class APIClient {
         if let token = accessToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        if path.hasPrefix("/api/patient/") {
+        if path.hasPrefix("/api/patient/") || path.hasPrefix("/api/messages") {
             if let userId = KeychainService.loadTokens().userId {
                 request.setValue(userId, forHTTPHeaderField: "X-User-Id")
             }

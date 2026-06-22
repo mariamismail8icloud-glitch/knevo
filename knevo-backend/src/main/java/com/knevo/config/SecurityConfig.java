@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**", "/api/health", "/api/admin/**",
                         "/api/patients/**", "/api/doctor/**",
                         "/api/exercises/**", "/api/patient/**", "/api/therapy-config/**",
-                        "/api/sessions/**", "/ws/**").permitAll()
+                        "/api/sessions/**", "/api/messages/**", "/ws/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

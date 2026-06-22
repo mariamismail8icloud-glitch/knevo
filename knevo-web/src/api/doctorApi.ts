@@ -171,3 +171,36 @@ export const getPatientSessions = (patientId: string): Promise<SessionSummary[]>
 
 export const getSessionDetail = (sessionId: string): Promise<SessionSummary> =>
   api.get<SessionSummary>(`/api/sessions/${sessionId}`).then(r => r.data);
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  senderName: string;
+  body: string;
+  messageType: string;
+  sentAt: string;
+  readAt: string | null;
+}
+
+export interface SendMessageRequest {
+  body: string;
+  receiverId: string;
+  messageType?: string;
+}
+
+export const getMessageThread = (partnerId: string, userId: string): Promise<ChatMessage[]> =>
+  api.get<ChatMessage[]>('/api/messages', {
+    params: { partnerId },
+    headers: { 'X-User-Id': userId },
+  }).then(r => r.data);
+
+export const sendMessage = (req: SendMessageRequest, userId: string): Promise<ChatMessage> =>
+  api.post<ChatMessage>('/api/messages', req, {
+    headers: { 'X-User-Id': userId },
+  }).then(r => r.data);
+
+export const markMessageRead = (messageId: string, userId: string): Promise<void> =>
+  api.put<void>(`/api/messages/${messageId}/read`, {}, {
+    headers: { 'X-User-Id': userId },
+  }).then(r => r.data);
