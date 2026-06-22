@@ -1,3 +1,5 @@
+playwright/.auth/
+
 # Logs
 logs
 *.log
