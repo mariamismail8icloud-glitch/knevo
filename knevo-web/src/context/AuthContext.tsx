@@ -24,12 +24,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setAuth = (state: AuthState) => {
     setAuthState(state);
-    if (state.accessToken) sessionStorage.setItem('accessToken', state.accessToken);
-    else sessionStorage.removeItem('accessToken');
+    if (state.accessToken) {
+      sessionStorage.setItem('accessToken', state.accessToken);
+      if (state.userId) sessionStorage.setItem('userId', state.userId);
+    } else {
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('userId');
+    }
   };
   const clearAuth = () => {
     setAuthState({ accessToken: null, userId: null, role: null });
     sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('userId');
   };
 
   return (

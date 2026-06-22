@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import DoctorSignupPage from './pages/DoctorSignupPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import PatientListPage from './pages/doctor/PatientListPage';
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/patients" element={<PatientListPage />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>

@@ -19,7 +19,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/health", "/api/admin/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/health", "/api/admin/**",
+                        "/api/patients/**", "/api/doctor/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
