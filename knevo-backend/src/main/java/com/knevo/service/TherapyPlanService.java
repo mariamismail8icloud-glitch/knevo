@@ -110,18 +110,21 @@ public class TherapyPlanService {
         return summary;
     }
 
+    @Transactional(readOnly = true)
     public TherapyConfigDto getActiveConfigForPatient(UUID patientId) {
         TherapyConfig config = therapyConfigRepository.findActiveConfigForPatient(patientId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No active therapy plan"));
         return toConfigDto(config);
     }
 
+    @Transactional(readOnly = true)
     public TherapyConfigDto getConfig(UUID configId) {
         TherapyConfig config = therapyConfigRepository.findById(configId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Config not found"));
         return toConfigDto(config);
     }
 
+    @Transactional(readOnly = true)
     public List<PlanSummaryDto> getPlansForPatient(UUID patientId) {
         return rehabPlanRepository.findByPatient_Id(patientId).stream()
             .map(p -> {

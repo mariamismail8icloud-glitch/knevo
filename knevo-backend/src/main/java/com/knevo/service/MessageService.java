@@ -46,6 +46,7 @@ public class MessageService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public List<MessageDto> getThread(UUID userId, UUID partnerId) {
         return messageRepository.findThread(userId, partnerId).stream()
                 .map(this::toDto)

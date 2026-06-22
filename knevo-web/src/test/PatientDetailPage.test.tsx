@@ -29,6 +29,11 @@ const mockPlans = [
 const mockConfig = {
   id: 'config-1',
   patientId: 'patient-1',
+  issuedById: 'doctor-1',
+  rehabPlanId: null,
+  comment: null,
+  createdAt: '2025-01-01T00:00:00Z',
+  deliveredAt: null,
   sessionsPerWeek: 3,
   schedule: 'Mon/Wed/Fri',
   totalSessionsNum: 12,

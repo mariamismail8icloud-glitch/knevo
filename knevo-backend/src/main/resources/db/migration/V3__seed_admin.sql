@@ -3,7 +3,7 @@ VALUES (
     gen_random_uuid(),
     'admin@knevo.com',
     'admin',
-    '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    '$2a$10$i401yP4J4NMIMdU5Tk.XEu4y/8V9B7Ve.PV9QDnCjxMoCR6XdHGuK',
     'Knevo Admin',
     'ADMIN',
     NOW()
