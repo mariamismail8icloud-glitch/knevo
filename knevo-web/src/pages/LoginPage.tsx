@@ -14,7 +14,7 @@ export default function LoginPage() {
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      setAuth({ accessToken: data.accessToken, userId: data.userId, role: data.role });
+      setAuth({ accessToken: data.accessToken, userId: data.userId, role: data.role, refreshToken: data.refreshToken });
       navigate(data.role === 'ADMIN' ? '/admin' : '/dashboard');
     },
     onError: (err: unknown) => {

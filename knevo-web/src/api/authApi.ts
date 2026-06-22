@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
-const api = axios.create({ baseURL: API_BASE_URL });
+// Plain axios instance — no retry interceptors, safe to use for auth calls
+const authClient = axios.create({ baseURL: API_BASE_URL });
 
 export interface LoginRequest {
   email: string;
@@ -16,9 +17,6 @@ export interface AuthResponse {
   refreshToken: string;
 }
 
-export const login = (req: LoginRequest): Promise<AuthResponse> =>
-  api.post<AuthResponse>('/api/auth/login', req).then(r => r.data);
-
 export interface DoctorSignupRequest {
   username: string;
   email: string;
@@ -31,5 +29,11 @@ export interface DoctorSignupRequest {
   yearsExperience?: number;
 }
 
+export const login = (req: LoginRequest): Promise<AuthResponse> =>
+  authClient.post<AuthResponse>('/api/auth/login', req).then(r => r.data);
+
 export const signupDoctor = (req: DoctorSignupRequest): Promise<void> =>
-  api.post('/api/auth/signup/doctor', req).then(() => undefined);
+  authClient.post('/api/auth/signup/doctor', req).then(() => undefined);
+
+export const refreshTokens = (refreshToken: string): Promise<AuthResponse> =>
+  authClient.post<AuthResponse>('/api/auth/refresh', { refreshToken }).then(r => r.data);
