@@ -1,0 +1,115 @@
+package com.knevo.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.knevo.dto.therapy.UpdateConfigRequest;
+import com.knevo.model.TherapyConfig;
+import com.knevo.model.User;
+import com.knevo.repository.TherapyConfigRepository;
+import com.knevo.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class ConfigSyncIntegrationTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    TherapyConfigRepository therapyConfigRepository;
+
+    @MockBean
+    SimpMessagingTemplate messagingTemplate;
+
+    private User patient;
+    private User doctor;
+    private TherapyConfig config;
+
+    @BeforeEach
+    void setup() {
+        doctor = new User();
+        doctor.setEmail("configsyncdoctor@test.com");
+        doctor.setUsername("configsyncdoctor");
+        doctor.setPasswordHash("hash");
+        doctor.setName("Config Sync Doctor");
+        doctor.setRole(User.Role.DOCTOR);
+        doctor.setDoctorStatus(User.DoctorStatus.APPROVED);
+        doctor = userRepository.save(doctor);
+
+        patient = new User();
+        patient.setEmail("configsyncpatient@test.com");
+        patient.setUsername("configsyncpatient");
+        patient.setPasswordHash("hash");
+        patient.setName("Config Sync Patient");
+        patient.setRole(User.Role.PATIENT);
+        patient.setDoctor(doctor);
+        patient = userRepository.save(patient);
+
+        config = new TherapyConfig();
+        config.setPatient(patient);
+        config.setIssuedBy(doctor);
+        config.setStatus("INPROGRESS");
+        config.setSessionsPerWeek(2);
+        config = therapyConfigRepository.save(config);
+    }
+
+    @Test
+    void updateConfigReturnsUpdatedFields() throws Exception {
+        UpdateConfigRequest req = new UpdateConfigRequest();
+        req.setSessionsPerWeek(4);
+        req.setMaxSpeed(new BigDecimal("1.5"));
+        req.setComment("Increased frequency");
+
+        mockMvc.perform(put("/api/therapy-config/" + config.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.sessionsPerWeek").value(4))
+            .andExpect(jsonPath("$.comment").value("Increased frequency"))
+            .andExpect(jsonPath("$.id").value(config.getId().toString()));
+    }
+
+    @Test
+    void markDeliveredReturns204() throws Exception {
+        mockMvc.perform(patch("/api/therapy-config/" + config.getId() + "/delivered"))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updateConfigWithUnknownIdReturns404() throws Exception {
+        UpdateConfigRequest req = new UpdateConfigRequest();
+        req.setSessionsPerWeek(3);
+
+        mockMvc.perform(put("/api/therapy-config/00000000-0000-0000-0000-000000000000")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void markDeliveredWithUnknownIdReturns404() throws Exception {
+        mockMvc.perform(patch("/api/therapy-config/00000000-0000-0000-0000-000000000000/delivered"))
+            .andExpect(status().isNotFound());
+    }
+}

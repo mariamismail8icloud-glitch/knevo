@@ -5,12 +5,15 @@ import com.knevo.model.*;
 import com.knevo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,6 +26,7 @@ public class TherapyPlanService {
     private final RehabPlanRepository rehabPlanRepository;
     private final TherapyConfigRepository therapyConfigRepository;
     private final TherapySetConfigRepository setConfigRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public List<ExerciseDto> getActiveExercises(String category, String mode) {
         List<Exercise> exercises;
@@ -134,6 +138,38 @@ public class TherapyPlanService {
                 return dto;
             })
             .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TherapyConfigDto updateConfig(UUID configId, UpdateConfigRequest req) {
+        TherapyConfig config = therapyConfigRepository.findById(configId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Config not found"));
+
+        if (req.getMaxSpeed() != null) config.setMaxSpeed(req.getMaxSpeed());
+        if (req.getMaxExtensionAngleDeg() != null) config.setMaxExtensionAngleDeg(req.getMaxExtensionAngleDeg());
+        if (req.getMaxFlexionAngleDeg() != null) config.setMaxFlexionAngleDeg(req.getMaxFlexionAngleDeg());
+        if (req.getSessionsPerWeek() != null) config.setSessionsPerWeek(req.getSessionsPerWeek());
+        if (req.getSchedule() != null) config.setSchedule(req.getSchedule());
+        if (req.getTotalSessionsNum() != null) config.setTotalSessionsNum(req.getTotalSessionsNum());
+        if (req.getComment() != null) config.setComment(req.getComment());
+
+        config = therapyConfigRepository.save(config);
+
+        String patientId = config.getPatient().getId().toString();
+        messagingTemplate.convertAndSend(
+            "/topic/patient/" + patientId + "/config-updated",
+            Map.of("configId", configId.toString(), "patientId", patientId)
+        );
+
+        return toConfigDto(config);
+    }
+
+    @Transactional
+    public void markDelivered(UUID configId) {
+        TherapyConfig config = therapyConfigRepository.findById(configId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Config not found"));
+        config.setDeliveredAt(OffsetDateTime.now());
+        therapyConfigRepository.save(config);
     }
 
     private TherapyConfigDto toConfigDto(TherapyConfig config) {

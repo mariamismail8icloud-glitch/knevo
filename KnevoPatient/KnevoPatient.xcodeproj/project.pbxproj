@@ -26,6 +26,7 @@
 		5ECE93204F49C3CC7558E486 /* RunningSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687528EB64426AF805DDE728 /* RunningSessionView.swift */; };
 		683765D2BD39B20A03BC1521 /* SessionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA25CD03CDE26518739D9D7 /* SessionFlowView.swift */; };
 		6D4B22D9A1D539531119453F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD021D9F736324FD5C9F2F29 /* LoginView.swift */; };
+		876962D2857661C2F292E208 /* ConfigSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F10DECC279B683C2D2E6CC6 /* ConfigSyncService.swift */; };
 		9566E10C91F169FA1780103C /* PatientProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C78E2D247D6384259B8268 /* PatientProgressView.swift */; };
 		9913E88DEED4D6C08AE0C446 /* SessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */; };
 		9EBEED243B96B915376AD88D /* SessionSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */; };
@@ -40,6 +41,7 @@
 		E9CB26B32CF2D253F429606A /* NetworkConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */; };
 		EB79F5A3AC81F44C38CEBB69 /* RestTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FCDD9B2DC1367DE95EB21B /* RestTimerView.swift */; };
 		ED8DDDC7E5732B177641D79E /* SessionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8212C990C9205709088C0C48 /* SessionViewModelTests.swift */; };
+		FE03B29A53619F9E42BBB47C /* ConfigSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +56,7 @@
 
 /* Begin PBXFileReference section */
 		0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanViewModelTests.swift; sourceTree = "<group>"; };
+		0F10DECC279B683C2D2E6CC6 /* ConfigSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigSyncService.swift; sourceTree = "<group>"; };
 		18C6C5A03378A48D8207FE2C /* NetworkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConfig.swift; sourceTree = "<group>"; };
 		1B920D7308A2C2C5640DC44D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		1DDDE5E57F47FB70920CAAA6 /* PainDuringView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PainDuringView.swift; sourceTree = "<group>"; };
@@ -82,6 +85,7 @@
 		AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModelTests.swift; sourceTree = "<group>"; };
 		BD021D9F736324FD5C9F2F29 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		BF7195FFC9367929C3E1AE91 /* KnevoPatient.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KnevoPatient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigSyncServiceTests.swift; sourceTree = "<group>"; };
 		C229BA26CE19936799266496 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CEEEC2C79A1A6B009989A8B8 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		DB8426151984B8593D946E93 /* TherapyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapyModels.swift; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				63CBBF875210D9079A467FEC /* Extensions */,
 				C591C7E0C7F68FCC0B9923A3 /* Models */,
 				733F627A4543080EEEE4EAE4 /* Network */,
+				4CC4E16637C6285C853AAE32 /* Services */,
 				35549BF8348A6DB87AAA9259 /* ViewModels */,
 				74BECE4A6DE445A4398477F5 /* Views */,
 			);
@@ -136,6 +141,14 @@
 				F12DDCCEE54A335A3CC75615 /* KnevoPatientTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4CC4E16637C6285C853AAE32 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				0F10DECC279B683C2D2E6CC6 /* ConfigSyncService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		5AB13386BA3C9AAF72374B77 /* Config */ = {
@@ -218,6 +231,7 @@
 			children = (
 				0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */,
 				AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */,
+				C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */,
 				9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */,
 				8212C990C9205709088C0C48 /* SessionViewModelTests.swift */,
 			);
@@ -314,6 +328,7 @@
 			files = (
 				C34F462D452B63B5C2D14ABD /* ActivePlanViewModelTests.swift in Sources */,
 				5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */,
+				FE03B29A53619F9E42BBB47C /* ConfigSyncServiceTests.swift in Sources */,
 				E9CB26B32CF2D253F429606A /* NetworkConfigTests.swift in Sources */,
 				ED8DDDC7E5732B177641D79E /* SessionViewModelTests.swift in Sources */,
 			);
@@ -330,6 +345,7 @@
 				B9C31E63D857B82AB5B548CE /* AuthModels.swift in Sources */,
 				1B68DF4DB2C43B0262C6E463 /* AuthViewModel.swift in Sources */,
 				2D50FAB1CA6402D226729731 /* Color+Hex.swift in Sources */,
+				876962D2857661C2F292E208 /* ConfigSyncService.swift in Sources */,
 				CC47018C62C97CD6C3311233 /* HomeView.swift in Sources */,
 				CE120800838FBE0F0505AB85 /* KeychainService.swift in Sources */,
 				239C8C23FA3C824A95CBE479 /* KnevoPatientApp.swift in Sources */,

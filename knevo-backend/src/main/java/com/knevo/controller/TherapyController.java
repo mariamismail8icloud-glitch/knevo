@@ -53,4 +53,17 @@ public class TherapyController {
             @RequestHeader("X-User-Id") UUID patientId) {
         return ResponseEntity.ok(therapyPlanService.getActiveConfigForPatient(patientId));
     }
+
+    @PutMapping("/api/therapy-config/{id}")
+    public ResponseEntity<TherapyConfigDto> updateConfig(
+            @PathVariable UUID id,
+            @RequestBody UpdateConfigRequest req) {
+        return ResponseEntity.ok(therapyPlanService.updateConfig(id, req));
+    }
+
+    @PatchMapping("/api/therapy-config/{id}/delivered")
+    public ResponseEntity<Void> markDelivered(@PathVariable UUID id) {
+        therapyPlanService.markDelivered(id);
+        return ResponseEntity.noContent().build();
+    }
 }

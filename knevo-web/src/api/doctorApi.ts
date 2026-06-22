@@ -106,7 +106,25 @@ export interface TherapyConfig {
   maxSpeed: number | null;
   status: string;
   sets: TherapySetConfigDto[];
+  issuedById: string;
+  rehabPlanId: string | null;
+  comment: string | null;
+  createdAt: string;
+  deliveredAt: string | null;
 }
+
+export interface UpdateConfigRequest {
+  maxSpeed?: number;
+  maxExtensionAngleDeg?: number;
+  maxFlexionAngleDeg?: number;
+  sessionsPerWeek?: number;
+  schedule?: string;
+  totalSessionsNum?: number;
+  comment?: string;
+}
+
+export const updateTherapyConfig = (configId: string, req: UpdateConfigRequest): Promise<TherapyConfig> =>
+  api.put<TherapyConfig>(`/api/therapy-config/${configId}`, req).then(r => r.data);
 
 export const getExercises = (params?: { category?: string; mode?: string }): Promise<Exercise[]> =>
   api.get<Exercise[]>('/api/exercises', { params }).then(r => r.data);

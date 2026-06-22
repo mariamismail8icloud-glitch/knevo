@@ -7,6 +7,7 @@ import {
   getPatientSessions,
   getSessionDetail,
 } from '../../api/doctorApi';
+import EditConfigModal from './EditConfigModal';
 
 function formatDuration(start: string | null, end: string | null): string {
   if (!start || !end) return '—';
@@ -38,6 +39,7 @@ export default function PatientDetailPage() {
   const { patientId = '' } = useParams();
   const [tab, setTab] = useState<'plan' | 'sessions'>('plan');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [editingConfig, setEditingConfig] = useState(false);
 
   const { data: plans = [], isLoading: plansLoading } = useQuery({
     queryKey: ['patient-plans', patientId],
@@ -110,7 +112,13 @@ export default function PatientDetailPage() {
                 <div className="bg-white rounded-2xl border border-[#E8007D] p-6 shadow-knevo">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-[#0f172a]">Active plan: {activePlan.title}</h2>
-                    <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-[#fce8f3] text-[#E8007D]">ACTIVE</span>
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-[#fce8f3] text-[#E8007D]">ACTIVE</span>
+                      <button onClick={() => setEditingConfig(true)}
+                        className="px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-[#f0d6e8] text-[#64748b] hover:border-[#E8007D] hover:text-[#E8007D] transition-colors">
+                        Edit config
+                      </button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
                     {config.sessionsPerWeek && <div><p className="text-[#64748b]">Sessions/week</p><p className="font-semibold text-[#0f172a]">{config.sessionsPerWeek}</p></div>}
@@ -214,6 +222,10 @@ export default function PatientDetailPage() {
           </div>
         )}
       </div>
+
+      {editingConfig && config && (
+        <EditConfigModal config={config} patientId={patientId} onClose={() => setEditingConfig(false)} />
+      )}
     </div>
   );
 }
