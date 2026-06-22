@@ -8,14 +8,23 @@ final class APIClient {
 
     private init() {}
 
+    private func applyCommonHeaders(to request: inout URLRequest, path: String) {
+        if let token = accessToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        if path.hasPrefix("/api/patient/") {
+            if let userId = KeychainService.loadTokens().userId {
+                request.setValue(userId, forHTTPHeaderField: "X-User-Id")
+            }
+        }
+    }
+
     func post<T: Decodable, B: Encodable>(path: String, body: B) async throws -> T {
         let url = URL(string: NetworkConfig.baseURL + path)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let token = accessToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
+        applyCommonHeaders(to: &request, path: path)
         request.httpBody = try JSONEncoder().encode(body)
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
@@ -31,9 +40,7 @@ final class APIClient {
         let url = URL(string: NetworkConfig.baseURL + path)!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        if let token = accessToken {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
+        applyCommonHeaders(to: &request, path: path)
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
             throw APIError.httpError(0, data)

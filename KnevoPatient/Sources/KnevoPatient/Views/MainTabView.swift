@@ -5,7 +5,7 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            HomeView()
+            ActivePlanView()
                 .tabItem { Label("Home", systemImage: "house.fill") }
             SessionsView()
                 .tabItem { Label("Sessions", systemImage: "figure.walk") }

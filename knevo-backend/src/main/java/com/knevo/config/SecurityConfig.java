@@ -20,7 +20,8 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/admin/**",
-                        "/api/patients/**", "/api/doctor/**").permitAll()
+                        "/api/patients/**", "/api/doctor/**",
+                        "/api/exercises/**", "/api/patient/**", "/api/therapy-config/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

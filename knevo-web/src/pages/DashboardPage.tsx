@@ -39,6 +39,11 @@ export default function DashboardPage() {
             <p className="text-2xl font-bold text-[#0f172a]">My patients</p>
             <p className="text-[#E8007D] text-sm font-semibold mt-2">View all →</p>
           </a>
+          <a href="/exercises" className="block p-6 rounded-2xl border border-[#f0d6e8] bg-white hover:border-[#E8007D] hover:shadow-knevo transition-all">
+            <p className="text-sm text-[#64748b] mb-1">Library</p>
+            <p className="text-2xl font-bold text-[#0f172a]">Exercise library</p>
+            <p className="text-[#E8007D] text-sm font-semibold mt-2">Browse →</p>
+          </a>
         </div>
       </div>
     </div>

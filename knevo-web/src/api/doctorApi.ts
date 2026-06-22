@@ -30,3 +30,96 @@ export const enrollPatient = (enrollmentCode: string): Promise<Patient> =>
     { enrollmentCode },
     { headers: { 'X-User-Id': getUserId() } }
   ).then(r => r.data);
+
+export interface Exercise {
+  id: string;
+  name: string;
+  category: string;
+  activityType: string;
+  mode: string;
+  difficulty: string;
+  description: string;
+  patientInstructions: string;
+  doctorInstructions: string;
+  defaultSets: number | null;
+  defaultReps: number | null;
+  defaultRestSeconds: number | null;
+  defaultMinRomDeg: number | null;
+  defaultMaxRomDeg: number | null;
+  defaultMaxAngularVelocityDegS: number | null;
+  defaultPainStopThreshold: number | null;
+  safetyNotes: string | null;
+  targetJoint: string;
+  videoUrl: string | null;
+  imageUrl: string | null;
+}
+
+export interface SetConfigRequest {
+  exerciseId: string;
+  deviceAssisted: boolean;
+  durationMin: number;
+  restDurationMin: number;
+  setOrder: number;
+}
+
+export interface CreatePlanRequest {
+  title: string;
+  goal?: string;
+  startDate?: string;
+  endDate?: string;
+  notes?: string;
+  maxSpeed?: number;
+  maxExtensionAngleDeg?: number;
+  maxFlexionAngleDeg?: number;
+  sessionsPerWeek?: number;
+  schedule?: string;
+  totalSessionsNum?: number;
+  comment?: string;
+  sets: SetConfigRequest[];
+}
+
+export interface PlanSummary {
+  planId: string;
+  title: string;
+  status: string;
+  therapyConfigId: string;
+  createdAt: string;
+}
+
+export interface TherapySetConfigDto {
+  id: string;
+  exercise: Exercise;
+  deviceAssisted: boolean;
+  durationMin: number | null;
+  restDurationMin: number | null;
+  setOrder: number;
+}
+
+export interface TherapyConfig {
+  id: string;
+  patientId: string;
+  sessionsPerWeek: number | null;
+  schedule: string | null;
+  totalSessionsNum: number | null;
+  maxFlexionAngleDeg: number | null;
+  maxExtensionAngleDeg: number | null;
+  maxSpeed: number | null;
+  status: string;
+  sets: TherapySetConfigDto[];
+}
+
+export const getExercises = (params?: { category?: string; mode?: string }): Promise<Exercise[]> =>
+  api.get<Exercise[]>('/api/exercises', { params }).then(r => r.data);
+
+export const createPlan = (patientId: string, req: CreatePlanRequest): Promise<PlanSummary> =>
+  api.post<PlanSummary>(`/api/doctor/patients/${patientId}/plans`, req, {
+    headers: { 'X-User-Id': getUserId() },
+  }).then(r => r.data);
+
+export const getPatientPlans = (patientId: string): Promise<PlanSummary[]> =>
+  api.get<PlanSummary[]>(`/api/doctor/patients/${patientId}/plans`, {
+    headers: { 'X-User-Id': getUserId() },
+  }).then(r => r.data);
+
+export const getTherapyConfig = (configId: string): Promise<TherapyConfig> =>
+  api.get<TherapyConfig>(`/api/therapy-config/${configId}`).then(r => r.data);
