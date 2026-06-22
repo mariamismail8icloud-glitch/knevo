@@ -15,6 +15,7 @@ targets:
   KnevoPatient:
     type: application
     platform: iOS
+    deploymentTarget: "17.0"
     sources:
       - path: Sources/KnevoPatient
     resources:
@@ -28,9 +29,11 @@ targets:
       SWIFT_STRICT_CONCURRENCY: minimal
       SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
       SUPPORTS_MACCATALYST: NO
+      IPHONEOS_DEPLOYMENT_TARGET: "17.0"
   KnevoPatientTests:
     type: bundle.unit-test
     platform: iOS
+    deploymentTarget: "17.0"
     sources:
       - path: Tests/KnevoPatientTests
     dependencies:
@@ -40,3 +43,21 @@ targets:
       SWIFT_VERSION: 6.0
       SWIFT_STRICT_CONCURRENCY: minimal
       SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+      IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+schemes:
+  KnevoPatient:
+    build:
+      targets:
+        KnevoPatient: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - KnevoPatientTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

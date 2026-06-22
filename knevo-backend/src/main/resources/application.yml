@@ -8,6 +8,9 @@ spring:
       ddl-auto: validate
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -20,3 +23,8 @@ server:
 logging:
   level:
     com.knevo: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-at-least-256-bits-long-for-hs256-algorithm}
+  access-expiry-minutes: 15
+  refresh-expiry-days: 7
