@@ -17,6 +17,8 @@ struct MainTabView: View {
                 .tabItem { Label("Progress", systemImage: "chart.line.uptrend.xyaxis") }
             MessagesView(patientId: patientId)
                 .tabItem { Label("Messages", systemImage: "message.fill") }
+            ProfileView()
+                .tabItem { Label("Profile", systemImage: "person.fill") }
         }
         .tint(Color(red: 232/255, green: 0/255, blue: 125/255))
     }

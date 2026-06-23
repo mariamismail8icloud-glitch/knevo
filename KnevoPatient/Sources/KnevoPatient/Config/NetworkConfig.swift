@@ -5,6 +5,6 @@ enum NetworkConfig {
         if let url = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String, !url.isEmpty {
             return url
         }
-        return "http://localhost:8080"
+        return "http://127.0.0.1:8080"
     }()
 }

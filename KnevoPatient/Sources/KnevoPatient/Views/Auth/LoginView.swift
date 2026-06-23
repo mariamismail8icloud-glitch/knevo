@@ -53,6 +53,15 @@ struct LoginView: View {
                         }
 
                         Button {
+                            authVM.errorMessage = nil
+                            guard !authVM.loginEmail.isEmpty, !authVM.loginPassword.isEmpty else {
+                                authVM.errorMessage = "Please enter your email and password."
+                                return
+                            }
+                            guard authVM.loginEmail.contains("@") else {
+                                authVM.errorMessage = "Please enter a valid email address."
+                                return
+                            }
                             Task { await authVM.login() }
                         } label: {
                             Group {

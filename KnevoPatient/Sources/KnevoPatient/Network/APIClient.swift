@@ -5,8 +5,14 @@ final class APIClient {
     static let shared = APIClient()
     private let session = URLSession.shared
     var accessToken: String?
+    var unauthorizedHandler: (() -> Void)?
 
     private init() {}
+
+    private func handleStatusCode(_ code: Int, _ data: Data) throws {
+        if code == 401 || code == 403 { unauthorizedHandler?() }
+        throw APIError.httpError(code, data)
+    }
 
     private func applyCommonHeaders(to request: inout URLRequest, path: String) {
         if let token = accessToken {
@@ -31,7 +37,8 @@ final class APIClient {
             throw APIError.httpError(0, data)
         }
         guard (200...299).contains(http.statusCode) else {
-            throw APIError.httpError(http.statusCode, data)
+            try handleStatusCode(http.statusCode, data)
+            return try JSONDecoder().decode(T.self, from: data) // unreachable
         }
         return try JSONDecoder().decode(T.self, from: data)
     }
@@ -46,7 +53,8 @@ final class APIClient {
             throw APIError.httpError(0, data)
         }
         guard (200...299).contains(http.statusCode) else {
-            throw APIError.httpError(http.statusCode, data)
+            try handleStatusCode(http.statusCode, data)
+            return try JSONDecoder().decode(T.self, from: data) // unreachable
         }
         return try JSONDecoder().decode(T.self, from: data)
     }

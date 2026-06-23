@@ -20,6 +20,12 @@ public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
 
+    @GetMapping("/api/patient/enrollment-code")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<EnrollmentCodeResponse> getCode(Authentication auth) {
+        return ResponseEntity.ok(enrollmentService.getCode(UUID.fromString(auth.getName())));
+    }
+
     @PostMapping("/api/patients/enrollment-code")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<EnrollmentCodeResponse> regenerateCode(Authentication auth) {

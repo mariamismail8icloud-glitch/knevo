@@ -25,6 +25,13 @@ public class EnrollmentService {
     private final AuditLogRepository auditLogRepository;
     private final EnrollmentCodeGenerator codeGenerator;
 
+    public EnrollmentCodeResponse getCode(UUID patientId) {
+        User patient = userRepository.findById(patientId)
+            .filter(u -> u.getRole() == User.Role.PATIENT)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+        return new EnrollmentCodeResponse(patient.getEnrollmentCode());
+    }
+
     public EnrollmentCodeResponse regenerateCode(UUID patientId) {
         User patient = userRepository.findById(patientId)
             .filter(u -> u.getRole() == User.Role.PATIENT)
@@ -40,9 +47,6 @@ public class EnrollmentService {
 
         if (patient.getRole() != User.Role.PATIENT) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code does not belong to a patient");
-        }
-        if (patient.getDoctor() != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Patient is already linked to a doctor");
         }
 
         User doctor = userRepository.findById(doctorId)
