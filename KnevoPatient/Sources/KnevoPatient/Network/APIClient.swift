@@ -58,10 +58,19 @@ enum APIError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .httpError(let code, let data):
-            if let msg = try? JSONDecoder().decode([String: String].self, from: data)["message"] {
+            // Only trust backend message for codes where it's meaningful (not Spring validation noise)
+            if code != 400, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let msg = json["message"] as? String, !msg.isEmpty {
                 return msg
             }
-            return "Request failed (\(code))"
+            switch code {
+            case 400: return "Invalid request. Please check your details."
+            case 401: return "Incorrect email or password."
+            case 403: return "You don't have permission to do that."
+            case 404: return "Not found."
+            case 409: return "An account with that email or username already exists."
+            default:  return "Something went wrong. Please try again."
+            }
         }
     }
 }

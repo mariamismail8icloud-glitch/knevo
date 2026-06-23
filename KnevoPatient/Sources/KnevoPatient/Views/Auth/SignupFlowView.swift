@@ -76,6 +76,14 @@ struct SignupStep1View: View {
                         authVM.errorMessage = "Please fill in all fields"
                         return
                     }
+                    guard authVM.signupUsername.count >= 3 else {
+                        authVM.errorMessage = "Username must be at least 3 characters"
+                        return
+                    }
+                    guard authVM.signupPassword.count >= 8 else {
+                        authVM.errorMessage = "Password must be at least 8 characters"
+                        return
+                    }
                     guard authVM.signupPassword == authVM.signupConfirmPassword else {
                         authVM.errorMessage = "Passwords don't match"
                         return

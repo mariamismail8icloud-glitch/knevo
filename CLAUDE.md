@@ -16,6 +16,16 @@
 - `knevo-web/` is the web application
 - `KnevoPatient/` is the mobile iOS application
 
+## UI Design
+
+- User facing errors should be user friendly error, not technical errors.
+
+## Integrations
+
+- For integrations between systems/subsystems/containers/applications, design and create an API contract/schema first, then use that API contract/schema while implementing the client/server/peer sides of the integration.
+    - This must include end points, data structures, data types, what is required and what is optional, and any significant semantics as well.
+    - This must include operational aspects like authentication, authorization, and latency requirements.
+
 ## Coding and testing
 
 - Always use automated tools to verify the correctness of code, like linters and validators
