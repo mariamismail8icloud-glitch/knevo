@@ -9,6 +9,7 @@ struct SessionViewModelTests {
         ActivePlan(
             id: "config-1",
             patientId: "patient-1",
+            issuedById: nil,
             sessionsPerWeek: 3,
             schedule: "MON,WED,FRI",
             totalSessionsNum: 12,
