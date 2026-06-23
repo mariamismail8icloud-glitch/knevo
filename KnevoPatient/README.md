@@ -1,6 +1,6 @@
 # KnevoPatient
 
-Native Swift + SwiftUI iOS patient app for the Knevo knee exoskeleton rehabilitation system. iOS 17+.
+Native Swift + SwiftUI iOS patient app for the Knevo knee exoskeleton rehabilitation system. iOS 18+.
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ This creates `KnevoPatient.xcodeproj`.
 
 1. Open `KnevoPatient.xcodeproj` in Xcode.
 2. Select an iOS 17+ simulator or a connected device.
-3. Press `⌘R` to build and run.
+3. Press `⌘ R` to build and run.
 
 The app connects to `http://localhost:8080` by default. To change the API URL, edit the `API_BASE_URL` entry in `Info.plist`, or set it in the scheme's environment variables.
 
@@ -32,7 +32,7 @@ The app connects to `http://localhost:8080` by default. To change the API URL, e
 
 ## Run tests
 
-**From Xcode:** `⌘U` runs all tests.
+**From Xcode:** `⌘ U` runs all tests.
 
 **From the command line:**
 
@@ -55,7 +55,7 @@ Rules are configured in `.swiftlint.yml`. Disabled: `trailing_whitespace`, `line
 
 ## Project structure
 
-```
+```text
 Sources/KnevoPatient/
 ├── Config/         NetworkConfig.swift (base URL)
 ├── Network/        APIClient.swift, AuthModels.swift, KeychainService.swift
@@ -99,6 +99,7 @@ Use the patient account created via the signup flow in the app. After signup, th
 ## Known issues
 
 See `docs/codebase-ios.md` for the full issue list. Critical items:
+
 - No token refresh — the 15-minute access token expires with no recovery path.
 - `SessionsView` (session history tab) is a placeholder — not implemented.
 - No logout button accessible from the main app UI.

@@ -33,6 +33,8 @@
 - Use playwright to test web applications; do not rely only on vite unit tests because even though these are useful the are not sufficient on their own, you need to verify functionality of web apps using playwright.
 - Use other means to check the code works, like the browser
 - Always review the code and check complexity that needs to be simplified
+- When there is frontend and backend, or a mobile app and a backend, you must create some end to end integration tests to verify integration.
+- Use pepper to perform testing of mobile iOS applications inside the simulator
 
 ## Diagrams
 
