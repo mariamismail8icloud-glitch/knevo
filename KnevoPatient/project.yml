@@ -1,0 +1,64 @@
+name: KnevoPatient
+options:
+  bundleIdPrefix: com.knevo
+  deploymentTarget:
+    iOS: "18.0"
+  generateEmptyDirectories: true
+  indentWidth: 4
+  tabWidth: 4
+settings:
+  SWIFT_VERSION: 6.0
+  MARKETING_VERSION: 1.0.0
+  CURRENT_PROJECT_VERSION: 1
+  SWIFT_STRICT_CONCURRENCY: minimal
+targets:
+  KnevoPatient:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources/KnevoPatient
+    resources:
+      - path: Resources
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.knevo.patient
+      INFOPLIST_FILE: Sources/KnevoPatient/Info.plist
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: ""
+      SWIFT_VERSION: 6.0
+      SWIFT_STRICT_CONCURRENCY: minimal
+      SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+      SUPPORTS_MACCATALYST: NO
+      IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+  KnevoPatientTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests/KnevoPatientTests
+    dependencies:
+      - target: KnevoPatient
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.knevo.patientTests
+      SWIFT_VERSION: 6.0
+      SWIFT_STRICT_CONCURRENCY: minimal
+      SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+      IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+      GENERATE_INFOPLIST_FILE: YES
+schemes:
+  KnevoPatient:
+    build:
+      targets:
+        KnevoPatient: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - KnevoPatientTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
