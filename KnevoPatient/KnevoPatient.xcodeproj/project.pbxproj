@@ -26,6 +26,7 @@
 		4A26A6C126D6F3C32DD86AB3 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B920D7308A2C2C5640DC44D /* MainTabView.swift */; };
 		520244550325CE19EE627A36 /* ActiveSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BDA2B6FB2F41A9E651B63F /* ActiveSetView.swift */; };
 		5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */; };
+		5AE9124DF6B7594E7F1387DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F6C4FDF7A3BA01D3F2D85C7 /* Assets.xcassets */; };
 		5ECE93204F49C3CC7558E486 /* RunningSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687528EB64426AF805DDE728 /* RunningSessionView.swift */; };
 		66B036DDE3A4384FD26E8A32 /* ProgressViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D2CD4728E74222DA1BB846 /* ProgressViewModelTests.swift */; };
 		683765D2BD39B20A03BC1521 /* SessionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA25CD03CDE26518739D9D7 /* SessionFlowView.swift */; };
@@ -81,6 +82,7 @@
 		43A0DA30CAC0E9FC9FA2121E /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
 		4665F97401AA6967343950A2 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewModel.swift; sourceTree = "<group>"; };
+		4F6C4FDF7A3BA01D3F2D85C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5DD1BC48D58E2513496A34C5 /* PreSessionPainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreSessionPainView.swift; sourceTree = "<group>"; };
 		687528EB64426AF805DDE728 /* RunningSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningSessionView.swift; sourceTree = "<group>"; };
 		775638FB1AACF5528572DD94 /* PostSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSessionView.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 		1BB457A058FEEC1CF88BECBE /* KnevoPatient */ = {
 			isa = PBXGroup;
 			children = (
+				4F6C4FDF7A3BA01D3F2D85C7 /* Assets.xcassets */,
 				C229BA26CE19936799266496 /* Info.plist */,
 				793E10578B515EA4B29904B8 /* KnevoPatientApp.swift */,
 				5AB13386BA3C9AAF72374B77 /* Config */,
@@ -274,6 +277,7 @@
 			buildConfigurationList = 46090E247E3CE68F2AC2C0FA /* Build configuration list for PBXNativeTarget "KnevoPatient" */;
 			buildPhases = (
 				A3996799153C67C3B55C51B6 /* Sources */,
+				1DF3E0B4C4FDEDB31F64AD09 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -338,6 +342,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1DF3E0B4C4FDEDB31F64AD09 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AE9124DF6B7594E7F1387DF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4E0DEAD4158A01D04B717C45 /* Sources */ = {
@@ -477,7 +492,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -560,7 +575,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Sources/KnevoPatient/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -580,7 +595,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -604,7 +619,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Sources/KnevoPatient/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

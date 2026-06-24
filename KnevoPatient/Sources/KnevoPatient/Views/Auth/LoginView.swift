@@ -19,14 +19,11 @@ struct LoginView: View {
                     Spacer()
                     VStack(alignment: .leading, spacing: 24) {
                         HStack(spacing: 12) {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(LinearGradient(
-                                    colors: [Color(hex: "#ff4da6"), Color(hex: "#E8007D")],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
+                            Image("AppLogo")
+                                .resizable()
+                                .scaledToFit()
                                 .frame(width: 48, height: 48)
-                                .overlay(Text("K").font(.title2.bold()).foregroundStyle(.white))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Knevo").font(.headline).foregroundStyle(Color(hex: "#0f172a"))
                                 Text("Rehabilitation").font(.caption).foregroundStyle(Color(hex: "#64748b"))

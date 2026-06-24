@@ -15,7 +15,7 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff4da6] to-[#E8007D] flex items-center justify-center text-white font-bold">K</div>
+            <img src="/knevo-logo.png" alt="Knevo" className="w-10 h-10 rounded-xl object-cover" />
             <h1 className="text-2xl font-bold text-[#0f172a]">Knevo</h1>
           </div>
           <div className="flex items-center gap-4">

@@ -45,7 +45,7 @@ export default function DoctorSignupPage() {
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(to bottom, #fff5fa, #fdf5f9)' }}>
       <div className="w-full max-w-lg bg-white/90 backdrop-blur border border-[#f0d6e8] rounded-3xl p-9 shadow-knevo">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff4da6] to-[#E8007D] flex items-center justify-center text-white font-bold text-xl">K</div>
+          <img src="/knevo-logo.png" alt="Knevo" className="w-12 h-12 rounded-2xl object-cover" />
           <div>
             <h1 className="text-xl font-semibold text-[#0f172a]">Knevo</h1>
             <p className="text-sm text-[#64748b]">Doctor Registration</p>
