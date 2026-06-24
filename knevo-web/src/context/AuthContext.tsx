@@ -9,6 +9,7 @@ interface AuthState {
   accessToken: string | null;
   userId: string | null;
   role: string | null;
+  name: string | null;
 }
 
 interface SetAuthPayload extends AuthState {
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     accessToken: null,
     userId: sessionStorage.getItem('userId'),
     role: sessionStorage.getItem('role'),
+    name: sessionStorage.getItem('name'),
   });
 
   // True while we wait for an auto-refresh attempt on page load.
@@ -41,14 +43,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(state.accessToken);
     if (state.userId) sessionStorage.setItem('userId', state.userId);
     if (state.role) sessionStorage.setItem('role', state.role);
+    if (state.name) sessionStorage.setItem('name', state.name);
     if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
   }, []);
 
   const clearAuth = useCallback(() => {
-    setAuthState({ accessToken: null, userId: null, role: null });
+    setAuthState({ accessToken: null, userId: null, role: null, name: null });
     setAccessToken(null);
     sessionStorage.removeItem('userId');
     sessionStorage.removeItem('role');
+    sessionStorage.removeItem('name');
     localStorage.removeItem('refreshToken');
     queryClient.clear();
   }, []);
@@ -64,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           accessToken: res.accessToken,
           userId: res.userId,
           role: res.role,
+          name: res.name,
           refreshToken: res.refreshToken,
         });
       })
@@ -82,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           accessToken: res.accessToken,
           userId: res.userId,
           role: res.role,
+          name: res.name,
           refreshToken: res.refreshToken,
         });
         return res.accessToken;

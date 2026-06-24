@@ -12,6 +12,7 @@ export interface LoginRequest {
 export interface AuthResponse {
   userId: string;
   role: string;
+  name: string | null;
   enrollmentCode: string | null;
   accessToken: string;
   refreshToken: string;

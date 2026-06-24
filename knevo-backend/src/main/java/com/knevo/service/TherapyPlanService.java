@@ -107,6 +107,8 @@ public class TherapyPlanService {
         summary.setStatus(plan.getStatus());
         summary.setTherapyConfigId(config.getId());
         summary.setCreatedAt(plan.getCreatedAt());
+        summary.setStartDate(plan.getStartDate());
+        summary.setEndDate(plan.getEndDate());
         return summary;
     }
 
@@ -133,6 +135,8 @@ public class TherapyPlanService {
                 dto.setTitle(p.getTitle());
                 dto.setStatus(p.getStatus());
                 dto.setCreatedAt(p.getCreatedAt());
+                dto.setStartDate(p.getStartDate());
+                dto.setEndDate(p.getEndDate());
                 // Find associated config
                 therapyConfigRepository.findByPatient_Id(patientId).stream()
                     .filter(c -> c.getRehabPlan() != null && c.getRehabPlan().getId().equals(p.getId()))

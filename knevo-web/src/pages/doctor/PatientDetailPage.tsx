@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
+  getPatient,
   getPatientPlans,
   getTherapyConfig,
   getPatientSessions,
@@ -42,6 +43,12 @@ export default function PatientDetailPage() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [editingConfig, setEditingConfig] = useState(false);
 
+  const { data: patient } = useQuery({
+    queryKey: ['patient', patientId],
+    queryFn: () => getPatient(patientId),
+    enabled: !!patientId,
+  });
+
   const { data: plans = [], isLoading: plansLoading } = useQuery({
     queryKey: ['patient-plans', patientId],
     queryFn: () => getPatientPlans(patientId),
@@ -79,7 +86,7 @@ export default function PatientDetailPage() {
           </a>
         </div>
 
-        <h1 className="text-2xl font-bold text-[#0f172a] mb-6">Patient</h1>
+        <h1 className="text-2xl font-bold text-[#0f172a] mb-6">{patient?.name ?? 'Patient'}</h1>
 
         {/* Tab bar */}
         <div className="flex gap-2 mb-6">
@@ -124,6 +131,8 @@ export default function PatientDetailPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
                     {config.sessionsPerWeek && <div><p className="text-[#64748b]">Sessions/week</p><p className="font-semibold text-[#0f172a]">{config.sessionsPerWeek}</p></div>}
                     {config.totalSessionsNum && <div><p className="text-[#64748b]">Total sessions</p><p className="font-semibold text-[#0f172a]">{config.totalSessionsNum}</p></div>}
+                    {activePlan.startDate && <div><p className="text-[#64748b]">Start date</p><p className="font-semibold text-[#0f172a]">{formatDate(activePlan.startDate)}</p></div>}
+                    {activePlan.endDate && <div><p className="text-[#64748b]">End date</p><p className="font-semibold text-[#0f172a]">{formatDate(activePlan.endDate)}</p></div>}
                     {config.schedule && <div><p className="text-[#64748b]">Schedule</p><p className="font-semibold text-[#0f172a]">{config.schedule}</p></div>}
                     {config.maxFlexionAngleDeg && <div><p className="text-[#64748b]">Max flexion</p><p className="font-semibold text-[#0f172a]">{config.maxFlexionAngleDeg}°</p></div>}
                   </div>

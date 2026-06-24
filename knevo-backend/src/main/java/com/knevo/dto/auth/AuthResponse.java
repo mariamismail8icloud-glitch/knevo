@@ -10,6 +10,7 @@ import java.util.UUID;
 public class AuthResponse {
     private UUID userId;
     private String role;
+    private String name;
     private String enrollmentCode;
     private String accessToken;
     private String refreshToken;

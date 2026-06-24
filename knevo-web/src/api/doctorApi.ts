@@ -11,6 +11,9 @@ export interface Patient {
 export const getMyPatients = (): Promise<Patient[]> =>
   client.get<Patient[]>('/api/doctor/patients').then(r => r.data);
 
+export const getPatient = (patientId: string): Promise<Patient> =>
+  client.get<Patient>(`/api/doctor/patients/${patientId}`).then(r => r.data);
+
 export const enrollPatient = (enrollmentCode: string): Promise<Patient> =>
   client.post<Patient>('/api/doctor/enroll-patient', { enrollmentCode }).then(r => r.data);
 
@@ -67,6 +70,8 @@ export interface PlanSummary {
   status: string;
   therapyConfigId: string;
   createdAt: string;
+  startDate: string | null;
+  endDate: string | null;
 }
 
 export interface TherapySetConfigDto {

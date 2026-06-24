@@ -74,6 +74,13 @@ public class EnrollmentService {
             .collect(Collectors.toList());
     }
 
+    public PatientSummaryDto getPatient(UUID patientId) {
+        User patient = userRepository.findById(patientId)
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Patient not found"));
+        return toSummary(patient);
+    }
+
     public List<PatientSummaryDto> getAllPatients() {
         return userRepository.findByRoleOrderByCreatedAtDesc(User.Role.PATIENT)
             .stream()

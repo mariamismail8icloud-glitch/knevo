@@ -31,9 +31,13 @@ export default function PatientProgressTab({ patientId }: Props) {
   return (
     <div className="space-y-6">
       {/* Metric cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <MetricCard label="Completed" value={data.totalSessionsCompleted.toString()} />
         <MetricCard label="Prescribed" value={data.totalSessionsPrescribed.toString()} />
+        <MetricCard
+          label="Remaining"
+          value={Math.max(0, data.totalSessionsPrescribed - data.totalSessionsCompleted).toString()}
+        />
         <MetricCard label="Adherence" value={`${adherencePct}%`} accent />
         <MetricCard
           label="Missed"

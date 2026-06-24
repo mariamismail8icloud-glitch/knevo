@@ -111,6 +111,6 @@ public class AuthService {
     private AuthResponse buildAuthResponse(User user) {
         String access = jwtService.generateAccessToken(user.getId(), user.getRole().name());
         String refresh = jwtService.generateRefreshToken(user.getId());
-        return new AuthResponse(user.getId(), user.getRole().name(), user.getEnrollmentCode(), access, refresh);
+        return new AuthResponse(user.getId(), user.getRole().name(), user.getName(), user.getEnrollmentCode(), access, refresh);
     }
 }
