@@ -189,12 +189,14 @@ public class SessionService {
         return toDto(session, setRecordRepository.findBySession_Id(sessionId));
     }
 
+    @Transactional(readOnly = true)
     public SessionDto getSession(UUID sessionId) {
         Session session = sessionRepository.findById(sessionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found"));
         return toDto(session, setRecordRepository.findBySession_Id(sessionId));
     }
 
+    @Transactional(readOnly = true)
     public List<SessionDto> getPatientSessions(UUID patientId) {
         return sessionRepository.findByPatient_IdOrderByStartedAtDesc(patientId)
             .stream().map(s -> toDto(s, List.of())).toList();

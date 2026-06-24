@@ -116,9 +116,15 @@ private struct SessionRowView: View {
         )
     }
 
+    private static let iso8601: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
     private var formattedDate: String {
         guard let raw = session.startedAt,
-              let date = ISO8601DateFormatter().date(from: raw) else {
+              let date = Self.iso8601.date(from: raw) else {
             return "Session"
         }
         return date.formatted(.dateTime.day().month(.wide).year().hour().minute())
@@ -127,8 +133,8 @@ private struct SessionRowView: View {
     private var durationText: String? {
         guard let startRaw = session.startedAt,
               let endRaw = session.endedAt,
-              let start = ISO8601DateFormatter().date(from: startRaw),
-              let end = ISO8601DateFormatter().date(from: endRaw) else {
+              let start = Self.iso8601.date(from: startRaw),
+              let end = Self.iso8601.date(from: endRaw) else {
             return nil
         }
         let minutes = Int(end.timeIntervalSince(start) / 60)
@@ -147,17 +153,28 @@ private struct SessionRowView: View {
 private struct StatusBadge: View {
     let status: String
 
+    private var displayText: String {
+        switch status.uppercased() {
+        case "COMPLETED":           return "Completed"
+        case "IN_PROGRESS":         return "In Progress"
+        case "STOPPED_BY_PATIENT":  return "Stopped"
+        case "STOPPED_DUE_TO_PAIN": return "Stopped (Pain)"
+        default: return status.replacingOccurrences(of: "_", with: " ").capitalized
+        }
+    }
+
     private var color: Color {
         switch status.uppercased() {
-        case "COMPLETED": return .green
-        case "STOPPED":   return .orange
-        case "ACTIVE":    return Color(red: 0.91, green: 0, blue: 0.49)
-        default:          return .secondary
+        case "COMPLETED":           return .green
+        case "IN_PROGRESS":         return Color(red: 0.91, green: 0, blue: 0.49)
+        case "STOPPED_BY_PATIENT",
+             "STOPPED_DUE_TO_PAIN": return .orange
+        default:                    return .secondary
         }
     }
 
     var body: some View {
-        Text(status.capitalized)
+        Text(displayText)
             .font(.caption2).fontWeight(.bold)
             .padding(.horizontal, 8).padding(.vertical, 4)
             .background(color.opacity(0.12))
