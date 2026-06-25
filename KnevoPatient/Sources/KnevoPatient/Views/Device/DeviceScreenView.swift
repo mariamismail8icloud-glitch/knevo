@@ -4,6 +4,7 @@ struct DeviceScreenView: View {
     @Environment(DeviceConnectionViewModel.self) private var deviceVM
 
     @State private var showCalibration = false
+    @State private var showWifiSetup = false
 
     private let accent = Color(red: 0.91, green: 0, blue: 0.49)
     private let ink = Color(red: 0.06, green: 0.09, blue: 0.16)
@@ -17,6 +18,12 @@ struct DeviceScreenView: View {
         case .done: "DONE"
         case .fault: "FAULT"
         }
+    }
+
+    /// Battery values above 100 (the device sends 0xFF = 255) mean "no battery
+    /// sensing on this hardware" — show a dash instead of a bogus percentage.
+    static func batteryLabel(for pct: UInt8) -> String {
+        pct > 100 ? "—" : "\(pct)%"
     }
 
     var body: some View {
@@ -43,6 +50,16 @@ struct DeviceScreenView: View {
                     CalibrationView(transport: deviceVM.bleTransport) {
                         showCalibration = false
                     }
+                }
+            }
+            .sheet(isPresented: $showWifiSetup) {
+                NavigationStack {
+                    WiFiProvisioningView(viewModel: deviceVM)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") { showWifiSetup = false }
+                            }
+                        }
                 }
             }
         }
@@ -73,6 +90,12 @@ struct DeviceScreenView: View {
                 .opacity(deviceVM.isBusy ? 0.6 : 1)
 
                 Button {
+                    showWifiSetup = true
+                } label: {
+                    secondaryLabel(deviceVM.wifiSSID.isEmpty ? "Set up WiFi" : "WiFi: \(deviceVM.wifiSSID)")
+                }
+
+                Button {
                     showCalibration = true
                 } label: {
                     primaryLabel("Calibrate device")
@@ -85,7 +108,7 @@ struct DeviceScreenView: View {
         VStack(spacing: 12) {
             if let status = deviceVM.deviceStatus {
                 statusRow(label: "Status", value: Self.statusLabel(for: status.state))
-                statusRow(label: "Battery", value: "\(status.batteryPct)%")
+                statusRow(label: "Battery", value: Self.batteryLabel(for: status.batteryPct))
             } else {
                 Text("Waiting for device status…")
                     .font(.subheadline)

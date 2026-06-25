@@ -16,7 +16,8 @@ struct DeviceStatusCard: View {
     /// Pure connection summary so it can be unit-tested without the view.
     static func summary(isConnected: Bool, status: DeviceStatus?) -> String {
         guard isConnected else { return "Not connected" }
-        if let status {
+        // batteryPct > 100 (device sends 0xFF) = no battery sensing — omit it.
+        if let status, status.batteryPct <= 100 {
             return "Knevo Device · Connected · \(status.batteryPct)%"
         }
         return "Knevo Device · Connected"

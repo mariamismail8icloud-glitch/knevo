@@ -5,6 +5,9 @@ struct SessionFlowView: View {
     @Environment(\.dismiss) private var dismiss
 
     init(plan: ActivePlan, deviceTransport: BLETransport? = nil) {
+        // Per-set WiFiConfig deliberately carries EMPTY creds (IP/port refresh only) to
+        // keep WiFi off during the session; the device reuses the credentials it stored
+        // during one-time provisioning on the Device Screen. So no creds are threaded here.
         let coordinator: DeviceSessionCoordinating = plan.sets.contains(where: { $0.deviceAssisted })
             ? BLEDeviceSessionCoordinator(transport: deviceTransport)
             : NoopDeviceSessionCoordinator()

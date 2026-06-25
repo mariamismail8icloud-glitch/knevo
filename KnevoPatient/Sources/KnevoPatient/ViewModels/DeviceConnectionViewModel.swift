@@ -19,6 +19,12 @@ final class DeviceConnectionViewModel {
     /// notifications routed by the shared status observer.
     private(set) var deviceStatus: DeviceStatus?
 
+    /// WiFi credentials captured during a successful `provision()`. Threaded into
+    /// the session coordinator so every per-set WiFiConfig carries real creds
+    /// (the device does not persist them across reboots). Empty until provisioned.
+    private(set) var wifiSSID = ""
+    private(set) var wifiPassword = ""
+
     private(set) var transport: BLETransport
     private let receiver: SensorDataReceiver
 
@@ -111,6 +117,8 @@ final class DeviceConnectionViewModel {
 
             let status = try KnevoCodec.decodeWiFiStatus(statusData)
             if status.ok {
+                wifiSSID = ssid
+                wifiPassword = password
                 state = .provisioned
             } else {
                 state = .failed(Self.provisioningMessage(for: status.errorCode))

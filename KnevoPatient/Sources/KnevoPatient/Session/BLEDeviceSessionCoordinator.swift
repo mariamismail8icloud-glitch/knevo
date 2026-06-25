@@ -30,7 +30,7 @@ final class BLEDeviceSessionCoordinator: DeviceSessionCoordinating {
         receiver: SensorReceiving = SensorDataReceiver(),
         wifiSSID: String = "",
         wifiPassword: String = "",
-        batchTimeoutSeconds: Double = 30
+        batchTimeoutSeconds: Double = 60   // device does a COLD WiFi join (up to ~15s) + TCP upload after STOP
     ) {
         self.transport = transport ?? BLETransportFactory.make()
         self.receiver = receiver
