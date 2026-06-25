@@ -5,7 +5,10 @@ struct SessionFlowView: View {
     @Environment(\.dismiss) private var dismiss
 
     init(plan: ActivePlan) {
-        _viewModel = State(initialValue: SessionViewModel(plan: plan))
+        let coordinator: DeviceSessionCoordinating = plan.sets.contains(where: { $0.deviceAssisted })
+            ? BLEDeviceSessionCoordinator()
+            : NoopDeviceSessionCoordinator()
+        _viewModel = State(initialValue: SessionViewModel(plan: plan, deviceCoordinator: coordinator))
     }
 
     var body: some View {
