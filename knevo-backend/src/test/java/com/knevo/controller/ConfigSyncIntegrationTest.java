@@ -73,6 +73,8 @@ class ConfigSyncIntegrationTest {
         UpdateConfigRequest req = new UpdateConfigRequest();
         req.setSessionsPerWeek(4);
         req.setMaxSpeed(new BigDecimal("1.5"));
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        req.setMaxFlexionAngleDeg(new BigDecimal("60"));
         req.setComment("Increased frequency");
 
         mockMvc.perform(put("/api/therapy-config/" + config.getId())
@@ -96,12 +98,30 @@ class ConfigSyncIntegrationTest {
     void updateConfigWithUnknownIdReturns404() throws Exception {
         UpdateConfigRequest req = new UpdateConfigRequest();
         req.setSessionsPerWeek(3);
+        req.setMaxSpeed(new BigDecimal("5"));
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        req.setMaxFlexionAngleDeg(new BigDecimal("60"));
 
         mockMvc.perform(put("/api/therapy-config/00000000-0000-0000-0000-000000000000")
                 .with(user(doctor.getId().toString()).roles("DOCTOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateConfigRejectsOutOfRangeFlexion() throws Exception {
+        UpdateConfigRequest req = new UpdateConfigRequest();
+        req.setMaxSpeed(new BigDecimal("5"));
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        req.setMaxFlexionAngleDeg(new BigDecimal("100")); // > 65
+
+        mockMvc.perform(put("/api/therapy-config/" + config.getId())
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", org.hamcrest.Matchers.containsString("Max flexion")));
     }
 
     @Test

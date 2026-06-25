@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knevo.dto.therapy.CreatePlanRequest;
 import com.knevo.dto.therapy.SetConfigRequest;
 import com.knevo.model.User;
+
+import java.math.BigDecimal;
 import com.knevo.repository.ExerciseRepository;
 import com.knevo.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +81,9 @@ class TherapyPlanIntegrationTest {
         req.setGoal("Restore knee ROM to 90 degrees");
         req.setSessionsPerWeek(3);
         req.setTotalSessionsNum(12);
+        req.setMaxSpeed(new BigDecimal("5"));
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        req.setMaxFlexionAngleDeg(new BigDecimal("60"));
         req.setSets(List.of(set));
 
         mockMvc.perform(post("/api/doctor/patients/" + patient.getId() + "/plans")
@@ -100,6 +105,9 @@ class TherapyPlanIntegrationTest {
 
         CreatePlanRequest req = new CreatePlanRequest();
         req.setTitle("Active Plan");
+        req.setMaxSpeed(new BigDecimal("5"));
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        req.setMaxFlexionAngleDeg(new BigDecimal("60"));
         req.setSets(List.of(set));
 
         mockMvc.perform(post("/api/doctor/patients/" + patient.getId() + "/plans")
@@ -119,5 +127,51 @@ class TherapyPlanIntegrationTest {
         mockMvc.perform(get("/api/patient/active-plan")
                 .with(user(patient.getId().toString()).roles("PATIENT")))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createPlanRejectsOutOfRangeSpeed() throws Exception {
+        CreatePlanRequest req = new CreatePlanRequest();
+        req.setTitle("Bad Plan");
+        req.setMaxSpeed(new BigDecimal("20")); // > 12
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        req.setMaxFlexionAngleDeg(new BigDecimal("60"));
+
+        mockMvc.perform(post("/api/doctor/patients/" + patient.getId() + "/plans")
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("Max speed")));
+    }
+
+    @Test
+    void createPlanRejectsMissingFlexion() throws Exception {
+        CreatePlanRequest req = new CreatePlanRequest();
+        req.setTitle("Bad Plan");
+        req.setMaxSpeed(new BigDecimal("5"));
+        req.setMaxExtensionAngleDeg(new BigDecimal("5"));
+        // maxFlexion missing → required
+
+        mockMvc.perform(post("/api/doctor/patients/" + patient.getId() + "/plans")
+                .with(user(doctor.getId().toString()).roles("DOCTOR"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void configDefaultsEndpointReturnsBackendDefaults() throws Exception {
+        mockMvc.perform(get("/api/therapy-config/defaults")
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.maxSpeed.defaultValue").value(5))
+            .andExpect(jsonPath("$.maxSpeed.min").value(1))
+            .andExpect(jsonPath("$.maxSpeed.max").value(12))
+            .andExpect(jsonPath("$.maxExtensionAngleDeg.defaultValue").value(5))
+            .andExpect(jsonPath("$.maxExtensionAngleDeg.max").value(5))
+            .andExpect(jsonPath("$.maxFlexionAngleDeg.defaultValue").value(60))
+            .andExpect(jsonPath("$.maxFlexionAngleDeg.min").value(30))
+            .andExpect(jsonPath("$.maxFlexionAngleDeg.max").value(65));
     }
 }

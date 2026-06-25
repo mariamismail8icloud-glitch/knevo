@@ -59,10 +59,16 @@ public class TherapyController {
         return ResponseEntity.ok(therapyPlanService.getActiveConfigForPatient(UUID.fromString(auth.getName())));
     }
 
+    @GetMapping("/api/therapy-config/defaults")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<TherapyDefaultsDto> getConfigDefaults() {
+        return ResponseEntity.ok(therapyPlanService.getConfigDefaults());
+    }
+
     @PutMapping("/api/therapy-config/{id}")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<TherapyConfigDto> updateConfig(@PathVariable UUID id,
-                                                         @RequestBody UpdateConfigRequest req) {
+                                                         @Valid @RequestBody UpdateConfigRequest req) {
         return ResponseEntity.ok(therapyPlanService.updateConfig(id, req));
     }
 

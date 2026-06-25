@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateTherapyConfig, type TherapyConfig, type UpdateConfigRequest } from '../../api/doctorApi';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { updateTherapyConfig, getTherapyDefaults, type TherapyConfig, type UpdateConfigRequest } from '../../api/doctorApi';
+import { validateTherapyLimits } from '../../utils/therapyLimits';
 
 interface Props {
   config: TherapyConfig;
@@ -18,16 +19,32 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
   const [maxSpeed, setMaxSpeed] = useState(config.maxSpeed?.toString() ?? '');
   const [comment, setComment] = useState('');
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const { data: defaults } = useQuery({
+    queryKey: ['therapy-defaults'],
+    queryFn: () => getTherapyDefaults(),
+  });
+
+  // Backfill any missing safety limit with the backend default so the doctor
+  // always edits a valid, in-range value.
+  useEffect(() => {
+    if (!defaults) return;
+    setMaxSpeed(prev => (prev === '' ? String(defaults.maxSpeed.defaultValue) : prev));
+    setMaxExtension(prev => (prev === '' ? String(defaults.maxExtensionAngleDeg.defaultValue) : prev));
+    setMaxFlexion(prev => (prev === '' ? String(defaults.maxFlexionAngleDeg.defaultValue) : prev));
+  }, [defaults]);
 
   const mutation = useMutation({
     mutationFn: () => {
-      const req: UpdateConfigRequest = {};
+      const req: UpdateConfigRequest = {
+        maxSpeed: parseFloat(maxSpeed),
+        maxExtensionAngleDeg: parseFloat(maxExtension),
+        maxFlexionAngleDeg: parseFloat(maxFlexion),
+      };
       if (sessionsPerWeek) req.sessionsPerWeek = parseInt(sessionsPerWeek);
       if (totalSessions) req.totalSessionsNum = parseInt(totalSessions);
       if (schedule) req.schedule = schedule;
-      if (maxFlexion) req.maxFlexionAngleDeg = parseFloat(maxFlexion);
-      if (maxExtension) req.maxExtensionAngleDeg = parseFloat(maxExtension);
-      if (maxSpeed) req.maxSpeed = parseFloat(maxSpeed);
       if (comment) req.comment = comment;
       return updateTherapyConfig(config.id, req);
     },
@@ -38,6 +55,20 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
       setTimeout(onClose, 1200);
     },
   });
+
+  const save = () => {
+    if (!defaults) {
+      setError('Still loading defaults — please try again in a moment.');
+      return;
+    }
+    const limitError = validateTherapyLimits({ maxSpeed, maxExtension, maxFlexion }, defaults);
+    if (limitError) {
+      setError(limitError);
+      return;
+    }
+    setError('');
+    mutation.mutate();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6 z-50">
@@ -54,9 +85,9 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
           </div>
         )}
 
-        {mutation.isError && (
+        {(error || mutation.isError) && (
           <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
-            Failed to update config.
+            {error || 'Failed to update config.'}
           </div>
         )}
 
@@ -65,14 +96,25 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
             { label: 'Sessions per week', value: sessionsPerWeek, set: setSessionsPerWeek, type: 'number' },
             { label: 'Total sessions', value: totalSessions, set: setTotalSessions, type: 'number' },
             { label: 'Schedule (e.g. MON,WED,FRI)', value: schedule, set: setSchedule },
-            { label: 'Max flexion angle (°)', value: maxFlexion, set: setMaxFlexion, type: 'number' },
-            { label: 'Max extension angle (°)', value: maxExtension, set: setMaxExtension, type: 'number' },
-            { label: 'Max speed', value: maxSpeed, set: setMaxSpeed, type: 'number' },
             { label: 'Comment', value: comment, set: setComment },
           ].map(({ label, value, set, type }) => (
             <div key={label}>
               <label className="block text-sm font-semibold text-[#334155] mb-2">{label}</label>
               <input type={type ?? 'text'} value={value} onChange={e => set(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border border-[#f0d6e8] bg-[#fdf5f9] focus:outline-none focus:ring-2 focus:ring-[#E8007D]/30 focus:border-[#E8007D] text-[#0f172a]" />
+            </div>
+          ))}
+          {[
+            { label: 'Max speed', value: maxSpeed, set: setMaxSpeed, range: defaults?.maxSpeed },
+            { label: 'Max extension angle (°)', value: maxExtension, set: setMaxExtension, range: defaults?.maxExtensionAngleDeg },
+            { label: 'Max flexion angle (°)', value: maxFlexion, set: setMaxFlexion, range: defaults?.maxFlexionAngleDeg },
+          ].map(({ label, value, set, range }) => (
+            <div key={label}>
+              <label className="block text-sm font-semibold text-[#334155] mb-2">
+                {label}{range ? <span className="text-[#64748b] font-normal"> ({range.min}–{range.max})</span> : null}
+              </label>
+              <input type="number" value={value} onChange={e => set(e.target.value)} required
+                min={range?.min} max={range?.max} step="0.1"
                 className="w-full px-4 py-3 rounded-2xl border border-[#f0d6e8] bg-[#fdf5f9] focus:outline-none focus:ring-2 focus:ring-[#E8007D]/30 focus:border-[#E8007D] text-[#0f172a]" />
             </div>
           ))}
@@ -83,7 +125,7 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
             className="flex-1 py-3 rounded-2xl border border-[#f0d6e8] text-[#64748b] font-semibold">
             Cancel
           </button>
-          <button onClick={() => mutation.mutate()} disabled={mutation.isPending}
+          <button onClick={save} disabled={mutation.isPending}
             className="flex-1 py-3 rounded-2xl bg-[#E8007D] text-white font-semibold hover:bg-[#cc006e] disabled:opacity-60">
             {mutation.isPending ? 'Saving…' : 'Save Changes'}
           </button>

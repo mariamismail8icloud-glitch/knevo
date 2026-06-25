@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getExercises, createPlan, type Exercise, type SetConfigRequest } from '../../api/doctorApi';
+import { getExercises, createPlan, getTherapyDefaults, type Exercise, type SetConfigRequest } from '../../api/doctorApi';
+import { validateTherapyLimits } from '../../utils/therapyLimits';
 
 interface SelectedSet extends SetConfigRequest {
   exerciseName: string;
@@ -37,6 +38,19 @@ export default function CreatePlanPage() {
     queryFn: () => getExercises(),
   });
 
+  const { data: defaults } = useQuery({
+    queryKey: ['therapy-defaults'],
+    queryFn: () => getTherapyDefaults(),
+  });
+
+  // Pre-populate the safety limits with the backend defaults once they load.
+  useEffect(() => {
+    if (!defaults) return;
+    setMaxSpeed(prev => (prev === '' ? String(defaults.maxSpeed.defaultValue) : prev));
+    setMaxExtension(prev => (prev === '' ? String(defaults.maxExtensionAngleDeg.defaultValue) : prev));
+    setMaxFlexion(prev => (prev === '' ? String(defaults.maxFlexionAngleDeg.defaultValue) : prev));
+  }, [defaults]);
+
   const filteredEx = exercises.filter(e =>
     e.name.toLowerCase().includes(exSearch.toLowerCase())
   );
@@ -47,9 +61,9 @@ export default function CreatePlanPage() {
       sessionsPerWeek: sessionsPerWeek ? parseInt(sessionsPerWeek) : undefined,
       totalSessionsNum: totalSessions ? parseInt(totalSessions) : undefined,
       schedule: schedule || undefined,
-      maxFlexionAngleDeg: maxFlexion ? parseFloat(maxFlexion) : undefined,
-      maxExtensionAngleDeg: maxExtension ? parseFloat(maxExtension) : undefined,
-      maxSpeed: maxSpeed ? parseFloat(maxSpeed) : undefined,
+      maxFlexionAngleDeg: parseFloat(maxFlexion),
+      maxExtensionAngleDeg: parseFloat(maxExtension),
+      maxSpeed: parseFloat(maxSpeed),
       sets: sets.map(s => ({
         exerciseId: s.exerciseId,
         deviceAssisted: s.deviceAssisted,
@@ -77,6 +91,20 @@ export default function CreatePlanPage() {
   };
 
   const removeSet = (index: number) => setSets(prev => prev.filter((_, i) => i !== index));
+
+  const submitPlan = () => {
+    if (!defaults) {
+      setError('Still loading defaults — please try again in a moment.');
+      return;
+    }
+    const limitError = validateTherapyLimits({ maxSpeed, maxExtension, maxFlexion }, defaults);
+    if (limitError) {
+      setError(limitError);
+      return;
+    }
+    setError('');
+    mutation.mutate();
+  };
 
   return (
     <div className="min-h-screen bg-[#fdf5f9] p-8">
@@ -158,9 +186,6 @@ export default function CreatePlanPage() {
                 { label: 'Sessions per week', value: sessionsPerWeek, set: setSessionsPerWeek, type: 'number' },
                 { label: 'Total sessions', value: totalSessions, set: setTotalSessions, type: 'number' },
                 { label: 'Schedule (e.g. MON,WED,FRI)', value: schedule, set: setSchedule },
-                { label: 'Max flexion angle (°)', value: maxFlexion, set: setMaxFlexion, type: 'number' },
-                { label: 'Max extension angle (°)', value: maxExtension, set: setMaxExtension, type: 'number' },
-                { label: 'Max speed', value: maxSpeed, set: setMaxSpeed, type: 'number' },
               ].map(({ label, value, set, type }) => (
                 <div key={label}>
                   <label className="block text-sm font-semibold text-[#334155] mb-2">{label} <span className="text-[#64748b] font-normal">(optional)</span></label>
@@ -168,9 +193,23 @@ export default function CreatePlanPage() {
                     className="w-full px-4 py-3 rounded-2xl border border-[#f0d6e8] bg-[#fdf5f9] focus:outline-none focus:ring-2 focus:ring-[#E8007D]/30 focus:border-[#E8007D] text-[#0f172a]" />
                 </div>
               ))}
+              {[
+                { label: 'Max speed', value: maxSpeed, set: setMaxSpeed, range: defaults?.maxSpeed },
+                { label: 'Max extension angle (°)', value: maxExtension, set: setMaxExtension, range: defaults?.maxExtensionAngleDeg },
+                { label: 'Max flexion angle (°)', value: maxFlexion, set: setMaxFlexion, range: defaults?.maxFlexionAngleDeg },
+              ].map(({ label, value, set, range }) => (
+                <div key={label}>
+                  <label className="block text-sm font-semibold text-[#334155] mb-2">
+                    {label}{range ? <span className="text-[#64748b] font-normal"> ({range.min}–{range.max})</span> : null}
+                  </label>
+                  <input type="number" value={value} onChange={e => set(e.target.value)} required
+                    min={range?.min} max={range?.max} step="0.1"
+                    className="w-full px-4 py-3 rounded-2xl border border-[#f0d6e8] bg-[#fdf5f9] focus:outline-none focus:ring-2 focus:ring-[#E8007D]/30 focus:border-[#E8007D] text-[#0f172a]" />
+                </div>
+              ))}
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="flex-1 py-3 rounded-2xl border border-[#f0d6e8] text-[#64748b] font-semibold">← Back</button>
-                <button onClick={() => mutation.mutate()} disabled={mutation.isPending}
+                <button onClick={submitPlan} disabled={mutation.isPending}
                   className="flex-1 py-3 rounded-2xl bg-[#E8007D] text-white font-semibold hover:bg-[#cc006e] disabled:opacity-60">
                   {mutation.isPending ? 'Creating…' : 'Create plan'}
                 </button>
