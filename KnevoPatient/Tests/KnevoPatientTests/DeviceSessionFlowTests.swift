@@ -121,6 +121,25 @@ struct DeviceSessionFlowTests {
         #expect(receiver.stopped)
     }
 
+    // MARK: - Control: calibration opcodes
+
+    @Test("MockBLETransport records calibration control writes without pushing a batch")
+    func mockRecordsCalibrationControls() async throws {
+        let unloaded = MockBLETransport()
+        try await unloaded.write(
+            KnevoCodec.encodeControl(.calibrateUnloaded),
+            to: KnevoGATT.controlUUID
+        )
+        #expect(unloaded.lastControl == .calibrateUnloaded)
+
+        let staticCal = MockBLETransport()
+        try await staticCal.write(
+            KnevoCodec.encodeControl(.calibrateStatic),
+            to: KnevoGATT.controlUUID
+        )
+        #expect(staticCal.lastControl == .calibrateStatic)
+    }
+
     // MARK: - VM: upload wiring
 
     @Test("collectAndUpload calls the uploader with correct sessionId, setRecordId, and samples")

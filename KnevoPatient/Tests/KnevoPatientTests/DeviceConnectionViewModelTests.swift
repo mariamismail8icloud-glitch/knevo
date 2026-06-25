@@ -58,4 +58,40 @@ struct DeviceConnectionViewModelTests {
         }
         #expect(!message.isEmpty)
     }
+
+    @Test("a 3-byte DeviceStatus notification updates deviceStatus after connect()")
+    func deviceStatusObserved() async {
+        let mock = MockBLETransport()
+        let viewModel = DeviceConnectionViewModel(transport: mock)
+
+        await viewModel.connect()
+        #expect(viewModel.deviceStatus == nil)
+
+        // Emit a START control; the mock yields a 3-byte running DeviceStatus.
+        try? await mock.write(KnevoCodec.encodeControl(.start), to: KnevoGATT.controlUUID)
+
+        // Let the shared observer drain the yielded notification.
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        #expect(viewModel.deviceStatus?.state == .running)
+        #expect(viewModel.deviceStatus?.batteryPct == 87)
+    }
+
+    @Test("reconnect() reaches connected state again against a fresh mock")
+    func reconnectSucceeds() async {
+        // reconnect() builds a fresh transport via BLETransportFactory.make();
+        // force the mock so this runs without real CoreBluetooth in the Simulator.
+        setenv("KNEVO_MOCK_BLE", "1", 1)
+        defer { unsetenv("KNEVO_MOCK_BLE") }
+
+        let mock = MockBLETransport()
+        let viewModel = DeviceConnectionViewModel(transport: mock)
+
+        await viewModel.connect()
+        #expect(viewModel.state == .connected)
+
+        await viewModel.reconnect()
+
+        #expect(viewModel.state == .connected)
+    }
 }
