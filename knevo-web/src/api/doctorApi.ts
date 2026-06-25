@@ -111,6 +111,21 @@ export interface UpdateConfigRequest {
   comment?: string;
 }
 
+export interface FieldRange {
+  defaultValue: number;
+  min: number;
+  max: number;
+}
+
+export interface TherapyDefaults {
+  maxSpeed: FieldRange;
+  maxExtensionAngleDeg: FieldRange;
+  maxFlexionAngleDeg: FieldRange;
+}
+
+export const getTherapyDefaults = (): Promise<TherapyDefaults> =>
+  client.get<TherapyDefaults>('/api/therapy-config/defaults').then(r => r.data);
+
 export const updateTherapyConfig = (configId: string, req: UpdateConfigRequest): Promise<TherapyConfig> =>
   client.put<TherapyConfig>(`/api/therapy-config/${configId}`, req).then(r => r.data);
 
