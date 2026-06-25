@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -39,7 +39,8 @@ describe('PatientProgressTab', () => {
 
   it('shows Missed count', async () => {
     wrap(<PatientProgressTab patientId="p-1" />);
-    expect(await screen.findByText('1')).toBeInTheDocument();
-    expect(screen.getByText('Missed')).toBeInTheDocument();
+    const missedLabel = await screen.findByText('Missed');
+    const card = missedLabel.closest('div')!;
+    expect(within(card).getByText('1')).toBeInTheDocument();
   });
 });

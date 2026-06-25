@@ -7,7 +7,7 @@ function TestConsumer() {
   return (
     <div>
       <span data-testid="auth">{isAuthenticated ? 'yes' : 'no'}</span>
-      <button onClick={() => setAuth({ accessToken: 'tok', userId: 'u1', role: 'DOCTOR' })}>login</button>
+      <button onClick={() => setAuth({ accessToken: 'tok', userId: 'u1', role: 'DOCTOR', name: 'Dr. Test' })}>login</button>
       <span data-testid="uid">{userId ?? 'none'}</span>
     </div>
   );

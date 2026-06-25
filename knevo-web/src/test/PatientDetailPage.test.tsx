@@ -23,6 +23,8 @@ const mockPlans = [
     status: 'ACTIVE',
     therapyConfigId: 'config-1',
     createdAt: '2026-06-01T10:00:00Z',
+    startDate: null,
+    endDate: null,
   },
 ];
 

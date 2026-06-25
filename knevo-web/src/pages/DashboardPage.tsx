@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
-  const { userId, role, name, clearAuth } = useAuth();
+  const { role, name, clearAuth } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
