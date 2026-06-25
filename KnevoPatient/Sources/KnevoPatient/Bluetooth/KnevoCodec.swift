@@ -64,6 +64,18 @@ enum KnevoCodec {
         withUnsafeBytes(of: &bits) { data.append(contentsOf: $0) }
     }
 
+    private static func appendLE(_ value: UInt32, to data: inout Data) {
+        for index in 0 ..< 4 {
+            data.append(UInt8((value >> (8 * index)) & 0xFF))
+        }
+    }
+
+    private static func appendLE(_ value: UInt64, to data: inout Data) {
+        for index in 0 ..< 8 {
+            data.append(UInt8((value >> (8 * UInt64(index))) & 0xFF))
+        }
+    }
+
     private static func uuidBytes(_ uuid: UUID) -> [UInt8] {
         let raw = uuid.uuid
         return [raw.0, raw.1, raw.2, raw.3, raw.4, raw.5, raw.6, raw.7,
@@ -120,10 +132,59 @@ enum KnevoCodec {
         return DeviceStatus(state: state, batteryPct: bytes[1], faultCode: bytes[2])
     }
 
-    // MARK: - TCP sensor frame (decode) §4
+    // MARK: - TCP sensor frame (encode) §4
 
     private static let headerSize = 28
     private static let sampleSize = 88
+
+    static func encodeSensorBatch(setRecordId: UUID, samples: [SensorSample]) -> Data {
+        var header = Data()
+        header.append(contentsOf: Array("KNVO".utf8))
+        header.append(1) // version
+        header.append(0) // flags
+        header.append(contentsOf: uuidBytes(setRecordId))
+        appendLE(UInt32(samples.count), to: &header)
+        appendLE(UInt16(sampleSize), to: &header)
+
+        var records = Data()
+        records.reserveCapacity(samples.count * sampleSize)
+        for sample in samples {
+            appendLE(UInt64(bitPattern: sample.timestampUs), to: &records)
+            appendLE(UInt32(bitPattern: Int32(sample.sampleId)), to: &records)
+
+            appendLE(Float(sample.footAxG), to: &records)
+            appendLE(Float(sample.footAyG), to: &records)
+            appendLE(Float(sample.footAzG), to: &records)
+            appendLE(Float(sample.footGxRadS), to: &records)
+            appendLE(Float(sample.footGyRadS), to: &records)
+            appendLE(Float(sample.footGzRadS), to: &records)
+
+            appendLE(Float(sample.shankAxG), to: &records)
+            appendLE(Float(sample.shankAyG), to: &records)
+            appendLE(Float(sample.shankAzG), to: &records)
+            appendLE(Float(sample.shankGxRadS), to: &records)
+            appendLE(Float(sample.shankGyRadS), to: &records)
+            appendLE(Float(sample.shankGzRadS), to: &records)
+
+            appendLE(Float(sample.thighAxG), to: &records)
+            appendLE(Float(sample.thighAyG), to: &records)
+            appendLE(Float(sample.thighAzG), to: &records)
+            appendLE(Float(sample.thighGxRadS), to: &records)
+            appendLE(Float(sample.thighGyRadS), to: &records)
+            appendLE(Float(sample.thighGzRadS), to: &records)
+
+            appendLE(UInt16(sample.heelFsrRaw), to: &records)
+            appendLE(UInt16(sample.midfootFsrRaw), to: &records)
+        }
+
+        var data = Data()
+        appendLE(UInt32(header.count + records.count), to: &data)
+        data.append(header)
+        data.append(records)
+        return data
+    }
+
+    // MARK: - TCP sensor frame (decode) §4
 
     static func decodeSensorBatch(_ data: Data) throws -> SensorBatch {
         let bytes = [UInt8](data)

@@ -252,6 +252,48 @@ struct KnevoCodecTests {
         }
     }
 
+    // MARK: - Sensor frame encode round-trip (§4)
+
+    private func makeSample(index: Int) -> SensorSample {
+        // Use Float-representable values so encode (Double→Float) then
+        // decode (Float→Double) round-trips exactly.
+        let floats = sampleFloats(base: Float(index) * 0.5)
+        return SensorSample(
+            timestampUs: Int64(1_719_300_000_000_000 + index), sampleId: index,
+            footAxG: Double(floats[0]), footAyG: Double(floats[1]), footAzG: Double(floats[2]),
+            footGxRadS: Double(floats[3]), footGyRadS: Double(floats[4]), footGzRadS: Double(floats[5]),
+            shankAxG: Double(floats[6]), shankAyG: Double(floats[7]), shankAzG: Double(floats[8]),
+            shankGxRadS: Double(floats[9]), shankGyRadS: Double(floats[10]), shankGzRadS: Double(floats[11]),
+            thighAxG: Double(floats[12]), thighAyG: Double(floats[13]), thighAzG: Double(floats[14]),
+            thighGxRadS: Double(floats[15]), thighGyRadS: Double(floats[16]), thighGzRadS: Double(floats[17]),
+            heelFsrRaw: 1000 + index, midfootFsrRaw: 200 + index
+        )
+    }
+
+    @Test("encodeSensorBatch then decodeSensorBatch round-trips")
+    func encodeDecodeRoundTrip() throws {
+        let uuid = UUID()
+        let samples = (0 ..< 5).map { makeSample(index: $0) }
+        let data = KnevoCodec.encodeSensorBatch(setRecordId: uuid, samples: samples)
+        let batch = try KnevoCodec.decodeSensorBatch(data)
+        #expect(batch.setRecordId == uuid)
+        #expect(batch.samples == samples)
+    }
+
+    @Test("encodeSensorBatch produces a valid §4 frame layout")
+    func encodeSensorBatchLayout() {
+        let uuid = UUID()
+        let data = KnevoCodec.encodeSensorBatch(setRecordId: uuid, samples: [makeSample(index: 0)])
+        let bytes = [UInt8](data)
+        // frame_len = header(28) + 1 record(88) = 116
+        #expect(bytes[0] == 116)
+        #expect(Array(bytes[4 ..< 8]) == Array("KNVO".utf8))
+        #expect(bytes[8] == 1) // version
+        #expect(bytes[9] == 0) // flags
+        #expect(Array(bytes[10 ..< 26]) == uuidBytes(uuid))
+        #expect(bytes.count == 4 + 116)
+    }
+
     // MARK: - Round-trip: encode SetConfig then decode the UUID portion
 
     @Test("SensorBatch decode preserves first sample values")
