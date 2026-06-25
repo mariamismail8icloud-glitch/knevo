@@ -49,6 +49,10 @@ public class EnrollmentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code does not belong to a patient");
         }
 
+        if (patient.getDoctor() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Patient is already enrolled with a doctor");
+        }
+
         User doctor = userRepository.findById(doctorId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
