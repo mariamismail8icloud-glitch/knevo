@@ -7,6 +7,7 @@ extension Notification.Name {
 @main
 struct KnevoPatientApp: App {
     @State private var authViewModel = AuthViewModel()
+    @State private var deviceViewModel = DeviceConnectionViewModel()
 
     init() {
         APIClient.shared.unauthorizedHandler = {
@@ -19,6 +20,7 @@ struct KnevoPatientApp: App {
             if authViewModel.isAuthenticated {
                 MainTabView()
                     .environment(authViewModel)
+                    .environment(deviceViewModel)
                     .onReceive(NotificationCenter.default.publisher(for: .sessionExpired)) { _ in
                         authViewModel.logout()
                     }
