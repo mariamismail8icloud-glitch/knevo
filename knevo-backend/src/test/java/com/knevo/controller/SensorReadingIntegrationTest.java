@@ -32,7 +32,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,13 +55,14 @@ class SensorReadingIntegrationTest {
     @Autowired JdbcTemplate jdbcTemplate;
     @PersistenceContext EntityManager entityManager;
 
+    private User doctor;
     private User patient;
     private Session session;
     private TherapySetRecord setRecord;
 
     @BeforeEach
     void setup() {
-        User doctor = new User();
+        doctor = new User();
         doctor.setEmail("sensordoctor@test.com");
         doctor.setUsername("sensordoctor");
         doctor.setPasswordHash("hash");
@@ -209,5 +212,69 @@ class SensorReadingIntegrationTest {
             .andExpect(status().isBadRequest());
 
         assertEquals(0, countRows(setRecord.getId()));
+    }
+
+    /** Inserts {@code n} readings directly via JDBC for the GET (graph) tests. */
+    private void seedReadings(UUID setRecordId, int n) {
+        for (int i = 0; i < n; i++) {
+            jdbcTemplate.update(
+                "INSERT INTO sensor_readings (therapy_set_record_id, timestamp_us, sample_id, "
+                    + "heel_fsr_raw, midfoot_fsr_raw) VALUES (?, ?, ?, ?, ?)",
+                setRecordId, 1719300000000000L + i, i, 1000 + i, 200 + i);
+        }
+    }
+
+    @Test
+    void owningDoctorGetsReadings() throws Exception {
+        seedReadings(setRecord.getId(), 30);
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/sessions/" + session.getId() + "/sensor-readings")
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(30))
+            .andExpect(jsonPath("$[0].sampleId").value(0))
+            .andExpect(jsonPath("$[0].heelFsrRaw").value(1000))
+            // knee angle is null in Phase 2
+            .andExpect(jsonPath("$[0].kneeAngleEstDeg").doesNotExist());
+    }
+
+    @Test
+    void nonOwningDoctorIsForbidden() throws Exception {
+        seedReadings(setRecord.getId(), 5);
+        entityManager.flush();
+
+        User otherDoctor = new User();
+        otherDoctor.setEmail("sensorotherdoc@test.com");
+        otherDoctor.setUsername("sensorotherdoc");
+        otherDoctor.setPasswordHash("hash");
+        otherDoctor.setName("Other Doctor");
+        otherDoctor.setRole(User.Role.DOCTOR);
+        otherDoctor.setDoctorStatus(User.DoctorStatus.APPROVED);
+        otherDoctor = userRepository.save(otherDoctor);
+        entityManager.flush();
+
+        mockMvc.perform(get("/api/sessions/" + session.getId() + "/sensor-readings")
+                .with(user(otherDoctor.getId().toString()).roles("DOCTOR")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void downsamplingReducesCount() throws Exception {
+        seedReadings(setRecord.getId(), 100);
+        entityManager.flush();
+
+        // maxPoints=10 over 100 rows → stride 10 → 10 returned points.
+        var result = mockMvc.perform(get("/api/sessions/" + session.getId()
+                + "/sensor-readings")
+                .param("maxPoints", "10")
+                .with(user(doctor.getId().toString()).roles("DOCTOR")))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        var nodes = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertEquals(10, nodes.size());
+        // strictly fewer than the full series proves downsampling happened
+        assertTrue(nodes.size() < 100);
     }
 }

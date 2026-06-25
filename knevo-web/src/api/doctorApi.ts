@@ -201,3 +201,36 @@ export interface PatientProgress {
 
 export const getPatientProgress = (patientId: string): Promise<PatientProgress> =>
   client.get<PatientProgress>(`/api/patients/${patientId}/progress`).then(r => r.data);
+
+export interface SensorReading {
+  timestampUs: number | null;
+  sampleId: number | null;
+  heelFsrRaw: number | null;
+  midfootFsrRaw: number | null;
+  // null until Phase 3 analytics (M14)
+  kneeAngleEstDeg: number | null;
+  footAxG?: number | null;
+  footAyG?: number | null;
+  footAzG?: number | null;
+  shankAxG?: number | null;
+  shankAyG?: number | null;
+  shankAzG?: number | null;
+  thighAxG?: number | null;
+  thighAyG?: number | null;
+  thighAzG?: number | null;
+}
+
+export interface SensorReadingsOptions {
+  setRecordId?: string;
+  maxPoints?: number;
+}
+
+export const getSessionSensorReadings = (
+  sessionId: string,
+  opts?: SensorReadingsOptions
+): Promise<SensorReading[]> =>
+  client
+    .get<SensorReading[]>(`/api/sessions/${sessionId}/sensor-readings`, {
+      params: { setRecordId: opts?.setRecordId, maxPoints: opts?.maxPoints },
+    })
+    .then(r => r.data);

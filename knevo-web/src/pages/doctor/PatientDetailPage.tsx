@@ -10,6 +10,7 @@ import {
 } from '../../api/doctorApi';
 import EditConfigModal from './EditConfigModal';
 import PatientProgressTab from './PatientProgressTab';
+import SessionSensorGraphs from './SessionSensorGraphs';
 
 function formatDuration(start: string | null, end: string | null): string {
   if (!start || !end) return '—';
@@ -227,6 +228,12 @@ export default function PatientDetailPage() {
                     ))}
                   </div>
                 )}
+
+                {/* Sensor data graphs (device-assisted sessions) */}
+                <div className="mt-6">
+                  <h3 className="text-base font-semibold text-[#0f172a] mb-4">Sensor data</h3>
+                  <SessionSensorGraphs sessionId={selectedSessionId} />
+                </div>
               </div>
             )}
           </div>
