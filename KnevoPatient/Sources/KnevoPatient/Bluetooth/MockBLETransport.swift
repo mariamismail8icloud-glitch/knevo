@@ -108,6 +108,9 @@ final class MockBLETransport: BLETransport, @unchecked Sendable {
             if pushSensorBatchOnStop {
                 pushSensorBatch()
             }
+        case .calibrateUnloaded, .calibrateStatic:
+            // Calibration opcodes are recorded only; they do not push a sensor batch.
+            break
         }
     }
 

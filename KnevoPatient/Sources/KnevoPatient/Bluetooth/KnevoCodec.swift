@@ -31,6 +31,8 @@ struct SetConfig {
 enum Control: UInt8 {
     case start = 0x01
     case stop = 0x02
+    case calibrateUnloaded = 0x10 // calibration step 1: foot lifted, sensors unloaded
+    case calibrateStatic = 0x11 // calibration step 2: standing still, static weight
 }
 
 enum DeviceState: UInt8 {

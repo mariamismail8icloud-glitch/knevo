@@ -96,6 +96,14 @@ struct KnevoCodecTests {
     func encodeControl() {
         #expect([UInt8](KnevoCodec.encodeControl(.start)) == [0x01])
         #expect([UInt8](KnevoCodec.encodeControl(.stop)) == [0x02])
+        #expect([UInt8](KnevoCodec.encodeControl(.calibrateUnloaded)) == [0x10])
+        #expect([UInt8](KnevoCodec.encodeControl(.calibrateStatic)) == [0x11])
+    }
+
+    @Test("Control raw values map to the documented opcodes")
+    func controlRawValues() {
+        #expect(Control(rawValue: 0x10) == .calibrateUnloaded)
+        #expect(Control(rawValue: 0x11) == .calibrateStatic)
     }
 
     // MARK: - WiFiStatus decode
