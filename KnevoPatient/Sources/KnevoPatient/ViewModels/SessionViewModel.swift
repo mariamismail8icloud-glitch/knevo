@@ -32,9 +32,11 @@ final class SessionViewModel {
     private var timerTask: Task<Void, Never>?
 
     let plan: ActivePlan
+    private let deviceCoordinator: DeviceSessionCoordinating
 
-    init(plan: ActivePlan) {
+    init(plan: ActivePlan, deviceCoordinator: DeviceSessionCoordinating = NoopDeviceSessionCoordinator()) {
         self.plan = plan
+        self.deviceCoordinator = deviceCoordinator
     }
 
     func startSession() async {
@@ -156,7 +158,7 @@ final class SessionViewModel {
         }
     }
 
-    func skipRest(nextSetIndex: Int) {
+    func skipRest(nextSetIndex _: Int) {
         stopTimer()
         phase = .running
     }
