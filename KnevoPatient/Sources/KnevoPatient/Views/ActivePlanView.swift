@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct ActivePlanView: View {
+    @Environment(DeviceConnectionViewModel.self) private var deviceVM
     @State private var viewModel = ActivePlanViewModel()
     @State private var selectedSet: TherapySetInfo?
     @State private var showingSession = false
+    @State private var showDeviceScreen = false
 
     var body: some View {
         NavigationStack {
@@ -27,6 +29,9 @@ struct ActivePlanView: View {
             }
             .navigationTitle("My Plan")
             .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(isPresented: $showDeviceScreen) {
+                DeviceScreenView()
+            }
             .refreshable {
                 await viewModel.fetchActivePlan()
             }
@@ -36,8 +41,9 @@ struct ActivePlanView: View {
             .sheet(isPresented: $showingSession) {
                 if let plan = viewModel.plan {
                     NavigationStack {
-                        SessionFlowView(plan: plan)
+                        SessionFlowView(plan: plan, deviceTransport: deviceVM.bleTransport)
                     }
+                    .environment(deviceVM)
                 }
             }
         }
@@ -63,10 +69,10 @@ struct ActivePlanView: View {
         .padding()
     }
 
-    @ViewBuilder
     private func planContent(_ plan: ActivePlan) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                DeviceStatusCard(onManage: { showDeviceScreen = true })
                 scheduleCard(plan)
                 Button {
                     showingSession = true

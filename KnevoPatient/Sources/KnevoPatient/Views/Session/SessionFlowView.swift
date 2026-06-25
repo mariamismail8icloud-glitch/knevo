@@ -4,9 +4,9 @@ struct SessionFlowView: View {
     @State private var viewModel: SessionViewModel
     @Environment(\.dismiss) private var dismiss
 
-    init(plan: ActivePlan) {
+    init(plan: ActivePlan, deviceTransport: BLETransport? = nil) {
         let coordinator: DeviceSessionCoordinating = plan.sets.contains(where: { $0.deviceAssisted })
-            ? BLEDeviceSessionCoordinator()
+            ? BLEDeviceSessionCoordinator(transport: deviceTransport)
             : NoopDeviceSessionCoordinator()
         _viewModel = State(initialValue: SessionViewModel(plan: plan, deviceCoordinator: coordinator))
     }
@@ -41,9 +41,9 @@ struct SessionFlowView: View {
             PreSessionPainView(viewModel: viewModel)
         case .running:
             RunningSessionView(viewModel: viewModel, dismiss: dismiss)
-        case .setActive(let index):
+        case let .setActive(index):
             ActiveSetView(viewModel: viewModel, setIndex: index)
-        case .restTimer(let index):
+        case let .restTimer(index):
             RestTimerView(viewModel: viewModel, setIndex: index)
         case .postSession:
             PostSessionView(viewModel: viewModel)
