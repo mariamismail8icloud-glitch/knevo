@@ -21,6 +21,7 @@
 		2D50FAB1CA6402D226729731 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4665F97401AA6967343950A2 /* Color+Hex.swift */; };
 		2DFD4050BB5BE8AE99907694 /* KnevoTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8BC66C6DD85492599D2A60D /* KnevoTextField.swift */; };
 		382FC867BA51ED2FE32CEFAF /* ProgressModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C0F7462A1100A46626D9230 /* ProgressModels.swift */; };
+		396457B74143B3F152525FFA /* CoreBluetoothTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F824CF7A2A4C6A04D0BD811 /* CoreBluetoothTransport.swift */; };
 		3F147D8A0955596D3C9F3123 /* SensorDataReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1924102A2139B31DC8D362F0 /* SensorDataReceiver.swift */; };
 		3F1CC3F1E9506CCDB06E6DC7 /* SessionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222709CDF8E499CFD1100260 /* SessionModels.swift */; };
 		4074FE5C218D5E3EEFC85543 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F29947AD9F670C0D86933E03 /* APIClient.swift */; };
@@ -29,8 +30,10 @@
 		520244550325CE19EE627A36 /* ActiveSetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BDA2B6FB2F41A9E651B63F /* ActiveSetView.swift */; };
 		5217DCA55C68317A5A0BA177 /* KnevoGATT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F11A96EBCD8AD5202717302 /* KnevoGATT.swift */; };
 		5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */; };
+		5646454576BA3861A89FF6AD /* DeviceConnectionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A7B44E4D81BC5A36BDAE804 /* DeviceConnectionViewModelTests.swift */; };
 		5929FB89710EDCE831C34578 /* SensorUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07733FE8662A67F7E69943A /* SensorUploadService.swift */; };
 		5AE9124DF6B7594E7F1387DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F6C4FDF7A3BA01D3F2D85C7 /* Assets.xcassets */; };
+		5C3EDF96777DDB7F4715AB17 /* DeviceScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA817590FD86091B8C621480 /* DeviceScanView.swift */; };
 		5ECE93204F49C3CC7558E486 /* RunningSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687528EB64426AF805DDE728 /* RunningSessionView.swift */; };
 		6023A094B5BDF696B3E3C7A8 /* SensorDataReceiverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F1573D719B25D37F1C85FBA /* SensorDataReceiverTests.swift */; };
 		66B036DDE3A4384FD26E8A32 /* ProgressViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D2CD4728E74222DA1BB846 /* ProgressViewModelTests.swift */; };
@@ -46,18 +49,22 @@
 		9EBEED243B96B915376AD88D /* SessionSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */; };
 		9FE31AE8B0D5D4EBA38AC9DC /* KnevoCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC52175D6509E80C7246446 /* KnevoCodec.swift */; };
 		A5269BBCD2E45EBDC7DFFDB1 /* MessageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1B8688A0A7591A58CA8A28 /* MessageModels.swift */; };
+		AFB51BBFAC751E7114B2F46B /* BLETransportFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D4F499E5063CE4C3F3401E /* BLETransportFactory.swift */; };
 		B9C31E63D857B82AB5B548CE /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3230889D0EF5D7FDD98B34CC /* AuthModels.swift */; };
+		C23A4498C29CBFC66937D26B /* MockBLETransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3069462E24E1317B6D67900 /* MockBLETransport.swift */; };
 		C34F462D452B63B5C2D14ABD /* ActivePlanViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */; };
 		CC47018C62C97CD6C3311233 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5E195D34BA939BAD4BE3AC /* HomeView.swift */; };
 		CE120800838FBE0F0505AB85 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEEEC2C79A1A6B009989A8B8 /* KeychainService.swift */; };
 		D5270B0A0161EC3D8A029AB5 /* PostSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775638FB1AACF5528572DD94 /* PostSessionView.swift */; };
 		D836444CBD5F4C679B68F843 /* ActivePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30F932833C539AA2E3A9E94A /* ActivePlanView.swift */; };
+		DAC5B18BA5D6124CB053FEF2 /* DeviceConnectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77746571660FE41C8639673 /* DeviceConnectionViewModel.swift */; };
 		DE155BC73073DB9344975A5A /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28614986AA4C285EE58753B7 /* MessagesView.swift */; };
 		E0E15436CE20DAD4E097A8C2 /* TherapyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8426151984B8593D946E93 /* TherapyModels.swift */; };
 		E9CB26B32CF2D253F429606A /* NetworkConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */; };
 		EB79F5A3AC81F44C38CEBB69 /* RestTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FCDD9B2DC1367DE95EB21B /* RestTimerView.swift */; };
 		ED202F650B90F87110C62415 /* SensorUploadServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B168A593078A86CFDBCF7C6 /* SensorUploadServiceTests.swift */; };
 		ED8DDDC7E5732B177641D79E /* SessionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8212C990C9205709088C0C48 /* SessionViewModelTests.swift */; };
+		F8EBDDDAC1938704A3C39F4E /* WiFiProvisioningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED79A12FD170DEA922B6262 /* WiFiProvisioningView.swift */; };
 		FE03B29A53619F9E42BBB47C /* ConfigSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -74,7 +81,9 @@
 /* Begin PBXFileReference section */
 		06431CA6A0DD5584D7E7F2F6 /* KnevoCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoCodecTests.swift; sourceTree = "<group>"; };
 		09A72A3AC0D5366955BC4A88 /* BLETransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETransport.swift; sourceTree = "<group>"; };
+		0A7B44E4D81BC5A36BDAE804 /* DeviceConnectionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceConnectionViewModelTests.swift; sourceTree = "<group>"; };
 		0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlanViewModelTests.swift; sourceTree = "<group>"; };
+		0ED79A12FD170DEA922B6262 /* WiFiProvisioningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiProvisioningView.swift; sourceTree = "<group>"; };
 		0F10DECC279B683C2D2E6CC6 /* ConfigSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigSyncService.swift; sourceTree = "<group>"; };
 		18C6C5A03378A48D8207FE2C /* NetworkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConfig.swift; sourceTree = "<group>"; };
 		1924102A2139B31DC8D362F0 /* SensorDataReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorDataReceiver.swift; sourceTree = "<group>"; };
@@ -105,15 +114,19 @@
 		6B168A593078A86CFDBCF7C6 /* SensorUploadServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorUploadServiceTests.swift; sourceTree = "<group>"; };
 		775638FB1AACF5528572DD94 /* PostSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSessionView.swift; sourceTree = "<group>"; };
 		793E10578B515EA4B29904B8 /* KnevoPatientApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoPatientApp.swift; sourceTree = "<group>"; };
+		7F824CF7A2A4C6A04D0BD811 /* CoreBluetoothTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBluetoothTransport.swift; sourceTree = "<group>"; };
 		8212C990C9205709088C0C48 /* SessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewModelTests.swift; sourceTree = "<group>"; };
 		88FCDD9B2DC1367DE95EB21B /* RestTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimerView.swift; sourceTree = "<group>"; };
 		8BC45AD1A924A2697D71CCF7 /* SetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDetailView.swift; sourceTree = "<group>"; };
 		8C0F7462A1100A46626D9230 /* ProgressModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressModels.swift; sourceTree = "<group>"; };
 		9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConfigTests.swift; sourceTree = "<group>"; };
+		A3069462E24E1317B6D67900 /* MockBLETransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBLETransport.swift; sourceTree = "<group>"; };
 		A3B6B2FBAB9E224D7F5C138B /* DeviceSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSessionCoordinator.swift; sourceTree = "<group>"; };
 		A8BC66C6DD85492599D2A60D /* KnevoTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoTextField.swift; sourceTree = "<group>"; };
+		AA817590FD86091B8C621480 /* DeviceScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceScanView.swift; sourceTree = "<group>"; };
 		AC1B8688A0A7591A58CA8A28 /* MessageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageModels.swift; sourceTree = "<group>"; };
 		AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModelTests.swift; sourceTree = "<group>"; };
+		B5D4F499E5063CE4C3F3401E /* BLETransportFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLETransportFactory.swift; sourceTree = "<group>"; };
 		BD021D9F736324FD5C9F2F29 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		BF0D5F0E3580438D4AC59CCE /* MessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewModel.swift; sourceTree = "<group>"; };
 		BF7195FFC9367929C3E1AE91 /* KnevoPatient.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KnevoPatient.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,6 +137,7 @@
 		DB8426151984B8593D946E93 /* TherapyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapyModels.swift; sourceTree = "<group>"; };
 		DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		E6D2CD4728E74222DA1BB846 /* ProgressViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressViewModelTests.swift; sourceTree = "<group>"; };
+		E77746571660FE41C8639673 /* DeviceConnectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceConnectionViewModel.swift; sourceTree = "<group>"; };
 		F12DDCCEE54A335A3CC75615 /* KnevoPatientTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KnevoPatientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F29947AD9F670C0D86933E03 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSummaryView.swift; sourceTree = "<group>"; };
@@ -166,6 +180,7 @@
 			children = (
 				296104DC7F6A10372F342F34 /* ActivePlanViewModel.swift */,
 				DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */,
+				E77746571660FE41C8639673 /* DeviceConnectionViewModel.swift */,
 				BF0D5F0E3580438D4AC59CCE /* MessagesViewModel.swift */,
 				19B9CDB84A106222D09AB885 /* ProgressViewModel.swift */,
 				4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */,
@@ -230,6 +245,7 @@
 				8BC45AD1A924A2697D71CCF7 /* SetDetailView.swift */,
 				81E86794BF2FE7F9FA0CC59E /* Auth */,
 				90F56EB91C682E11413C94BA /* Components */,
+				D0700C10CF2B46B62A37E7C2 /* Device */,
 				7627F48CD74464CF89E3BFDD /* Session */,
 			);
 			path = Views;
@@ -271,8 +287,11 @@
 			isa = PBXGroup;
 			children = (
 				09A72A3AC0D5366955BC4A88 /* BLETransport.swift */,
+				B5D4F499E5063CE4C3F3401E /* BLETransportFactory.swift */,
+				7F824CF7A2A4C6A04D0BD811 /* CoreBluetoothTransport.swift */,
 				4AC52175D6509E80C7246446 /* KnevoCodec.swift */,
 				3F11A96EBCD8AD5202717302 /* KnevoGATT.swift */,
+				A3069462E24E1317B6D67900 /* MockBLETransport.swift */,
 			);
 			path = Bluetooth;
 			sourceTree = "<group>";
@@ -291,6 +310,7 @@
 				0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */,
 				AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */,
 				C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */,
+				0A7B44E4D81BC5A36BDAE804 /* DeviceConnectionViewModelTests.swift */,
 				06431CA6A0DD5584D7E7F2F6 /* KnevoCodecTests.swift */,
 				2AD07A1FE8453A8BFE6DAA59 /* MessagesViewModelTests.swift */,
 				9BE719DDEED7565D021723DD /* NetworkConfigTests.swift */,
@@ -313,6 +333,15 @@
 				DB8426151984B8593D946E93 /* TherapyModels.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		D0700C10CF2B46B62A37E7C2 /* Device */ = {
+			isa = PBXGroup;
+			children = (
+				AA817590FD86091B8C621480 /* DeviceScanView.swift */,
+				0ED79A12FD170DEA922B6262 /* WiFiProvisioningView.swift */,
+			);
+			path = Device;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -408,6 +437,7 @@
 				C34F462D452B63B5C2D14ABD /* ActivePlanViewModelTests.swift in Sources */,
 				5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */,
 				FE03B29A53619F9E42BBB47C /* ConfigSyncServiceTests.swift in Sources */,
+				5646454576BA3861A89FF6AD /* DeviceConnectionViewModelTests.swift in Sources */,
 				7DB5C6178D658B9F37106529 /* KnevoCodecTests.swift in Sources */,
 				19DFE671EC57BF787B7A53AD /* MessagesViewModelTests.swift in Sources */,
 				E9CB26B32CF2D253F429606A /* NetworkConfigTests.swift in Sources */,
@@ -429,8 +459,12 @@
 				B9C31E63D857B82AB5B548CE /* AuthModels.swift in Sources */,
 				1B68DF4DB2C43B0262C6E463 /* AuthViewModel.swift in Sources */,
 				938FF7F1153B122B4ADA539E /* BLETransport.swift in Sources */,
+				AFB51BBFAC751E7114B2F46B /* BLETransportFactory.swift in Sources */,
 				2D50FAB1CA6402D226729731 /* Color+Hex.swift in Sources */,
 				876962D2857661C2F292E208 /* ConfigSyncService.swift in Sources */,
+				396457B74143B3F152525FFA /* CoreBluetoothTransport.swift in Sources */,
+				DAC5B18BA5D6124CB053FEF2 /* DeviceConnectionViewModel.swift in Sources */,
+				5C3EDF96777DDB7F4715AB17 /* DeviceScanView.swift in Sources */,
 				7620CD7308E011FF539796CA /* DeviceSessionCoordinator.swift in Sources */,
 				CC47018C62C97CD6C3311233 /* HomeView.swift in Sources */,
 				CE120800838FBE0F0505AB85 /* KeychainService.swift in Sources */,
@@ -443,6 +477,7 @@
 				A5269BBCD2E45EBDC7DFFDB1 /* MessageModels.swift in Sources */,
 				DE155BC73073DB9344975A5A /* MessagesView.swift in Sources */,
 				83C09B350C5C9D673D89FB5E /* MessagesViewModel.swift in Sources */,
+				C23A4498C29CBFC66937D26B /* MockBLETransport.swift in Sources */,
 				4827A77469EA2C70B14008B5 /* NetworkConfig.swift in Sources */,
 				20D1F0A477E78BCF4AE08BFA /* PainDuringView.swift in Sources */,
 				9566E10C91F169FA1780103C /* PatientProgressView.swift in Sources */,
@@ -463,6 +498,7 @@
 				0A57E3ADA6D02405324636A0 /* SetDetailView.swift in Sources */,
 				08417DBD8C9E60E90F15D4B9 /* SignupFlowView.swift in Sources */,
 				E0E15436CE20DAD4E097A8C2 /* TherapyModels.swift in Sources */,
+				F8EBDDDAC1938704A3C39F4E /* WiFiProvisioningView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
