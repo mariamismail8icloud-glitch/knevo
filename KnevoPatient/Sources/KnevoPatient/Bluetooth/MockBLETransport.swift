@@ -71,8 +71,8 @@ final class MockBLETransport: BLETransport, @unchecked Sendable {
             lock.withLock { _lastWiFiConfig = config }
             statusContinuation.yield(wifiStatusBytes())
         case KnevoGATT.setConfigUUID.lowercased():
-            // SetConfig has no decoder in KnevoCodec; record receipt only.
-            break
+            let config = try decodeSetConfig(data)
+            lock.withLock { _lastSetConfig = config }
         case KnevoGATT.controlUUID.lowercased():
             handleControl(data)
         default:
@@ -140,6 +140,39 @@ final class MockBLETransport: BLETransport, @unchecked Sendable {
         guard bytes.count >= offset + passLen else { throw KnevoCodecError.bufferTooShort }
         let password = String(bytes: bytes[offset ..< offset + passLen], encoding: .utf8) ?? ""
         return WiFiConfig(appPort: appPort, appIP: appIP, ssid: ssid, password: password)
+    }
+
+    // MARK: - SetConfig decode (inverse of KnevoCodec.encodeSetConfig, §3.4)
+
+    private func decodeSetConfig(_ data: Data) throws -> SetConfig {
+        let bytes = [UInt8](data)
+        guard bytes.count >= 30 else { throw KnevoCodecError.bufferTooShort }
+        let idTuple = (
+            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]
+        )
+        let setRecordId = UUID(uuid: idTuple)
+        var offset = 16
+        let durationS = UInt16(bytes[offset]) | (UInt16(bytes[offset + 1]) << 8)
+        offset += 2
+        let maxSpeed = Self.readFloatLE(bytes, offset); offset += 4
+        let maxExtension = Self.readFloatLE(bytes, offset); offset += 4
+        let maxFlexion = Self.readFloatLE(bytes, offset)
+        return SetConfig(
+            setRecordId: setRecordId,
+            durationS: durationS,
+            maxSpeed: maxSpeed,
+            maxExtensionAngleDeg: maxExtension,
+            maxFlexionAngleDeg: maxFlexion
+        )
+    }
+
+    private static func readFloatLE(_ bytes: [UInt8], _ offset: Int) -> Float {
+        let bits = UInt32(bytes[offset])
+            | (UInt32(bytes[offset + 1]) << 8)
+            | (UInt32(bytes[offset + 2]) << 16)
+            | (UInt32(bytes[offset + 3]) << 24)
+        return Float(bitPattern: bits)
     }
 
     // MARK: - TCP sensor push (data plane, §4)

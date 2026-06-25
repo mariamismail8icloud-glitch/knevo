@@ -92,6 +92,9 @@ final class SensorDataReceiver {
         connection = nil
         listener?.cancel()
         listener = nil
+        // Resolve any pending awaitBatch() so callers (e.g. a coordinator timeout)
+        // don't leak the suspension when the batch never arrives.
+        failPending(.cancelled)
     }
 
     // MARK: - Connection handling
