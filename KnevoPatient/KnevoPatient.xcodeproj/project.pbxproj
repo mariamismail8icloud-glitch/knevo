@@ -44,6 +44,7 @@
 		7DB5C6178D658B9F37106529 /* KnevoCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06431CA6A0DD5584D7E7F2F6 /* KnevoCodecTests.swift */; };
 		83C09B350C5C9D673D89FB5E /* MessagesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0D5F0E3580438D4AC59CCE /* MessagesViewModel.swift */; };
 		876962D2857661C2F292E208 /* ConfigSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F10DECC279B683C2D2E6CC6 /* ConfigSyncService.swift */; };
+		8B2410877E05486690081D50 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E509C9CC5E889632CD5895 /* CalibrationView.swift */; };
 		938FF7F1153B122B4ADA539E /* BLETransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A72A3AC0D5366955BC4A88 /* BLETransport.swift */; };
 		9566E10C91F169FA1780103C /* PatientProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C78E2D247D6384259B8268 /* PatientProgressView.swift */; };
 		9913E88DEED4D6C08AE0C446 /* SessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */; };
@@ -57,7 +58,9 @@
 		CC47018C62C97CD6C3311233 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5E195D34BA939BAD4BE3AC /* HomeView.swift */; };
 		CE120800838FBE0F0505AB85 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEEEC2C79A1A6B009989A8B8 /* KeychainService.swift */; };
 		D5270B0A0161EC3D8A029AB5 /* PostSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775638FB1AACF5528572DD94 /* PostSessionView.swift */; };
+		D755F76744CBF2734E5DD4AD /* CalibrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3CBD4BE9A8CB44FB87D778 /* CalibrationViewModel.swift */; };
 		D836444CBD5F4C679B68F843 /* ActivePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30F932833C539AA2E3A9E94A /* ActivePlanView.swift */; };
+		D9B8030A678250200998AA2A /* CalibrationViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652D2F52C02C83330F2B5DC3 /* CalibrationViewModelTests.swift */; };
 		DAC5B18BA5D6124CB053FEF2 /* DeviceConnectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77746571660FE41C8639673 /* DeviceConnectionViewModel.swift */; };
 		DE155BC73073DB9344975A5A /* MessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28614986AA4C285EE58753B7 /* MessagesView.swift */; };
 		DE40D992460F55AF1AC85D83 /* BLEDeviceSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA7CD7E84D3EEB31913BD3B /* BLEDeviceSessionCoordinator.swift */; };
@@ -104,14 +107,17 @@
 		3230889D0EF5D7FDD98B34CC /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		374B9A199A14079D79B2AE40 /* SignupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupFlowView.swift; sourceTree = "<group>"; };
 		3F11A96EBCD8AD5202717302 /* KnevoGATT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoGATT.swift; sourceTree = "<group>"; };
+		40E509C9CC5E889632CD5895 /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
 		43A0DA30CAC0E9FC9FA2121E /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
 		4665F97401AA6967343950A2 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		4AC52175D6509E80C7246446 /* KnevoCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnevoCodec.swift; sourceTree = "<group>"; };
 		4AE9B901F20B637ABB4DE656 /* SessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionViewModel.swift; sourceTree = "<group>"; };
 		4F6C4FDF7A3BA01D3F2D85C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5D3CBD4BE9A8CB44FB87D778 /* CalibrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationViewModel.swift; sourceTree = "<group>"; };
 		5DD1BC48D58E2513496A34C5 /* PreSessionPainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreSessionPainView.swift; sourceTree = "<group>"; };
 		5E7C94C25230E30B38B667D3 /* SensorSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorSample.swift; sourceTree = "<group>"; };
 		5F1573D719B25D37F1C85FBA /* SensorDataReceiverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorDataReceiverTests.swift; sourceTree = "<group>"; };
+		652D2F52C02C83330F2B5DC3 /* CalibrationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationViewModelTests.swift; sourceTree = "<group>"; };
 		687528EB64426AF805DDE728 /* RunningSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningSessionView.swift; sourceTree = "<group>"; };
 		6B168A593078A86CFDBCF7C6 /* SensorUploadServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorUploadServiceTests.swift; sourceTree = "<group>"; };
 		775638FB1AACF5528572DD94 /* PostSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostSessionView.swift; sourceTree = "<group>"; };
@@ -184,6 +190,7 @@
 			children = (
 				296104DC7F6A10372F342F34 /* ActivePlanViewModel.swift */,
 				DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */,
+				5D3CBD4BE9A8CB44FB87D778 /* CalibrationViewModel.swift */,
 				E77746571660FE41C8639673 /* DeviceConnectionViewModel.swift */,
 				BF0D5F0E3580438D4AC59CCE /* MessagesViewModel.swift */,
 				19B9CDB84A106222D09AB885 /* ProgressViewModel.swift */,
@@ -314,6 +321,7 @@
 			children = (
 				0CE3FF935A4088347F8BD38E /* ActivePlanViewModelTests.swift */,
 				AF8B321F60CA654833E263FA /* AuthViewModelTests.swift */,
+				652D2F52C02C83330F2B5DC3 /* CalibrationViewModelTests.swift */,
 				C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */,
 				0A7B44E4D81BC5A36BDAE804 /* DeviceConnectionViewModelTests.swift */,
 				9FC0C3DF24D010A51626E0D4 /* DeviceSessionFlowTests.swift */,
@@ -344,6 +352,7 @@
 		D0700C10CF2B46B62A37E7C2 /* Device */ = {
 			isa = PBXGroup;
 			children = (
+				40E509C9CC5E889632CD5895 /* CalibrationView.swift */,
 				AA817590FD86091B8C621480 /* DeviceScanView.swift */,
 				0ED79A12FD170DEA922B6262 /* WiFiProvisioningView.swift */,
 			);
@@ -442,6 +451,7 @@
 			files = (
 				C34F462D452B63B5C2D14ABD /* ActivePlanViewModelTests.swift in Sources */,
 				5473F84EBCEE8CBA5E2BD4B7 /* AuthViewModelTests.swift in Sources */,
+				D9B8030A678250200998AA2A /* CalibrationViewModelTests.swift in Sources */,
 				FE03B29A53619F9E42BBB47C /* ConfigSyncServiceTests.swift in Sources */,
 				5646454576BA3861A89FF6AD /* DeviceConnectionViewModelTests.swift in Sources */,
 				225F633D542C388BEF3E23BD /* DeviceSessionFlowTests.swift in Sources */,
@@ -468,6 +478,8 @@
 				DE40D992460F55AF1AC85D83 /* BLEDeviceSessionCoordinator.swift in Sources */,
 				938FF7F1153B122B4ADA539E /* BLETransport.swift in Sources */,
 				AFB51BBFAC751E7114B2F46B /* BLETransportFactory.swift in Sources */,
+				8B2410877E05486690081D50 /* CalibrationView.swift in Sources */,
+				D755F76744CBF2734E5DD4AD /* CalibrationViewModel.swift in Sources */,
 				2D50FAB1CA6402D226729731 /* Color+Hex.swift in Sources */,
 				876962D2857661C2F292E208 /* ConfigSyncService.swift in Sources */,
 				396457B74143B3F152525FFA /* CoreBluetoothTransport.swift in Sources */,
