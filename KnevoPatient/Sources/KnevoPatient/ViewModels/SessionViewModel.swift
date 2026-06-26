@@ -33,6 +33,9 @@ final class SessionViewModel {
     var lastUploadedSampleCount: Int?
 
     private var timerTask: Task<Void, Never>?
+    /// Background "stop the brace + upload its batch" work kicked off by a stop path.
+    /// Stored so it isn't orphaned (and so tests can await it). Best-effort.
+    private(set) var deviceStopTask: Task<Void, Never>?
 
     let plan: ActivePlan
     private let deviceCoordinator: DeviceSessionCoordinating
@@ -82,7 +85,7 @@ final class SessionViewModel {
             }
             secondsElapsed = 0
             timerActive = true
-            startTimer()
+            startTimer(autoFinishSeconds: (setConfig.durationMin ?? 0) * 60, setIndex: index)
             phase = .setActive(setIndex: index)
         } catch {
             errorMessage = "Failed to start set."
@@ -172,10 +175,29 @@ final class SessionViewModel {
         }
     }
 
+    /// Identifiers of the device-assisted set currently running, or nil if no
+    /// device set is active. Used by every session-stop path so each one halts the
+    /// brace and uploads its data (`collectAndUpload` sends the BLE STOP, then
+    /// collects + uploads the batch).
+    private func activeDeviceSetContext() -> (sessionId: String, setRecordId: String)? {
+        guard let session, let record = currentSetRecord,
+              case let .setActive(index) = phase,
+              index < plan.sets.count, plan.sets[index].deviceAssisted
+        else { return nil }
+        return (session.id, record.id)
+    }
+
     func reportPainButton(painLevel: Int) async {
         guard let session else { return }
-        isLoading = true
         stopTimer()
+        // Safety: a pain-button press always ends the session (backend marks it
+        // STOPPED_DUE_TO_PAIN), so stop the brace and upload its data. Run in the
+        // background so a slow/failed WiFi upload never delays recording the pain
+        // event — the BLE STOP inside is issued before the batch wait.
+        if let ctx = activeDeviceSetContext() {
+            deviceStopTask = Task { await self.collectAndUpload(sessionId: ctx.sessionId, setRecordId: ctx.setRecordId) }
+        }
+        isLoading = true
         defer { isLoading = false }
         do {
             self.session = try await APIClient.shared.post(
@@ -206,6 +228,11 @@ final class SessionViewModel {
     func stopSession() async {
         guard let session else { return }
         stopTimer()
+        // Halt + upload any in-progress device set (best-effort, background) so a
+        // manual stop behaves like the other stop paths.
+        if let ctx = activeDeviceSetContext() {
+            deviceStopTask = Task { await self.collectAndUpload(sessionId: ctx.sessionId, setRecordId: ctx.setRecordId) }
+        }
         isLoading = true
         defer { isLoading = false }
         do {
@@ -224,13 +251,20 @@ final class SessionViewModel {
         phase = .running
     }
 
-    private func startTimer() {
+    private func startTimer(autoFinishSeconds: Int = 0, setIndex: Int = 0) {
         timerTask?.cancel()
         timerTask = Task { @MainActor in
             while !Task.isCancelled && timerActive {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 guard !Task.isCancelled else { break }
                 secondsElapsed += 1
+                // Set duration elapsed -> auto-finish through the SAME stop+upload
+                // path as the manual "Finish Set" button. Detached so stopSet
+                // cancelling this timer can't abort the finish itself.
+                if autoFinishSeconds > 0, secondsElapsed >= autoFinishSeconds {
+                    Task { await self.stopSet(at: setIndex) }
+                    break
+                }
             }
         }
     }

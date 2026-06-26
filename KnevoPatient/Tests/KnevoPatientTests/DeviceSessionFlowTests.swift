@@ -222,7 +222,54 @@ struct DeviceSessionFlowTests {
         #expect(viewModel.lastUploadedSampleCount == nil)
     }
 
+    // MARK: - VM: stop paths halt the device + upload
+
+    @Test("pain-button stops the brace + collects when a device set is active")
+    func painButtonStopsActiveDeviceSet() async {
+        let stub = StubCoordinator()
+        let recordId = UUID()
+        let vm = SessionViewModel(plan: makeDeviceAssistedPlan(), deviceCoordinator: stub)
+        vm.session = makeSession()
+        vm.currentSetRecord = makeSetRecord(id: recordId)
+        vm.phase = .setActive(setIndex: 0)
+
+        // The pain-button network POST may fail in the test env (tolerated); what we
+        // assert is that the brace was stopped via the coordinator (STOP + collect).
+        await vm.reportPainButton(painLevel: 8)
+        await vm.deviceStopTask?.value
+
+        #expect(stub.finishedSetRecordId == recordId)
+    }
+
+    @Test("pain-button does not touch the device when no set is active")
+    func painButtonNoDeviceWhenNoActiveSet() async {
+        let stub = StubCoordinator()
+        let vm = SessionViewModel(plan: makeDeviceAssistedPlan(), deviceCoordinator: stub)
+        vm.session = makeSession()
+        // phase stays .prePainCheck, no currentSetRecord -> no active set
+
+        await vm.reportPainButton(painLevel: 8)
+        await vm.deviceStopTask?.value
+
+        #expect(stub.finishedSetRecordId == nil)
+    }
+
     // MARK: - Helpers
+
+    private func makeSession() -> SessionResponse {
+        SessionResponse(
+            id: UUID().uuidString, patientId: "patient-1", therapyConfigId: "config-1",
+            status: "INPROGRESS", startedAt: nil, endedAt: nil,
+            painBefore: 2, painDuring: nil, painAfter: nil, setRecords: nil
+        )
+    }
+
+    private func makeSetRecord(id: UUID) -> SetRecordResponse {
+        SetRecordResponse(
+            id: id.uuidString, therapySetConfigId: "set-1",
+            startDatetime: nil, stopDatetime: nil, painLevel: nil, feedback: nil, status: "IN_PROGRESS"
+        )
+    }
 
     private func makeDeviceAssistedPlan() -> ActivePlan {
         ActivePlan(
