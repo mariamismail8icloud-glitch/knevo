@@ -1,6 +1,7 @@
 package com.knevo.dto.therapy;
 
 import lombok.Data;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -11,4 +12,6 @@ public class PlanSummaryDto {
     private String status;
     private UUID therapyConfigId;
     private OffsetDateTime createdAt;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }

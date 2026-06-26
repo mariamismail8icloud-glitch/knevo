@@ -44,4 +44,10 @@ public class EnrollmentController {
     public ResponseEntity<List<PatientSummaryDto>> getPatients(Authentication auth) {
         return ResponseEntity.ok(enrollmentService.getDoctorPatients(UUID.fromString(auth.getName())));
     }
+
+    @GetMapping("/api/doctor/patients/{patientId}")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<PatientSummaryDto> getPatient(@PathVariable UUID patientId) {
+        return ResponseEntity.ok(enrollmentService.getPatient(patientId));
+    }
 }

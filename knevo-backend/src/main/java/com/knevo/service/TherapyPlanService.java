@@ -1,8 +1,10 @@
 package com.knevo.service;
 
 import com.knevo.dto.therapy.*;
+import com.knevo.dto.therapy.TherapyDefaultsDto.FieldRange;
 import com.knevo.model.*;
 import com.knevo.repository.*;
+import com.knevo.util.TherapyDefaults;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -107,7 +109,17 @@ public class TherapyPlanService {
         summary.setStatus(plan.getStatus());
         summary.setTherapyConfigId(config.getId());
         summary.setCreatedAt(plan.getCreatedAt());
+        summary.setStartDate(plan.getStartDate());
+        summary.setEndDate(plan.getEndDate());
         return summary;
+    }
+
+    public TherapyDefaultsDto getConfigDefaults() {
+        return new TherapyDefaultsDto(
+            new FieldRange(TherapyDefaults.SPEED_DEFAULT, TherapyDefaults.SPEED_MIN, TherapyDefaults.SPEED_MAX),
+            new FieldRange(TherapyDefaults.EXTENSION_DEFAULT, TherapyDefaults.EXTENSION_MIN, TherapyDefaults.EXTENSION_MAX),
+            new FieldRange(TherapyDefaults.FLEXION_DEFAULT, TherapyDefaults.FLEXION_MIN, TherapyDefaults.FLEXION_MAX)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -133,6 +145,8 @@ public class TherapyPlanService {
                 dto.setTitle(p.getTitle());
                 dto.setStatus(p.getStatus());
                 dto.setCreatedAt(p.getCreatedAt());
+                dto.setStartDate(p.getStartDate());
+                dto.setEndDate(p.getEndDate());
                 // Find associated config
                 therapyConfigRepository.findByPatient_Id(patientId).stream()
                     .filter(c -> c.getRehabPlan() != null && c.getRehabPlan().getId().equals(p.getId()))

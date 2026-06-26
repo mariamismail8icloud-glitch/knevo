@@ -52,3 +52,31 @@
 - Use react for the frontend, with tailwindcss
 - Use PostgreSQL for the database
 - Use Swift and SwiftUI for the iOS mobile app. Support iOS version 18 and 26 (18+)
+
+## Architecture
+
+- Follow existing architectural patterns and conventions.
+- Avoid introducing new frameworks, abstractions, or dependencies unless they provide clear value and are consistent with the existing codebase.
+- Prefer simple solutions over clever ones.
+- Minimize scope and avoid unrelated refactoring.
+
+## Decision Making
+
+When multiple implementation options exist:
+
+- Choose the simplest solution that satisfies the requirements. It still needs to be a real solution though, fake solutions don't count.
+- Prefer existing project patterns over introducing new ones.
+- Explain significant architectural decisions before making them.
+
+<!-- graymatter:instructions:begin — managed by `graymatter init`; edits inside this block are overwritten -->
+## Memory (GrayMatter)
+
+This project has persistent agent memory via the `graymatter` MCP tools:
+
+- `memory_search` (`agent_id`, `query`) — call at the **start of a task** when prior context might matter.
+- `memory_add` (`agent_id`, `text`) — call whenever you learn something **durable**: user preferences, decisions, conventions, gotchas.
+- `memory_reflect` (`action`, `agent`, `text`/`target`) — update or forget stale facts. ⚠ takes `agent`, not `agent_id`.
+- `checkpoint_save` / `checkpoint_resume` (`agent_id`) — snapshot/restore session state before major refactors or across restarts.
+
+Use a stable `agent_id` of the form `<project>-<role>` (e.g. `myapp-backend`). Store conclusions, not conversation logs. Err on the side of remembering.
+<!-- graymatter:instructions:end -->

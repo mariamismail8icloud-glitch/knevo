@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-[#f0d6e8] px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#ff4da6] to-[#E8007D] flex items-center justify-center text-white font-bold text-sm">K</div>
+          <img src="/knevo-logo.png" alt="Knevo" className="w-9 h-9 rounded-xl object-cover" />
           <div>
             <p className="font-semibold text-[#0f172a] leading-tight">Knevo Admin</p>
             <p className="text-xs text-[#64748b]">Doctor management</p>

@@ -29,12 +29,23 @@ final class SessionViewModel {
     var secondsElapsed: Int = 0
     var timerActive = false
 
+    /// Lightweight surface for the last device-assisted upload (nil when none).
+    var lastUploadedSampleCount: Int?
+
     private var timerTask: Task<Void, Never>?
 
     let plan: ActivePlan
+    private let deviceCoordinator: DeviceSessionCoordinating
+    private let uploadService: SensorUploadService
 
-    init(plan: ActivePlan) {
+    init(
+        plan: ActivePlan,
+        deviceCoordinator: DeviceSessionCoordinating = NoopDeviceSessionCoordinator(),
+        uploadService: SensorUploadService = SensorUploadService()
+    ) {
         self.plan = plan
+        self.deviceCoordinator = deviceCoordinator
+        self.uploadService = uploadService
     }
 
     func startSession() async {
@@ -61,16 +72,41 @@ final class SessionViewModel {
         isLoading = true
         defer { isLoading = false }
         do {
-            currentSetRecord = try await APIClient.shared.post(
+            let record: SetRecordResponse = try await APIClient.shared.post(
                 path: "/api/sessions/\(session.id)/start-set",
                 body: StartSetRequest(therapySetConfigId: setConfig.id)
             )
+            currentSetRecord = record
+            if setConfig.deviceAssisted {
+                await prepareDevice(for: setConfig, setRecordId: record.id)
+            }
             secondsElapsed = 0
             timerActive = true
             startTimer()
             phase = .setActive(setIndex: index)
         } catch {
             errorMessage = "Failed to start set."
+        }
+    }
+
+    /// Best-effort device prep. The set runs autonomously: any BLE/WiFi failure
+    /// surfaces a friendly message but MUST NOT block the HTTP set state machine.
+    func prepareDevice(for setConfig: TherapySetInfo, setRecordId: String) async {
+        guard let recordUUID = UUID(uuidString: setRecordId) else {
+            errorMessage = "Couldn't start the device for this set. The session will continue without it."
+            return
+        }
+        let config = SetConfig(
+            setRecordId: recordUUID,
+            durationS: UInt16((setConfig.durationMin ?? 0) * 60),
+            maxSpeed: Float(plan.maxSpeed ?? 0),
+            maxExtensionAngleDeg: Float(plan.maxExtensionAngleDeg ?? 0),
+            maxFlexionAngleDeg: Float(plan.maxFlexionAngleDeg ?? 0)
+        )
+        do {
+            try await deviceCoordinator.prepareSet(config)
+        } catch {
+            errorMessage = "Couldn't start the device for this set. The session will continue without it."
         }
     }
 
@@ -88,6 +124,9 @@ final class SessionViewModel {
                     feedback: setFeedback
                 )
             )
+            if index < plan.sets.count, plan.sets[index].deviceAssisted {
+                await collectAndUpload(sessionId: session.id, setRecordId: record.id)
+            }
             currentSetRecord = nil
             inSetPainLevel = 0
             setFeedback = ""
@@ -106,6 +145,30 @@ final class SessionViewModel {
             }
         } catch {
             errorMessage = "Failed to stop set."
+        }
+    }
+
+    /// Best-effort post-set batch collection + upload. Errors surface a friendly
+    /// message but MUST NOT block the set/session state machine (autonomy + isolation).
+    func collectAndUpload(sessionId: String, setRecordId: String) async {
+        guard let sessionUUID = UUID(uuidString: sessionId),
+              let recordUUID = UUID(uuidString: setRecordId)
+        else {
+            errorMessage = "Couldn't save device data for this set."
+            return
+        }
+        do {
+            guard let batch = try await deviceCoordinator.finishSetAndCollect(setRecordId: recordUUID) else {
+                return
+            }
+            let inserted = try await uploadService.upload(
+                sessionId: sessionUUID,
+                setRecordId: recordUUID,
+                samples: batch.samples
+            )
+            lastUploadedSampleCount = inserted
+        } catch {
+            errorMessage = "Couldn't save device data for this set."
         }
     }
 
@@ -156,7 +219,7 @@ final class SessionViewModel {
         }
     }
 
-    func skipRest(nextSetIndex: Int) {
+    func skipRest(nextSetIndex _: Int) {
         stopTimer()
         phase = .running
     }

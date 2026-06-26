@@ -3,3 +3,7 @@
 /plans
 /knevo_dataset
 /data-sample
+# CocoIndex Code (ccc)
+/.cocoindex_code/
+/.graymatter
+/.cursor

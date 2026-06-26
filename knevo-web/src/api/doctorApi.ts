@@ -11,6 +11,9 @@ export interface Patient {
 export const getMyPatients = (): Promise<Patient[]> =>
   client.get<Patient[]>('/api/doctor/patients').then(r => r.data);
 
+export const getPatient = (patientId: string): Promise<Patient> =>
+  client.get<Patient>(`/api/doctor/patients/${patientId}`).then(r => r.data);
+
 export const enrollPatient = (enrollmentCode: string): Promise<Patient> =>
   client.post<Patient>('/api/doctor/enroll-patient', { enrollmentCode }).then(r => r.data);
 
@@ -67,6 +70,8 @@ export interface PlanSummary {
   status: string;
   therapyConfigId: string;
   createdAt: string;
+  startDate: string | null;
+  endDate: string | null;
 }
 
 export interface TherapySetConfigDto {
@@ -105,6 +110,21 @@ export interface UpdateConfigRequest {
   totalSessionsNum?: number;
   comment?: string;
 }
+
+export interface FieldRange {
+  defaultValue: number;
+  min: number;
+  max: number;
+}
+
+export interface TherapyDefaults {
+  maxSpeed: FieldRange;
+  maxExtensionAngleDeg: FieldRange;
+  maxFlexionAngleDeg: FieldRange;
+}
+
+export const getTherapyDefaults = (): Promise<TherapyDefaults> =>
+  client.get<TherapyDefaults>('/api/therapy-config/defaults').then(r => r.data);
 
 export const updateTherapyConfig = (configId: string, req: UpdateConfigRequest): Promise<TherapyConfig> =>
   client.put<TherapyConfig>(`/api/therapy-config/${configId}`, req).then(r => r.data);
@@ -196,3 +216,36 @@ export interface PatientProgress {
 
 export const getPatientProgress = (patientId: string): Promise<PatientProgress> =>
   client.get<PatientProgress>(`/api/patients/${patientId}/progress`).then(r => r.data);
+
+export interface SensorReading {
+  timestampUs: number | null;
+  sampleId: number | null;
+  heelFsrRaw: number | null;
+  midfootFsrRaw: number | null;
+  // null until Phase 3 analytics (M14)
+  kneeAngleEstDeg: number | null;
+  footAxG?: number | null;
+  footAyG?: number | null;
+  footAzG?: number | null;
+  shankAxG?: number | null;
+  shankAyG?: number | null;
+  shankAzG?: number | null;
+  thighAxG?: number | null;
+  thighAyG?: number | null;
+  thighAzG?: number | null;
+}
+
+export interface SensorReadingsOptions {
+  setRecordId?: string;
+  maxPoints?: number;
+}
+
+export const getSessionSensorReadings = (
+  sessionId: string,
+  opts?: SensorReadingsOptions
+): Promise<SensorReading[]> =>
+  client
+    .get<SensorReading[]>(`/api/sessions/${sessionId}/sensor-readings`, {
+      params: { setRecordId: opts?.setRecordId, maxPoints: opts?.maxPoints },
+    })
+    .then(r => r.data);

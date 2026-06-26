@@ -4,6 +4,6 @@ import XCTest
 final class NetworkConfigTests: XCTestCase {
     func testDefaultBaseURL() {
         let url = NetworkConfig.baseURL
-        XCTAssertEqual(url, "http://localhost:8080")
+        XCTAssertEqual(url, "http://127.0.0.1:8080")
     }
 }

@@ -7,6 +7,11 @@ opt_in_rules:
   - explicit_init
   - first_where
 
+identifier_name:
+  excluded:
+    - id
+    - ok
+
 included:
   - Sources
   - Tests

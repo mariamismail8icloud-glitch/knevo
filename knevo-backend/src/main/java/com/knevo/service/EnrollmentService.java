@@ -49,6 +49,10 @@ public class EnrollmentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Code does not belong to a patient");
         }
 
+        if (patient.getDoctor() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Patient is already enrolled with a doctor");
+        }
+
         User doctor = userRepository.findById(doctorId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
@@ -72,6 +76,13 @@ public class EnrollmentService {
             .stream()
             .map(this::toSummary)
             .collect(Collectors.toList());
+    }
+
+    public PatientSummaryDto getPatient(UUID patientId) {
+        User patient = userRepository.findById(patientId)
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Patient not found"));
+        return toSummary(patient);
     }
 
     public List<PatientSummaryDto> getAllPatients() {

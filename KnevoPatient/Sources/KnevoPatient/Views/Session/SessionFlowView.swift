@@ -4,8 +4,14 @@ struct SessionFlowView: View {
     @State private var viewModel: SessionViewModel
     @Environment(\.dismiss) private var dismiss
 
-    init(plan: ActivePlan) {
-        _viewModel = State(initialValue: SessionViewModel(plan: plan))
+    init(plan: ActivePlan, deviceTransport: BLETransport? = nil) {
+        // Per-set WiFiConfig deliberately carries EMPTY creds (IP/port refresh only) to
+        // keep WiFi off during the session; the device reuses the credentials it stored
+        // during one-time provisioning on the Device Screen. So no creds are threaded here.
+        let coordinator: DeviceSessionCoordinating = plan.sets.contains(where: { $0.deviceAssisted })
+            ? BLEDeviceSessionCoordinator(transport: deviceTransport)
+            : NoopDeviceSessionCoordinator()
+        _viewModel = State(initialValue: SessionViewModel(plan: plan, deviceCoordinator: coordinator))
     }
 
     var body: some View {
@@ -38,9 +44,9 @@ struct SessionFlowView: View {
             PreSessionPainView(viewModel: viewModel)
         case .running:
             RunningSessionView(viewModel: viewModel, dismiss: dismiss)
-        case .setActive(let index):
+        case let .setActive(index):
             ActiveSetView(viewModel: viewModel, setIndex: index)
-        case .restTimer(let index):
+        case let .restTimer(index):
             RestTimerView(viewModel: viewModel, setIndex: index)
         case .postSession:
             PostSessionView(viewModel: viewModel)

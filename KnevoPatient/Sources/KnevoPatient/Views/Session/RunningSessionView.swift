@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct RunningSessionView: View {
+    @Environment(DeviceConnectionViewModel.self) private var deviceVM
     var viewModel: SessionViewModel
     let dismiss: DismissAction
     @State private var showPainAlert = false
+    @State private var showDeviceScreen = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,6 +33,7 @@ struct RunningSessionView: View {
 
             ScrollView {
                 VStack(spacing: 12) {
+                    DeviceStatusCard(onManage: { showDeviceScreen = true })
                     ForEach(Array(viewModel.plan.sets.enumerated()), id: \.element.id) { index, set in
                         Button {
                             Task { await viewModel.startSet(at: index) }
@@ -42,6 +45,9 @@ struct RunningSessionView: View {
                 }
                 .padding()
             }
+        }
+        .navigationDestination(isPresented: $showDeviceScreen) {
+            DeviceScreenView()
         }
         .sheet(isPresented: $showPainAlert) {
             PainDuringView(viewModel: viewModel)
