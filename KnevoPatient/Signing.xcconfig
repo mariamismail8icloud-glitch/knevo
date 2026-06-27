@@ -1,0 +1,21 @@
+// Knevo patient app — code-signing configuration.
+//
+// Code signing is PER-DEVELOPER. Each machine sets its own team (and, if
+// needed, its own bundle id) in `Signing.local.xcconfig` — that file is
+// git-ignored, so developers never overwrite each other's signing setup.
+// The local file is optional: without it, the defaults below apply.
+//
+// Why a developer may need their own bundle id: an explicit App ID is globally
+// unique across Apple. `com.knevo.patient` is registered to the owning team, so
+// anyone NOT on that team must pick their own (e.g. com.<you>.knevo.patient)
+// and use their own personal DEVELOPMENT_TEAM. A free Apple ID works for
+// running on your own device (profiles expire after 7 days).
+//
+// Setup: copy `Signing.local.xcconfig.template` to `Signing.local.xcconfig`
+// and fill in your values.
+
+KNEVO_BUNDLE_ID = com.knevo.patient
+DEVELOPMENT_TEAM =
+
+// Optional per-developer overrides (git-ignored). Included last so it wins.
+#include? "Signing.local.xcconfig"

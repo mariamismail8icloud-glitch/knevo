@@ -3,3 +3,6 @@ build/
 xcuserdata/
 DerivedData/
 .DS_Store
+
+# Per-developer signing overrides (team + bundle id). Keep local-only.
+Signing.local.xcconfig

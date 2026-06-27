@@ -20,6 +20,57 @@ xcodegen generate
 
 This creates `KnevoPatient.xcodeproj`.
 
+## Code signing (per-developer)
+
+Signing is set up **per developer** so teammates never overwrite each other's
+team or bundle id. Defaults live in the committed `Signing.xcconfig`; each
+machine overrides them in a git-ignored `Signing.local.xcconfig`.
+
+Why you may need your own bundle id: an explicit Apple App ID is globally
+unique. `com.knevo.patient` is registered to the maintainer's team, so anyone
+**not** on that team must use their own bundle id and their own team.
+
+Setup:
+
+1. Copy the template (in the `KnevoPatient/` folder):
+
+   ```bash
+   cp Signing.local.xcconfig.template Signing.local.xcconfig
+   ```
+
+2. Edit `Signing.local.xcconfig`:
+
+   ```
+   DEVELOPMENT_TEAM = YOUR_TEAM_ID
+   KNEVO_BUNDLE_ID  = com.<you>.knevo.patient   # only if not on the owning team
+   ```
+
+3. Open `KnevoPatient.xcodeproj` and build. No `xcodegen` rerun is needed — the
+   `.xcodeproj` already references `Signing.xcconfig`. `Signing.local.xcconfig`
+   is git-ignored, so it stays on your machine.
+
+Verify what got resolved:
+
+```bash
+xcodebuild -showBuildSettings -scheme KnevoPatient -configuration Debug \
+  | grep -E 'PRODUCT_BUNDLE_IDENTIFIER|DEVELOPMENT_TEAM'
+```
+
+**Finding your Team ID** (the 10-character code):
+
+- **Xcode** → Settings (`⌘,`) → **Accounts** → select your Apple ID → select
+  your team. The Team ID is shown next to the team name. (Add your Apple ID with
+  the `+` button first if it isn't listed.)
+- **Paid program:** also at [developer.apple.com](https://developer.apple.com/account) → Membership → "Team ID".
+- **Terminal** (after the account is added in Xcode): run
+  `security find-identity -v -p codesigning` and read the 10-character code in
+  parentheses of the `Apple Development:` identity.
+
+**Free Apple ID:** a free personal team works for development. The simulator
+needs no signing at all; on a physical device the build installs but the profile
+expires after 7 days (rebuild from Xcode to refresh), and you must trust the
+certificate on the device under Settings → General → VPN & Device Management.
+
 ## Run for development
 
 1. Open `KnevoPatient.xcodeproj` in Xcode.

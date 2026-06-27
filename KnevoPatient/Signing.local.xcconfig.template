@@ -1,0 +1,14 @@
+// Per-developer signing overrides.
+//
+// 1. Copy this file to `Signing.local.xcconfig` (same folder).
+// 2. Fill in your values below.
+// The copy is git-ignored, so it stays local to your machine.
+
+// Your Apple Developer "Team ID" — find it in Xcode > Settings > Accounts
+// (select your team), or at developer.apple.com > Membership. A free personal
+// team works for installing on your own device.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+
+// Only change this if you are NOT on the team that owns com.knevo.patient.
+// Use your own unique reverse-domain id, e.g. com.fatema.knevo.patient
+KNEVO_BUNDLE_ID = com.knevo.patient
