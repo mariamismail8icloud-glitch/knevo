@@ -3,7 +3,9 @@ import XCTest
 
 final class NetworkConfigTests: XCTestCase {
     func testDefaultBaseURL() {
+        // Tracks the fallback in NetworkConfig.baseURL (used when Info.plist has no
+        // API_BASE_URL). Points at the deployed demo server.
         let url = NetworkConfig.baseURL
-        XCTAssertEqual(url, "http://127.0.0.1:8080")
+        XCTAssertEqual(url, "https://knevo.appscorner.com")
     }
 }

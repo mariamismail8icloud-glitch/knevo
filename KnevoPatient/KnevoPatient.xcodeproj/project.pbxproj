@@ -144,7 +144,7 @@
 		BBA7CD7E84D3EEB31913BD3B /* BLEDeviceSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEDeviceSessionCoordinator.swift; sourceTree = "<group>"; };
 		BD021D9F736324FD5C9F2F29 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		BF0D5F0E3580438D4AC59CCE /* MessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewModel.swift; sourceTree = "<group>"; };
-		BF7195FFC9367929C3E1AE91 /* KnevoPatient.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KnevoPatient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF7195FFC9367929C3E1AE91 /* KnevoPatient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KnevoPatient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C19DE933893A3ECC57C0EE6D /* ConfigSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigSyncServiceTests.swift; sourceTree = "<group>"; };
 		C229BA26CE19936799266496 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CEEEC2C79A1A6B009989A8B8 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
@@ -417,7 +417,6 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					1D28A7069AF2E9FF333CF8BD = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -697,7 +696,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = X4P9354PLZ;
 				INFOPLIST_FILE = Sources/KnevoPatient/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -741,7 +740,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = X4P9354PLZ;
 				INFOPLIST_FILE = Sources/KnevoPatient/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (

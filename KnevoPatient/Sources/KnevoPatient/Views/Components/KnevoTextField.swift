@@ -33,6 +33,8 @@ struct KnevoSecureField: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Color(hex: "#334155"))
             SecureField("", text: $text)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
                 .background(Color(hex: "#fdf5f9"))
