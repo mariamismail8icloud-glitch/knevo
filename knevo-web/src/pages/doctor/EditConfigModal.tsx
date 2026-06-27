@@ -24,6 +24,10 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
   const { data: defaults } = useQuery({
     queryKey: ['therapy-defaults'],
     queryFn: () => getTherapyDefaults(),
+    // Static server config: cache for the whole session so it never flickers
+    // back to undefined on remount and never dead-ends the save.
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
   // Backfill any missing safety limit with the backend default so the doctor
@@ -54,17 +58,22 @@ export default function EditConfigModal({ config, patientId, onClose }: Props) {
       setSuccess(true);
       setTimeout(onClose, 1200);
     },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(msg ?? 'Failed to update config.');
+    },
   });
 
   const save = () => {
-    if (!defaults) {
-      setError('Still loading defaults — please try again in a moment.');
-      return;
-    }
-    const limitError = validateTherapyLimits({ maxSpeed, maxExtension, maxFlexion }, defaults);
-    if (limitError) {
-      setError(limitError);
-      return;
+    // Client-side range check is a nicety when defaults have loaded; the backend
+    // validates the same ranges authoritatively, so never block the doctor if
+    // the defaults query hasn't resolved.
+    if (defaults) {
+      const limitError = validateTherapyLimits({ maxSpeed, maxExtension, maxFlexion }, defaults);
+      if (limitError) {
+        setError(limitError);
+        return;
+      }
     }
     setError('');
     mutation.mutate();

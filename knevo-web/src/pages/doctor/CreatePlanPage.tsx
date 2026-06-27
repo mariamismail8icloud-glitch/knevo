@@ -41,6 +41,10 @@ export default function CreatePlanPage() {
   const { data: defaults } = useQuery({
     queryKey: ['therapy-defaults'],
     queryFn: () => getTherapyDefaults(),
+    // Static server config: cache for the whole session so it never flickers
+    // back to undefined on remount and never dead-ends submission.
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
   // Pre-populate the safety limits with the backend defaults once they load.
@@ -93,14 +97,15 @@ export default function CreatePlanPage() {
   const removeSet = (index: number) => setSets(prev => prev.filter((_, i) => i !== index));
 
   const submitPlan = () => {
-    if (!defaults) {
-      setError('Still loading defaults — please try again in a moment.');
-      return;
-    }
-    const limitError = validateTherapyLimits({ maxSpeed, maxExtension, maxFlexion }, defaults);
-    if (limitError) {
-      setError(limitError);
-      return;
+    // Client-side range check is a nicety when defaults have loaded; the backend
+    // validates the same ranges authoritatively, so never block the doctor if
+    // the defaults query hasn't resolved.
+    if (defaults) {
+      const limitError = validateTherapyLimits({ maxSpeed, maxExtension, maxFlexion }, defaults);
+      if (limitError) {
+        setError(limitError);
+        return;
+      }
     }
     setError('');
     mutation.mutate();
