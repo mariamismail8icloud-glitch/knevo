@@ -7,3 +7,8 @@
 /.cocoindex_code/
 /.graymatter
 /.cursor
+/plantuml-images
+/opencode.jsonc
+/.mcp.json
+/.playwright-mcp
+/AGENTS.md
