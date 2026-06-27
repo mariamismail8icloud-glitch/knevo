@@ -210,7 +210,7 @@ struct DeviceSessionFlowTests {
         #expect(viewModel.errorMessage?.lowercased().contains("error") == false)
     }
 
-    @Test("a finish/upload failure sets errorMessage without throwing (session continues)")
+    @Test("a finish/upload failure is silent and does not throw (session continues)")
     func finishFailureIsIsolated() async {
         let stub = StubCoordinator()
         stub.finishError = FakeError()
@@ -218,7 +218,7 @@ struct DeviceSessionFlowTests {
 
         await viewModel.collectAndUpload(sessionId: UUID().uuidString, setRecordId: UUID().uuidString)
 
-        #expect(viewModel.errorMessage != nil)
+        #expect(viewModel.errorMessage == nil)
         #expect(viewModel.lastUploadedSampleCount == nil)
     }
 

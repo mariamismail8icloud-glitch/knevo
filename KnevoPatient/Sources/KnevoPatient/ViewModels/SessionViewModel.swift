@@ -128,7 +128,12 @@ final class SessionViewModel {
                 )
             )
             if index < plan.sets.count, plan.sets[index].deviceAssisted {
-                await collectAndUpload(sessionId: session.id, setRecordId: record.id)
+                // Non-blocking: don't make the patient wait on the device STOP +
+                // sensor upload (the WiFi upload can be slow/unreliable). The set
+                // is already recorded server-side above; the device work is best-effort.
+                let sid = session.id
+                let rid = record.id
+                deviceStopTask = Task { await self.collectAndUpload(sessionId: sid, setRecordId: rid) }
             }
             currentSetRecord = nil
             inSetPainLevel = 0
@@ -151,13 +156,14 @@ final class SessionViewModel {
         }
     }
 
-    /// Best-effort post-set batch collection + upload. Errors surface a friendly
-    /// message but MUST NOT block the set/session state machine (autonomy + isolation).
+    /// Best-effort post-set batch collection + upload. SILENT on failure — the
+    /// device STOP + WiFi upload must never block or surface errors in the session
+    /// UI (the upload can fail on flaky WiFi). On success it records the sample count.
     func collectAndUpload(sessionId: String, setRecordId: String) async {
         guard let sessionUUID = UUID(uuidString: sessionId),
               let recordUUID = UUID(uuidString: setRecordId)
         else {
-            errorMessage = "Couldn't save device data for this set."
+            // errorMessage = "Couldn't save device data for this set."
             return
         }
         do {
@@ -171,7 +177,8 @@ final class SessionViewModel {
             )
             lastUploadedSampleCount = inserted
         } catch {
-            errorMessage = "Couldn't save device data for this set."
+            // errorMessage = "Couldn't save device data for this set."
+            // Silent: best-effort upload; a failure (e.g. WiFi down) must not show.
         }
     }
 
