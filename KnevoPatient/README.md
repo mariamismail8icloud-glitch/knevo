@@ -62,9 +62,15 @@ xcodebuild -showBuildSettings -scheme KnevoPatient -configuration Debug \
   your team. The Team ID is shown next to the team name. (Add your Apple ID with
   the `+` button first if it isn't listed.)
 - **Paid program:** also at [developer.apple.com](https://developer.apple.com/account) → Membership → "Team ID".
-- **Terminal** (after the account is added in Xcode): run
-  `security find-identity -v -p codesigning` and read the 10-character code in
-  parentheses of the `Apple Development:` identity.
+- **Terminal** (after a dev certificate exists): read the `OU` field of your
+  signing certificate — that is the Team ID:
+
+  ```bash
+  security find-certificate -c "Apple Development: <your-apple-id-email>" -p \
+    | openssl x509 -noout -subject
+  # Team ID = the OU field. (Do NOT use the code in the CN parentheses — that
+  # identifies the certificate, not the team.)
+  ```
 
 **Free Apple ID:** a free personal team works for development. The simulator
 needs no signing at all; on a physical device the build installs but the profile
