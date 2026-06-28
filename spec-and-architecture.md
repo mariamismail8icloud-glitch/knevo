@@ -402,6 +402,204 @@ The mobile app must always hold the latest config without requiring the patient 
 
 ---
 
+## 4.7 Component Diagrams (per container)
+
+C4 Level-3 views of each deployable container's internal building blocks. Grouped by responsibility and grounded in the actual source layout.
+
+### 4.7.1 Patient Mobile App
+
+Native Swift/SwiftUI app. UI is split from logic (Views ↔ ViewModels), a single `APIClient` handles REST with JWT refresh, BLE control runs through a Core Bluetooth transport + contract codec, and sensor data arrives from the brace over local WiFi/TCP before being relayed to the backend.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Patient Mobile App (Swift / SwiftUI, iOS 18+)
+
+Person(patient, "Patient", "Performs therapy sessions")
+Container(backend, "Backend API", "Spring Boot 3.5 / Java 21", "REST + WebSocket")
+Container(brace, "Knevo Brace", "ESP32-S3 firmware", "BLE control + WiFi/TCP sensor upload")
+
+Container_Boundary(app, "Patient Mobile App") {
+  Component(views, "SwiftUI Views", "SwiftUI", "Screens: auth, active plan, session flow, device, progress, messages")
+  Component(vms, "ViewModels", "Swift (@Observable)", "Presentation logic (no SwiftUI imports): Auth, Session, ActivePlan, Calibration, DeviceConnection, Progress, Messages")
+  Component(api, "APIClient", "Swift / URLSession", "REST calls to backend; attaches JWT; refresh on 401")
+  Component(keychain, "KeychainService", "Security framework", "Stores access + refresh tokens")
+  Component(sync, "ConfigSyncService", "URLSessionWebSocketTask", "Real-time therapy-config sync push")
+  Component(coord, "Device Session Coordinator", "Swift", "Drives a device-assisted set: config delivery, start/stop")
+  Component(ble, "BLE Transport", "Core Bluetooth", "Connects to brace; GATT read/write/notify")
+  Component(codec, "KnevoCodec + GATT", "Swift", "Encodes/decodes contract byte layouts + UUIDs")
+  Component(rx, "SensorDataReceiver", "Network framework / TCP", "Receives post-set 88-byte sample batch over local WiFi")
+  Component(up, "SensorUploadService", "Swift / URLSession", "Relays decoded readings to backend over HTTPS")
+}
+
+Rel(patient, views, "Interacts with", "Touch")
+Rel(views, vms, "Observes / sends intents")
+Rel(vms, api, "Requests data")
+Rel(vms, sync, "Subscribes to config updates")
+Rel(vms, coord, "Starts / stops device set")
+Rel(api, keychain, "Reads / stores tokens")
+Rel(coord, ble, "Provision WiFi, deliver config, start/stop")
+Rel(ble, codec, "Uses")
+Rel(coord, rx, "Awaits sample batch")
+Rel(coord, up, "Forwards readings")
+Rel(api, backend, "REST", "HTTPS / JSON")
+Rel(sync, backend, "Config sync", "WebSocket")
+Rel(up, backend, "Uploads sensor batch", "HTTPS / JSON")
+Rel(ble, brace, "GATT control plane", "BLE")
+Rel(brace, rx, "Sensor batch", "WiFi / TCP")
+@enduml
+```
+
+---
+
+### 4.7.2 Doctor Web App
+
+React SPA. Routing is auth-guarded by an `Auth Context` that owns the JWT; pages read/write through a TanStack Query cache that calls typed API modules, all funnelled through one axios client with a 401-refresh interceptor.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Doctor Web App (React 19 + TypeScript + Tailwind, Vite)
+
+Person(doctor, "Doctor", "Reviews data, prescribes therapy")
+Person(admin, "Admin", "Manages doctor accounts")
+Container(backend, "Backend API", "Spring Boot 3.5 / Java 21", "REST over HTTPS")
+
+Container_Boundary(web, "Doctor Web App") {
+  Component(router, "App Router + PrivateRoute", "React Router", "Routing + auth-guarded routes")
+  Component(authctx, "Auth Context", "React Context", "Holds session; stores JWT; refresh on expiry")
+  Component(authpages, "Auth Pages", "React", "Login, doctor signup, pending approval")
+  Component(docpages, "Doctor Pages", "React", "Patient list/detail, create plan, edit config, exercise library")
+  Component(msgs, "Messages Page", "React", "Doctor-patient threads")
+  Component(progress, "Progress & Sensor Graphs", "React + Recharts", "Pain/adherence trends; knee-angle & FSR graphs")
+  Component(adminpage, "Admin Dashboard", "React", "Approve / reject doctors")
+  Component(query, "Server-State Cache", "TanStack Query", "Caching, dedup, refetch")
+  Component(apimods, "API Modules", "TypeScript", "authApi, doctorApi, adminApi")
+  Component(client, "HTTP Client", "axios", "Base URL + JWT header + 401-refresh interceptor")
+}
+
+Rel(doctor, docpages, "Uses")
+Rel(doctor, msgs, "Uses")
+Rel(doctor, progress, "Views")
+Rel(admin, adminpage, "Uses")
+Rel(router, authctx, "Guards routes")
+Rel(authpages, authctx, "Login / signup")
+Rel(docpages, query, "Reads / mutates")
+Rel(progress, query, "Reads")
+Rel(msgs, query, "Reads / mutates")
+Rel(adminpage, query, "Reads / mutates")
+Rel(query, apimods, "Calls")
+Rel(apimods, client, "Uses")
+Rel(authctx, client, "Sets / refreshes token")
+Rel(client, backend, "REST", "HTTPS / JSON")
+@enduml
+```
+
+---
+
+### 4.7.3 Backend API
+
+Layered Spring Boot service. A JWT filter authenticates every REST request before controllers delegate to a service layer, which uses Spring Data JPA repositories over Hibernate entities; Flyway owns the schema, and a WebSocket endpoint pushes real-time config sync.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Backend API (Spring Boot 3.5 / Java 21)
+
+Container(mobile, "Patient Mobile App", "Swift / SwiftUI", "iOS patient app")
+Container(web, "Doctor Web App", "React 19", "Doctor / admin portal")
+ContainerDb(db, "PostgreSQL", "Relational DB", "Flyway-managed schema")
+
+Container_Boundary(api, "Backend API") {
+  Component(jwtfilter, "JWT Auth Filter", "Spring Security", "Validates bearer token per request; sets security context")
+  Component(controllers, "REST Controllers", "Spring MVC", "Auth, Enrollment, Therapy, Session, SensorReading, Progress, Message, Admin, Health")
+  Component(ws, "WebSocket Endpoint", "Spring WebSocket", "Real-time therapy-config sync")
+  Component(exh, "Validation & Exception Handler", "@RestControllerAdvice", "Bean Validation -> user-friendly 400s")
+  Component(services, "Service Layer", "Spring @Service", "Business logic: Auth, Enrollment, TherapyPlan, Session, Sensor, Progress, Message, Admin")
+  Component(jwtsvc, "JWT Service", "jjwt", "Issues + verifies access / refresh tokens")
+  Component(repos, "Repositories", "Spring Data JPA", "Derived queries per aggregate")
+  Component(entities, "Domain Entities", "JPA / Hibernate", "User, RehabPlan, TherapyConfig, Session, SensorReading, ...")
+  Component(flyway, "Flyway Migrations", "Flyway", "Versioned schema (V1..)")
+}
+
+Rel(mobile, jwtfilter, "REST", "HTTPS / JSON")
+Rel(web, jwtfilter, "REST", "HTTPS / JSON")
+Rel(mobile, ws, "Config sync", "WebSocket")
+Rel(jwtfilter, controllers, "Forwards authenticated request")
+Rel(jwtfilter, jwtsvc, "Validates token")
+Rel(controllers, exh, "Errors handled by")
+Rel(controllers, services, "Delegates to")
+Rel(ws, services, "Delegates to")
+Rel(services, jwtsvc, "Issues tokens (auth)")
+Rel(services, repos, "Reads / writes")
+Rel(repos, entities, "Maps")
+Rel(repos, db, "SQL", "JPA / JDBC")
+Rel(flyway, db, "Migrates", "JDBC")
+@enduml
+```
+
+---
+
+### 4.7.4 Knevo Brace Firmware
+
+Dual-core ESP32-S3 firmware. **Core 1** runs the hard-real-time 10 ms motor loop and the hardware safety latch; **Core 0** handles sensors, the (shadow) TFLite gait classifier, calibration, the PSRAM sample buffer, and the WiFi/TCP upload. A single **Command API** is the one source of truth that both the Serial bench interface and the BLE GATT server drive.
+
+> **Status:** the BLE GATT + WiFi/TCP data-plane components (Step D integration) exist in firmware source and have passed code review; full on-hardware device-assisted E2E validation is in progress. Core 1 motor control + safety and Core 0 sensor/feature/TFLite are bench-validated.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Knevo Brace Firmware (ESP32-S3, dual-core)
+
+Container(mobile, "Patient Mobile App", "Swift / SwiftUI", "BLE control + WiFi/TCP receiver")
+Person(eng, "Engineer", "Bench testing via USB serial")
+System_Ext(motor, "Motor + Driver", "Geared DC motor (UART driver)")
+System_Ext(sensors, "Sensors", "3x IMU + 2x FSR")
+
+Container_Boundary(fw, "Knevo Brace Firmware") {
+  Component(ble, "BLE GATT Server", "NimBLE-Arduino", "DeviceStatus, Control, SetConfig, WiFiConfig, WiFiStatus; tiny non-blocking callbacks")
+  Component(serial, "Serial Command Parser", "Arduino Serial", "Bench commands: speed, ROM, calibrate, start/stop")
+  Component(cmd, "Command API", "C++", "Single source of truth: set speed/ROM, start/stop, calibrate")
+  Component(state, "Shared Session State", "C++ struct (mutex)", "deviceState IDLE/RUNNING/DONE/FAULT; set id; resolved speed + ROM")
+  Component(motorloop, "Motor Control Loop", "Core 1 - 10 ms", "Open-loop stepping; knee/gait tables; stop-at-extension")
+  Component(safety, "Safety Latch", "Core 1 / hardware", "E-stop + ROM/current/battery -> one-way freeze; reports FAULT")
+  Component(acq, "Sensor Acquisition", "Core 0", "Reads 3 IMU + 2 FSR")
+  Component(gait, "Feature + Gait Classifier", "Core 0 / TFLite Micro", "57 features -> 6-phase inference (shadow)")
+  Component(calib, "Calibration State Machine", "Core 0", "Non-blocking unloaded + static steps")
+  Component(buf, "Sample Buffer", "PSRAM", "88-byte contract records while RUNNING")
+  Component(wifi, "WiFi/TCP Data Plane", "Core 0", "Provision STA; post-set batch upload + ACK")
+}
+
+Rel(mobile, ble, "GATT control plane", "BLE")
+Rel(eng, serial, "Commands", "USB serial")
+Rel(ble, cmd, "Invokes")
+Rel(serial, cmd, "Invokes")
+Rel(cmd, state, "Updates")
+Rel(cmd, calib, "Triggers")
+Rel(state, motorloop, "Speed/ROM + run intent")
+Rel(motorloop, motor, "Step / position", "UART")
+Rel(safety, motorloop, "Cuts motor / freezes")
+Rel(sensors, acq, "Raw samples")
+Rel(acq, gait, "Feature window")
+Rel(acq, buf, "Append when RUNNING")
+Rel(buf, wifi, "Drains on STOP / DONE")
+Rel(ble, wifi, "WiFi credentials (WiFiConfig)")
+Rel(state, wifi, "DONE triggers upload")
+Rel(wifi, mobile, "Sensor batch + ACK", "WiFi / TCP")
+Rel(safety, state, "Reports FAULT")
+@enduml
+```
+
+---
+
 ## 5. Data Model
 
 > High-level entities only. Expand per-feature as needed. Full column detail for each entity is in the tables below the diagram.
