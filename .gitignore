@@ -12,3 +12,5 @@
 /.mcp.json
 /.playwright-mcp
 /AGENTS.md
+node-modeules
+.vscode
