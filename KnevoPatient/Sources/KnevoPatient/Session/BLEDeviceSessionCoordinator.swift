@@ -63,7 +63,13 @@ final class BLEDeviceSessionCoordinator: DeviceSessionCoordinating {
     }
 
     func finishSetAndCollect(setRecordId _: UUID) async throws -> SensorBatch? {
-        defer { receiver.stop() }
+        // The device hands the single 2.4GHz radio to WiFi for the upload, which drops
+        // this BLE link — so mark ourselves disconnected and let the next prepareSet
+        // reconnect. Done in defer so it holds even if STOP/collect throws.
+        defer {
+            receiver.stop()
+            connected = false
+        }
         try await transport.write(KnevoCodec.encodeControl(.stop), to: KnevoGATT.controlUUID)
         return try await awaitBatchWithTimeout()
     }

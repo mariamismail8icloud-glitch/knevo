@@ -48,7 +48,7 @@ public class AuthService {
         }
         user.setEmergencyContactName(req.getEmergencyContactName());
         user.setEmergencyContactPhone(req.getEmergencyContactPhone());
-        user.setEnrollmentCode(codeGenerator.generate());
+        user.setEnrollmentCode(codeGenerator.generateUnique(userRepository::existsByEnrollmentCode));
 
         User saved = userRepository.save(user);
         return buildAuthResponse(saved);

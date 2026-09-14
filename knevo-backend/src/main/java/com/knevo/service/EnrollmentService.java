@@ -36,7 +36,7 @@ public class EnrollmentService {
         User patient = userRepository.findById(patientId)
             .filter(u -> u.getRole() == User.Role.PATIENT)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
-        patient.setEnrollmentCode(codeGenerator.generate());
+        patient.setEnrollmentCode(codeGenerator.generateUnique(userRepository::existsByEnrollmentCode));
         userRepository.save(patient);
         return new EnrollmentCodeResponse(patient.getEnrollmentCode());
     }

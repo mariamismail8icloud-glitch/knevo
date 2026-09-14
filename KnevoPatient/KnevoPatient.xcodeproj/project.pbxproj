@@ -153,6 +153,7 @@
 		DE0AFA32ED563D4A78312A03 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		E6D2CD4728E74222DA1BB846 /* ProgressViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressViewModelTests.swift; sourceTree = "<group>"; };
 		E77746571660FE41C8639673 /* DeviceConnectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceConnectionViewModel.swift; sourceTree = "<group>"; };
+		E89119573B322215929FBE41 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		F12DDCCEE54A335A3CC75615 /* KnevoPatientTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KnevoPatientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F29947AD9F670C0D86933E03 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		F950054A85F5EFBBBA219C80 /* SessionSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSummaryView.swift; sourceTree = "<group>"; };
@@ -161,6 +162,27 @@
 
 /* Begin PBXGroup section */
 		1BB457A058FEEC1CF88BECBE /* KnevoPatient */ = {
+			isa = PBXGroup;
+			children = (
+				E89119573B322215929FBE41 /* Signing.xcconfig */,
+			);
+			name = KnevoPatient;
+			path = .;
+			sourceTree = "<group>";
+		};
+		23FBFE28E2103A87330BE217 = {
+			isa = PBXGroup;
+			children = (
+				1BB457A058FEEC1CF88BECBE /* KnevoPatient */,
+				344C06A7CF5B4F487D7340D8 /* KnevoPatient */,
+				B5FE00090A1DD928936FA1F0 /* KnevoPatientTests */,
+				37B20DA83D444AEF1342CDEE /* Products */,
+			);
+			indentWidth = 4;
+			sourceTree = "<group>";
+			tabWidth = 4;
+		};
+		344C06A7CF5B4F487D7340D8 /* KnevoPatient */ = {
 			isa = PBXGroup;
 			children = (
 				4F6C4FDF7A3BA01D3F2D85C7 /* Assets.xcassets */,
@@ -179,17 +201,6 @@
 			name = KnevoPatient;
 			path = Sources/KnevoPatient;
 			sourceTree = "<group>";
-		};
-		23FBFE28E2103A87330BE217 = {
-			isa = PBXGroup;
-			children = (
-				1BB457A058FEEC1CF88BECBE /* KnevoPatient */,
-				B5FE00090A1DD928936FA1F0 /* KnevoPatientTests */,
-				37B20DA83D444AEF1342CDEE /* Products */,
-			);
-			indentWidth = 4;
-			sourceTree = "<group>";
-			tabWidth = 4;
 		};
 		35549BF8348A6DB87AAA9259 /* ViewModels */ = {
 			isa = PBXGroup;
@@ -420,6 +431,9 @@
 						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
+					B3B73C4384D8651BCC63BB67 = {
+						DevelopmentTeam = "";
+					};
 				};
 			};
 			buildConfigurationList = 9461829EFE4A2874B28DBB8D /* Build configuration list for PBXProject "KnevoPatient" */;
@@ -547,6 +561,7 @@
 /* Begin XCBuildConfiguration section */
 		2D4E62823CBD8DB4966BA01B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E89119573B322215929FBE41 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -622,7 +637,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.knevo.patientTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(KNEVO_BUNDLE_ID)Tests";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_STRICT_CONCURRENCY = minimal;
@@ -634,6 +649,7 @@
 		};
 		4C5B0E4C55C6ED25E638D294 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E89119573B322215929FBE41 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -697,14 +713,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Sources/KnevoPatient/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.knevo.patient;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(KNEVO_BUNDLE_ID)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -725,7 +740,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.knevo.patientTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(KNEVO_BUNDLE_ID)Tests";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_STRICT_CONCURRENCY = minimal;
@@ -741,14 +756,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Sources/KnevoPatient/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.knevo.patient;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(KNEVO_BUNDLE_ID)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;

@@ -6,6 +6,9 @@ options:
   generateEmptyDirectories: true
   indentWidth: 4
   tabWidth: 4
+configFiles:
+  Debug: Signing.xcconfig
+  Release: Signing.xcconfig
 settings:
   SWIFT_VERSION: 6.0
   MARKETING_VERSION: 1.0.0
@@ -19,10 +22,11 @@ targets:
     sources:
       - path: Sources/KnevoPatient
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.knevo.patient
+      # Bundle id + team come from Signing.xcconfig (per-developer override in
+      # the git-ignored Signing.local.xcconfig). Do not hardcode them here.
+      PRODUCT_BUNDLE_IDENTIFIER: "$(KNEVO_BUNDLE_ID)"
       INFOPLIST_FILE: Sources/KnevoPatient/Info.plist
       CODE_SIGN_STYLE: Automatic
-      DEVELOPMENT_TEAM: ""
       SWIFT_VERSION: 6.0
       SWIFT_STRICT_CONCURRENCY: minimal
       SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
@@ -38,7 +42,7 @@ targets:
     dependencies:
       - target: KnevoPatient
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.knevo.patientTests
+      PRODUCT_BUNDLE_IDENTIFIER: "$(KNEVO_BUNDLE_ID)Tests"
       SWIFT_VERSION: 6.0
       SWIFT_STRICT_CONCURRENCY: minimal
       SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"

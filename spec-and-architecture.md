@@ -1,4 +1,4 @@
-# Knee Exoskeleton Rehabilitation System — Specification & Architecture
+# Knevo Brace Rehabilitation System — Specification & Architecture
 
 > **Audience:** Any agent or engineer picking up work on this project. Read this first. It is the single source of truth for goals, constraints, and architecture decisions.
 
@@ -6,7 +6,7 @@
 
 ## 1. System Goal
 
-Build a right-leg knee exoskeleton system that supports patients during guided rehabilitation therapy. The system captures objective movement data during sessions, makes it visible to the patient's doctor, and allows the doctor to tune therapy parameters remotely.
+Build the **Knevo Brace**, a right-leg knee rehabilitation brace that supports patients during guided rehabilitation therapy. The system captures objective movement data during sessions, makes it visible to the patient's doctor, and allows the doctor to tune therapy parameters remotely.
 
 This is a graduation project operating on a tight schedule. Simplicity and delivery speed take priority over long-term scalability. Single clinic, no multi-tenancy.
 
@@ -35,7 +35,7 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 
 ### Data Pipeline
 
-- **Device-to-app relay** — device streams buffered sensor data to the mobile app over local WiFi (seconds-level delay acceptable); re-transmits any buffered data on reconnect after a connectivity gap
+- **Device-to-app transfer** — at the end of each set the device uploads its buffered sensor data to the mobile app in one batch over local WiFi/TCP (seconds-level delay acceptable); retries on reconnect after a connectivity gap
 - **App-to-backend upload** — mobile app relays session data to the backend over HTTPS
 
 ### Configuration & Prescription
@@ -73,9 +73,9 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 | **Mobile-as-relay** | The mobile app is the data and control gateway between the device and the backend. The device never talks to the backend directly. |
 | **BLE for control, WiFi for data** | BLE is used for WiFi provisioning, session start/stop signals, and config delivery. WiFi (local network) is used for bulk sensor data transfer from device to mobile app. |
 | **Real-time config sync to app** | When the doctor updates a therapy config, the change is pushed to the patient's mobile app immediately if the app is connected to the internet. Session reminders update automatically without requiring the patient to open the app. |
-| **Async config delivery to device** | The mobile app holds the latest config locally. The config is delivered to the exoskeleton device via BLE at the point the device is needed in a session (first device-assisted set). |
+| **Async config delivery to device** | The mobile app holds the latest config locally. The config is delivered to the Knevo Brace via BLE at the point the device is needed in a session (first device-assisted set). |
 | **Single tenant** | One clinic, no multi-tenancy required |
-| **iOS primary** | Mobile app targets iOS. React Native used, so Android is theoretically possible but not tested. |
+| **iOS primary** | Mobile app targets iOS, built natively in Swift / SwiftUI. Android is out of scope. |
 
 ### 4.2 Constraints
 
@@ -84,9 +84,9 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 - **Privacy** — no legal/regulatory obligations (no HIPAA, no GDPR), but patient health data must not be exposed without authentication; apply reasonable access controls
 - **Single clinic** — no need for multi-tenant data isolation or per-clinic configuration
 
-### 4.3 Open Decisions
+### 4.3 Key Decisions
 
-> These must be resolved early as they affect all downstream work.
+> Originally open decisions (OD-x) that gated downstream work. OD-1 and OD-2 are now **resolved**; the resulting stack is captured in §4.3.1. OD-3 remains pending.
 
 ## OD-1: Backend Tech Stack
 
@@ -95,16 +95,42 @@ This is a graduation project operating on a tight schedule. Simplicity and deliv
 | Keep Firebase | Already partially in use; fast to prototype; built-in auth and real-time push | Limited query flexibility for analytics; less control; vendor lock-in |
 | Switch to Spring Boot + PostgreSQL | Full SQL query power for analytics; industry-standard; more control | More setup time; requires hosting; more code to write |
 
-**Decision:** switch to Spring Boot + PostgreSQL
+**Decision:** switch to Spring Boot + PostgreSQL — **RESOLVED** (details in §4.3.1).
 
 ## OD-2: Separate vs Shared User Auth
 
 Patients and doctors are separate user populations with no UI overlap. They can share the same backend user table with a `role` field, or be completely separate auth domains. Separate domains are cleaner but more setup.
-**Decision:** single backend user table with `role: PATIENT | DOCTOR | ADMIN`.
+**Decision:** single backend user table with `role: PATIENT | DOCTOR | ADMIN` — **RESOLVED**. Auth is stateless JWT (access + refresh); see §4.3.1.
 
 ## OD-3: SessionInsight Schema (Pending)
 
 The Data Analytics Service produces derived insights from sensor readings — step count, gait metrics, anomaly flags. The output schema is not yet defined; it depends on the analytics algorithms chosen. **Do not implement the SessionInsight entity until the Data Analytics Service design is underway.**
+
+---
+
+### 4.3.1 Technology Stack (decided)
+
+| Layer | Decision | Notes |
+|-------|----------|-------|
+| Backend | **Spring Boot 3.5 / Java 21** | Gradle (Kotlin DSL). Spring Web, Security, Data JPA, Validation, WebSocket |
+| Database | **PostgreSQL** | Schema managed by **Flyway** migrations; accessed via Spring Data JPA / Hibernate |
+| Auth | **Stateless JWT** | Single `USER` table with `role` (OD-2); short-lived access token + refresh token; `io.jsonwebtoken` (jjwt) |
+| Web app | **React 19 + TypeScript + Tailwind CSS**, built with **Vite** | TanStack Query for server state; axios; Recharts for sensor/progress graphs |
+| Mobile app | **Swift / SwiftUI**, iOS 18+ | Native; Core Bluetooth for BLE; Xcode project generated by XcodeGen |
+| Firmware | **ESP32-S3 / C++ (Arduino)** | 3 IMUs + 2 FSRs; on-device buffering; post-set WiFi/TCP batch upload |
+| Real-time | **WebSocket** (backend → mobile) | Drives real-time config sync (Flow 3). The web app uses HTTPS request/polling, not WebSocket |
+| Data Analytics | **Planned — Phase 3** | Not yet built (M15); SessionInsight schema pending (OD-3) |
+
+### 4.3.2 Deployment (decided)
+
+| Aspect | Decision |
+|--------|----------|
+| Host | Single **DigitalOcean droplet** (1 vCPU / 2 GB), domain `knevo.appscorner.com` |
+| Edge | **nginx** serves the built web bundle and reverse-proxies `/api` to the backend; **TLS via Let's Encrypt** (certbot) |
+| Backend runtime | Runs as a **systemd service** from an uber-jar — **no Docker** in production (leaner on 1 vCPU) |
+| Database | **PostgreSQL** on the same droplet; a `pg_dump` backup is taken before each deploy |
+| CI/CD | **GitHub Actions** builds `bootJar` + the web bundle and attaches them to a GitHub Release; `deploy/deploy.sh` on the droplet pulls and swaps them in |
+| Local dev | Backend as a host JVM process; **PostgreSQL in Docker** |
 
 ---
 
@@ -116,13 +142,13 @@ The Data Analytics Service produces derived insights from sensor readings — st
 
 LAYOUT_TOP_DOWN()
 
-title System Context — Knee Exoskeleton Rehabilitation System
+title System Context — Knevo Brace Rehabilitation System
 
-Person(patient, "Patient", "Rehabilitation patient. Uses the exoskeleton device and mobile app.")
+Person(patient, "Patient", "Rehabilitation patient. Uses the Knevo Brace and mobile app.")
 Person(doctor, "Doctor", "Physiotherapist. Reviews session data and prescribes therapy configs.")
 Person(admin, "Admin", "Clinic administrator. Manages doctor accounts.")
 
-System(knes, "Knee Exoskeleton System", "Captures rehabilitation session data, enables remote therapy configuration and progress monitoring.")
+System(knes, "Knevo Brace Rehabilitation System", "Captures rehabilitation session data, enables remote therapy configuration and progress monitoring.")
 
 Rel_D(patient, knes, "Performs therapy sessions, views schedule")
 Rel_D(doctor, knes, "Reviews session data, sets therapy parameters")
@@ -141,19 +167,19 @@ Rel_D(admin, knes, "Enrolls and manages doctor accounts")
 
 LAYOUT_TOP_DOWN()
 
-title Container Diagram — Knee Exoskeleton Rehabilitation System
+title Container Diagram — Knevo Brace Rehabilitation System
 
 Person(patient, "Patient", "Uses mobile app on iOS device")
 Person(doctor, "Doctor", "Uses web browser")
 Person(admin, "Admin", "Uses web browser")
 
-System_Boundary(exoskeleton_system, "Exoskeleton System") {
-    Container(mobile, "Patient Mobile App", "React Native / iOS", "Provisions device WiFi via BLE. Starts and stops sessions. Delivers doctor configs to device via BLE at session start. Relays sensor data to backend over HTTPS.")
-    Container(device, "Knee Exoskeleton Firmware", "ESP32-S3 / C/C++", "Captures data from 3 IMUs and 2 FSRs. Executes active therapy config. Buffers sensor data locally. Streams to mobile app over local WiFi.")
-    Container(backend, "Backend API", "Firebase or Spring Boot", "Manages users, sessions, sensor data, and therapy configs. Serves data to mobile app and web app.")
-    ContainerDb(db, "Database", "Firestore or PostgreSQL", "Persists all user records, sessions, sensor readings, therapy configurations, and session insights.")
-    Container(analytics, "Data Analytics Service", "TBD", "Processes raw sensor readings from completed sessions. Derives step count, gait metrics, and anomalous walking pattern detection. Writes results to SessionInsight.")
-    Container(webapp, "Doctor Web App", "React", "Displays session data, sensor graphs, progress trends, and analytics insights. Allows doctors to issue therapy configurations.")
+System_Boundary(knevo_system, "Knevo Brace System") {
+    Container(mobile, "Patient Mobile App", "Swift / SwiftUI / iOS 18+", "Provisions Knevo Brace WiFi via BLE (Core Bluetooth). Starts and stops sessions. Delivers doctor configs to the brace via BLE at session start. Relays sensor data to backend over HTTPS; receives real-time config updates over WebSocket.")
+    Container(device, "Knevo Brace Firmware", "ESP32-S3 / C++ (Arduino)", "Captures data from 3 IMUs and 2 FSRs. Executes active therapy config. Buffers a full set locally, then uploads it to the mobile app as one batch over local WiFi/TCP after the set ends.")
+    Container(backend, "Backend API", "Spring Boot 3.5 / Java 21", "REST over HTTPS + WebSocket. Spring Security with JWT (access + refresh). Spring Data JPA. Manages users, sessions, sensor data, and therapy configs; serves mobile + web.")
+    ContainerDb(db, "Database", "PostgreSQL", "Flyway-managed relational schema. Persists all user records, sessions, sensor readings, therapy configurations, and session insights.")
+    Container(analytics, "Data Analytics Service", "Planned — Phase 3", "Processes raw sensor readings from completed sessions. Derives step count, gait metrics, and anomalous walking pattern detection. Writes results to SessionInsight. Not yet built (M15 / OD-3).")
+    Container(webapp, "Doctor Web App", "React 19 + TypeScript + Tailwind (Vite)", "Displays session data, sensor graphs, progress trends, and analytics insights. Allows doctors to issue therapy configurations.")
 }
 
 Rel_D(patient, mobile, "Interacts with", "Touch UI")
@@ -161,14 +187,123 @@ Rel_D(doctor, webapp, "Interacts with", "HTTPS / Browser")
 Rel_D(admin, webapp, "Manages doctors via", "HTTPS / Browser")
 
 Rel(mobile, device, "Provisions WiFi, starts/stops session, delivers config", "BLE")
-Rel(device, mobile, "Streams buffered sensor data", "Local WiFi")
+Rel(device, mobile, "Uploads buffered set data (post-set batch)", "Local WiFi / TCP")
 Rel_D(mobile, backend, "Uploads session data, fetches pending configs", "HTTPS")
+Rel(backend, mobile, "Pushes real-time config sync", "WebSocket")
 Rel_D(webapp, backend, "Fetches session data, trends and insights, submits therapy configs", "HTTPS")
-Rel_D(backend, db, "Reads and writes", "Native driver")
+Rel_D(backend, db, "Reads and writes", "JPA / JDBC")
 Rel_D(backend, analytics, "Triggers analysis after session completion", "Internal")
-Rel(analytics, db, "Reads sensor readings, writes SessionInsight", "Native driver")
+Rel(analytics, db, "Reads sensor readings, writes SessionInsight", "JPA / JDBC")
 
 @enduml
+```
+
+---
+
+### 4.5.1 Therapy Session — Sequence (end-to-end)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor P as Patient
+    participant App as Mobile App (iOS)
+    participant Brace as Knevo Brace (ESP32-S3)
+    participant API as Backend API
+    participant DB as PostgreSQL
+
+    Note over App,Brace: Session contains a device-assisted set
+    P->>App: Open scheduled session
+    App->>Brace: BLE connect + deliver active config
+    Brace-->>App: Config applied (ACK)
+    P->>App: Enter pre-session pain (blocks if >= 7)
+    App->>API: POST /sessions (IN_PROGRESS)
+    API->>DB: Insert SESSION
+
+    loop For each set
+        P->>App: Start set
+        App->>API: POST start-set (THERAPY_SET_RECORD)
+        App->>Brace: BLE set-start signal
+        activate Brace
+        Brace->>Brace: Capture IMU x3 + FSR x2 into local buffer
+        Note over Brace: Runs autonomously — BLE/WiFi loss does not interrupt
+        P-->>App: Timer ends or taps Stop
+        App->>Brace: BLE stop (if manual)
+        Brace-->>App: WiFi/TCP batch upload of buffered set
+        deactivate Brace
+        App->>API: Relay SENSOR_READING batch (HTTPS)
+        API->>DB: Bulk insert readings
+        P->>App: Post-set pain + feedback
+        App->>API: POST stop-set
+    end
+
+    P->>App: End session
+    App->>API: PATCH complete (COMPLETED)
+    API->>DB: Update SESSION
+    API->>API: Trigger Data Analytics -> SessionInsight
+```
+
+---
+
+### 4.5.2 Knevo Brace Integration — BLE control + WiFi batch upload
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as Mobile App
+    participant Brace as Knevo Brace (ESP32-S3)
+    participant Net as Local WiFi
+
+    rect rgb(235,245,255)
+    Note over App,Brace: First-time WiFi provisioning (BLE)
+    App->>Brace: BLE connect (advertises "knevo_")
+    App->>Brace: Write WiFiConfig (SSID + password)
+    Brace->>Net: Join network (STA)
+    Brace-->>App: WiFiStatus notify (ok / err)
+    end
+
+    rect rgb(235,255,235)
+    Note over App,Brace: Per-set control (BLE)
+    App->>Brace: Write SetConfig (duration, speed, ROM)
+    Brace-->>App: DeviceStatus = IDLE (ACK / config_rejected)
+    App->>Brace: Write START (set_id)
+    Brace-->>App: DeviceStatus = RUNNING
+    Brace->>Brace: Buffer samples (no transfer during set)
+    App->>Brace: Write STOP (or duration elapses)
+    Brace-->>App: DeviceStatus = DONE (data ready)
+    end
+
+    rect rgb(255,245,235)
+    Note over App,Brace: Post-set bulk upload (WiFi/TCP)
+    Brace->>App: TCP connect to app_ip:app_port
+    Brace->>App: [len][header KNVO/v1][N x 88B samples]
+    App-->>Brace: 1-byte ACK 0x06
+    Brace->>Net: Disconnect WiFi
+    end
+```
+
+---
+
+### 4.5.3 State Machines — Brace device & Session lifecycle
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Knevo Brace" as Device {
+        [*] --> IDLE
+        IDLE --> RUNNING: START (config valid)
+        RUNNING --> DONE: STOP / duration elapsed
+        DONE --> IDLE: buffer uploaded + ACK
+        RUNNING --> FAULT: e-stop / ROM / current / battery
+        IDLE --> FAULT: hardware fault
+        FAULT --> IDLE: manual reset
+    }
+    state "Session" as Session {
+        [*] --> IN_PROGRESS: pre-pain < 7
+        IN_PROGRESS --> COMPLETED: all sets done / End
+        IN_PROGRESS --> INTERRUPTED: pain button / e-stop / fault
+        COMPLETED --> [*]
+        INTERRUPTED --> [*]
+    }
 ```
 
 ---
@@ -206,9 +341,9 @@ Phase 1 — Session Open
 | Event | Who | Outcome |
 |-------|-----|---------|
 | Patient taps "Start Set" | Patient | THERAPY_SET_RECORD created (`start_datetime` set) |
-| *If device-assisted:* set start signal sent to device | Mobile App → Device | Device begins sensor capture at 100 Hz |
-| Sensor data streamed to mobile app | Device → Mobile App | Data relayed to backend via HTTPS (seconds delay) |
-| Timer completes **or** patient taps "Stop Set" | Patient / Timer | Capture stops; THERAPY_SET_RECORD updated (`stop_datetime` set) |
+| *If device-assisted:* set start signal sent to device | Mobile App → Device | Device begins sensor capture into its local buffer (nominal 100 Hz; see SensorReading note) |
+| Samples accumulate in the device buffer | Device | No transfer during the set — data is held locally until the set ends |
+| Timer completes **or** patient taps "Stop Set" | Patient / Timer | Capture stops; device uploads the buffered set to the app over WiFi/TCP; app relays to backend via HTTPS (seconds delay); THERAPY_SET_RECORD updated (`stop_datetime` set) |
 | Patient inputs pain level (0–10) and optional feedback | Patient | THERAPY_SET_RECORD updated |
 | No remaining device-assisted sets in session | Mobile App | BLE connection dropped |
 
@@ -223,7 +358,7 @@ Phase 3 — Session End
 
 | Scenario | Behaviour |
 |----------|-----------|
-| WiFi lost during device-assisted set | Device buffers sensor data locally; resumes streaming when WiFi restores |
+| WiFi lost during device-assisted set | Device buffers sensor data locally; uploads the batch once WiFi restores |
 | BLE lost during device-assisted set | No impact — BLE is only needed to send the set-start signal. Once the set is underway, all data flows over local WiFi. |
 
 > **Decision:** A config change made while the patient is mid-session takes effect from the next session only. The running session completes under the config that was active when it started (`SESSION.config_id`).
@@ -262,8 +397,206 @@ The mobile app must always hold the latest config without requiring the patient 
 | Event | Behaviour |
 |-------|-----------|
 | Device detects WiFi loss | Continues capturing and buffering locally |
-| WiFi restored | Device resumes streaming buffered data to mobile app |
+| WiFi restored | Device uploads buffered data to mobile app |
 | Session completes before WiFi restored | Buffered data uploaded at next connectivity opportunity |
+
+---
+
+## 4.7 Component Diagrams (per container)
+
+C4 Level-3 views of each deployable container's internal building blocks. Grouped by responsibility and grounded in the actual source layout.
+
+### 4.7.1 Patient Mobile App
+
+Native Swift/SwiftUI app. UI is split from logic (Views ↔ ViewModels), a single `APIClient` handles REST with JWT refresh, BLE control runs through a Core Bluetooth transport + contract codec, and sensor data arrives from the brace over local WiFi/TCP before being relayed to the backend.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Patient Mobile App (Swift / SwiftUI, iOS 18+)
+
+Person(patient, "Patient", "Performs therapy sessions")
+Container(backend, "Backend API", "Spring Boot 3.5 / Java 21", "REST + WebSocket")
+Container(brace, "Knevo Brace", "ESP32-S3 firmware", "BLE control + WiFi/TCP sensor upload")
+
+Container_Boundary(app, "Patient Mobile App") {
+  Component(views, "SwiftUI Views", "SwiftUI", "Screens: auth, active plan, session flow, device, progress, messages")
+  Component(vms, "ViewModels", "Swift (@Observable)", "Presentation logic (no SwiftUI imports): Auth, Session, ActivePlan, Calibration, DeviceConnection, Progress, Messages")
+  Component(api, "APIClient", "Swift / URLSession", "REST calls to backend; attaches JWT; refresh on 401")
+  Component(keychain, "KeychainService", "Security framework", "Stores access + refresh tokens")
+  Component(sync, "ConfigSyncService", "URLSessionWebSocketTask", "Real-time therapy-config sync push")
+  Component(coord, "Device Session Coordinator", "Swift", "Drives a device-assisted set: config delivery, start/stop")
+  Component(ble, "BLE Transport", "Core Bluetooth", "Connects to brace; GATT read/write/notify")
+  Component(codec, "KnevoCodec + GATT", "Swift", "Encodes/decodes contract byte layouts + UUIDs")
+  Component(rx, "SensorDataReceiver", "Network framework / TCP", "Receives post-set 88-byte sample batch over local WiFi")
+  Component(up, "SensorUploadService", "Swift / URLSession", "Relays decoded readings to backend over HTTPS")
+}
+
+Rel(patient, views, "Interacts with", "Touch")
+Rel(views, vms, "Observes / sends intents")
+Rel(vms, api, "Requests data")
+Rel(vms, sync, "Subscribes to config updates")
+Rel(vms, coord, "Starts / stops device set")
+Rel(api, keychain, "Reads / stores tokens")
+Rel(coord, ble, "Provision WiFi, deliver config, start/stop")
+Rel(ble, codec, "Uses")
+Rel(coord, rx, "Awaits sample batch")
+Rel(coord, up, "Forwards readings")
+Rel(api, backend, "REST", "HTTPS / JSON")
+Rel(sync, backend, "Config sync", "WebSocket")
+Rel(up, backend, "Uploads sensor batch", "HTTPS / JSON")
+Rel(ble, brace, "GATT control plane", "BLE")
+Rel(brace, rx, "Sensor batch", "WiFi / TCP")
+@enduml
+```
+
+---
+
+### 4.7.2 Doctor Web App
+
+React SPA. Routing is auth-guarded by an `Auth Context` that owns the JWT; pages read/write through a TanStack Query cache that calls typed API modules, all funnelled through one axios client with a 401-refresh interceptor.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Doctor Web App (React 19 + TypeScript + Tailwind, Vite)
+
+Person(doctor, "Doctor", "Reviews data, prescribes therapy")
+Person(admin, "Admin", "Manages doctor accounts")
+Container(backend, "Backend API", "Spring Boot 3.5 / Java 21", "REST over HTTPS")
+
+Container_Boundary(web, "Doctor Web App") {
+  Component(router, "App Router + PrivateRoute", "React Router", "Routing + auth-guarded routes")
+  Component(authctx, "Auth Context", "React Context", "Holds session; stores JWT; refresh on expiry")
+  Component(authpages, "Auth Pages", "React", "Login, doctor signup, pending approval")
+  Component(docpages, "Doctor Pages", "React", "Patient list/detail, create plan, edit config, exercise library")
+  Component(msgs, "Messages Page", "React", "Doctor-patient threads")
+  Component(progress, "Progress & Sensor Graphs", "React + Recharts", "Pain/adherence trends; knee-angle & FSR graphs")
+  Component(adminpage, "Admin Dashboard", "React", "Approve / reject doctors")
+  Component(query, "Server-State Cache", "TanStack Query", "Caching, dedup, refetch")
+  Component(apimods, "API Modules", "TypeScript", "authApi, doctorApi, adminApi")
+  Component(client, "HTTP Client", "axios", "Base URL + JWT header + 401-refresh interceptor")
+}
+
+Rel(doctor, docpages, "Uses")
+Rel(doctor, msgs, "Uses")
+Rel(doctor, progress, "Views")
+Rel(admin, adminpage, "Uses")
+Rel(router, authctx, "Guards routes")
+Rel(authpages, authctx, "Login / signup")
+Rel(docpages, query, "Reads / mutates")
+Rel(progress, query, "Reads")
+Rel(msgs, query, "Reads / mutates")
+Rel(adminpage, query, "Reads / mutates")
+Rel(query, apimods, "Calls")
+Rel(apimods, client, "Uses")
+Rel(authctx, client, "Sets / refreshes token")
+Rel(client, backend, "REST", "HTTPS / JSON")
+@enduml
+```
+
+---
+
+### 4.7.3 Backend API
+
+Layered Spring Boot service. A JWT filter authenticates every REST request before controllers delegate to a service layer, which uses Spring Data JPA repositories over Hibernate entities; Flyway owns the schema, and a WebSocket endpoint pushes real-time config sync.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Backend API (Spring Boot 3.5 / Java 21)
+
+Container(mobile, "Patient Mobile App", "Swift / SwiftUI", "iOS patient app")
+Container(web, "Doctor Web App", "React 19", "Doctor / admin portal")
+ContainerDb(db, "PostgreSQL", "Relational DB", "Flyway-managed schema")
+
+Container_Boundary(api, "Backend API") {
+  Component(jwtfilter, "JWT Auth Filter", "Spring Security", "Validates bearer token per request; sets security context")
+  Component(controllers, "REST Controllers", "Spring MVC", "Auth, Enrollment, Therapy, Session, SensorReading, Progress, Message, Admin, Health")
+  Component(ws, "WebSocket Endpoint", "Spring WebSocket", "Real-time therapy-config sync")
+  Component(exh, "Validation & Exception Handler", "@RestControllerAdvice", "Bean Validation -> user-friendly 400s")
+  Component(services, "Service Layer", "Spring @Service", "Business logic: Auth, Enrollment, TherapyPlan, Session, Sensor, Progress, Message, Admin")
+  Component(jwtsvc, "JWT Service", "jjwt", "Issues + verifies access / refresh tokens")
+  Component(repos, "Repositories", "Spring Data JPA", "Derived queries per aggregate")
+  Component(entities, "Domain Entities", "JPA / Hibernate", "User, RehabPlan, TherapyConfig, Session, SensorReading, ...")
+  Component(flyway, "Flyway Migrations", "Flyway", "Versioned schema (V1..)")
+}
+
+Rel(mobile, jwtfilter, "REST", "HTTPS / JSON")
+Rel(web, jwtfilter, "REST", "HTTPS / JSON")
+Rel(mobile, ws, "Config sync", "WebSocket")
+Rel(jwtfilter, controllers, "Forwards authenticated request")
+Rel(jwtfilter, jwtsvc, "Validates token")
+Rel(controllers, exh, "Errors handled by")
+Rel(controllers, services, "Delegates to")
+Rel(ws, services, "Delegates to")
+Rel(services, jwtsvc, "Issues tokens (auth)")
+Rel(services, repos, "Reads / writes")
+Rel(repos, entities, "Maps")
+Rel(repos, db, "SQL", "JPA / JDBC")
+Rel(flyway, db, "Migrates", "JDBC")
+@enduml
+```
+
+---
+
+### 4.7.4 Knevo Brace Firmware
+
+Dual-core ESP32-S3 firmware. **Core 1** runs the hard-real-time 10 ms motor loop and the hardware safety latch; **Core 0** handles sensors, the (shadow) TFLite gait classifier, calibration, the PSRAM sample buffer, and the WiFi/TCP upload. A single **Command API** is the one source of truth that both the Serial bench interface and the BLE GATT server drive.
+
+> **Status:** the BLE GATT + WiFi/TCP data-plane components (Step D integration) exist in firmware source and have passed code review; full on-hardware device-assisted E2E validation is in progress. Core 1 motor control + safety and Core 0 sensor/feature/TFLite are bench-validated.
+
+```plantuml
+@startuml
+!include <C4/C4_Component>
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+title Component Diagram — Knevo Brace Firmware (ESP32-S3, dual-core)
+
+Container(mobile, "Patient Mobile App", "Swift / SwiftUI", "BLE control + WiFi/TCP receiver")
+Person(eng, "Engineer", "Bench testing via USB serial")
+System_Ext(motor, "Motor + Driver", "Geared DC motor (UART driver)")
+System_Ext(sensors, "Sensors", "3x IMU + 2x FSR")
+
+Container_Boundary(fw, "Knevo Brace Firmware") {
+  Component(ble, "BLE GATT Server", "NimBLE-Arduino", "DeviceStatus, Control, SetConfig, WiFiConfig, WiFiStatus; tiny non-blocking callbacks")
+  Component(serial, "Serial Command Parser", "Arduino Serial", "Bench commands: speed, ROM, calibrate, start/stop")
+  Component(cmd, "Command API", "C++", "Single source of truth: set speed/ROM, start/stop, calibrate")
+  Component(state, "Shared Session State", "C++ struct (mutex)", "deviceState IDLE/RUNNING/DONE/FAULT; set id; resolved speed + ROM")
+  Component(motorloop, "Motor Control Loop", "Core 1 - 10 ms", "Open-loop stepping; knee/gait tables; stop-at-extension")
+  Component(safety, "Safety Latch", "Core 1 / hardware", "E-stop + ROM/current/battery -> one-way freeze; reports FAULT")
+  Component(acq, "Sensor Acquisition", "Core 0", "Reads 3 IMU + 2 FSR")
+  Component(gait, "Feature + Gait Classifier", "Core 0 / TFLite Micro", "57 features -> 6-phase inference (shadow)")
+  Component(calib, "Calibration State Machine", "Core 0", "Non-blocking unloaded + static steps")
+  Component(buf, "Sample Buffer", "PSRAM", "88-byte contract records while RUNNING")
+  Component(wifi, "WiFi/TCP Data Plane", "Core 0", "Provision STA; post-set batch upload + ACK")
+}
+
+Rel(mobile, ble, "GATT control plane", "BLE")
+Rel(eng, serial, "Commands", "USB serial")
+Rel(ble, cmd, "Invokes")
+Rel(serial, cmd, "Invokes")
+Rel(cmd, state, "Updates")
+Rel(cmd, calib, "Triggers")
+Rel(state, motorloop, "Speed/ROM + run intent")
+Rel(motorloop, motor, "Step / position", "UART")
+Rel(safety, motorloop, "Cuts motor / freezes")
+Rel(sensors, acq, "Raw samples")
+Rel(acq, gait, "Feature window")
+Rel(acq, buf, "Append when RUNNING")
+Rel(buf, wifi, "Drains on STOP / DONE")
+Rel(ble, wifi, "WiFi credentials (WiFiConfig)")
+Rel(state, wifi, "DONE triggers upload")
+Rel(wifi, mobile, "Sensor batch + ACK", "WiFi / TCP")
+Rel(safety, state, "Reports FAULT")
+@enduml
+```
 
 ---
 
@@ -387,6 +720,27 @@ erDiagram
     SESSION ||--o| SESSION_INSIGHT : "analyzed into"
 ```
 
+**Compact view — entities and relationships only** (for slides / at-a-glance):
+
+```mermaid
+erDiagram
+    USER ||--o{ SESSION : "performs"
+    USER ||--o{ THERAPY_CONFIG : "prescribed for"
+    USER ||--o| DEVICE : "owns"
+    USER }o--o| USER : "patient treated by doctor"
+    USER ||--o{ PATIENT_PROFILE : "assessed as"
+    THERAPY_CONFIG ||--o{ SESSION : "applied in"
+    THERAPY_CONFIG ||--o{ THERAPY_SET_CONFIG : "consists of"
+    EXERCISE ||--o{ THERAPY_SET_CONFIG : "prescribed in"
+    EXERCISE ||--o{ THERAPY_SET_RECORD : "performed in"
+    THERAPY_SET_RECORD ||--o{ SENSOR_READING : "contains"
+    SESSION ||--o{ THERAPY_SET_RECORD : "records"
+    THERAPY_SET_CONFIG ||--o{ THERAPY_SET_RECORD : "executed as"
+    SESSION ||--o| SESSION_INSIGHT : "analyzed into"
+```
+
+---
+
 > **Note on SENSOR_READING:** Only key columns are shown in the diagram. See the full column table below for all 18 IMU channels, 2 FSR channels, and computed fields.
 >
 > **Note on SESSION_INSIGHT:** Structure is a pending decision (OD-3). Entity shown to preserve the relationship. Do not implement until the Data Analytics Service design begins.
@@ -504,7 +858,7 @@ Describes the individual sets that compose a therapy config. Each TherapyConfig 
 | `id` | UUID |
 | `therapy_config_id` | FK → TherapyConfig |
 | `exercise_id` | FK → Exercise |
-| `device_assisted` | Boolean — whether the exoskeleton actively assists during this set |
+| `device_assisted` | Boolean — whether the Knevo Brace actively assists during this set |
 | `duration_min` | Duration of the set in minutes |
 | `rest_duration_min` | Rest time after the set in minutes |
 
@@ -549,7 +903,7 @@ Captures the actual execution of each set within a session, including patient-re
 
 ### SensorReading
 
-One row per sample streamed from the device. Sample rate: 100 Hz. IMU placement: foot, shank, thigh (right leg). FSR placement: heel, midfoot.
+One row per sample captured by the device. Nominal sample rate 100 Hz (validated at 95–105 Hz on the standalone capture firmware). The integrated brace's achieved rate may be variable and sub-100 Hz under on-device processing load, so consumers must key on `timestamp_us` rather than assume a fixed cadence. IMU placement: foot, shank, thigh (right leg). FSR placement: heel, midfoot.
 
 | Field | Notes |
 |-------|-------|
@@ -604,8 +958,8 @@ One row per sample streamed from the device. Sample rate: 100 Hz. IMU placement:
 
 ## 6. Out of Scope
 
-- Mechanical/hardware design of the exoskeleton
-- Android testing (theoretically supported by React Native but not validated)
+- Mechanical/hardware design of the Knevo Brace
+- Android support (the mobile app is native Swift/SwiftUI; iOS only)
 - Multi-clinic / multi-tenant support
 - Real-time alerts to doctors during sessions
 - Legal compliance frameworks (HIPAA, GDPR, etc.)
